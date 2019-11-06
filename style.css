@@ -1,0 +1,38 @@
+
+html{
+  min-width: 1040px;
+}
+
+body{
+  color: rgb(25,35,50);
+  -webkit-font-smoothing: antialiased;
+  display: block;
+  margin: 1em auto 4em auto;
+  width: 960;
+  max-width: 960px;
+  position: relative;
+  font-family: "PT Serif", serif;
+}
+
+h1{
+  margin: 0.2em auto;
+}
+
+aside{
+  position: absolute;
+  right: 0;
+  width: 200px;
+}
+
+svg {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+}
+
+text{
+  display: block;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+  fill: rgb(92, 99, 109);
+}
+

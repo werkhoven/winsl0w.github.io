@@ -33,6 +33,15 @@ text{
   display: block;
   white-space: nowrap;
   -webkit-font-smoothing: antialiased;
-  fill: rgb(92, 99, 109);
+  fill: rgb(0, 0, 0);
 }
+
+.mouseover-textbox{
+  height: 55px;
+  fill: rgb(200,200,220);
+  stroke: rgb(0,0,0);
+  stroke-width: 1px;
+  fill-opacity: 0.7;
+}
+
 

@@ -1,46 +1,36 @@
-const scatter_width = 240, scatter_height = 240;
-const scatter_margin = {right: 0, left: 40, top: 0, bottom: 40};
-const scatter_plot_width = scatter_width - scatter_margin.left - scatter_margin.right;
-const scatter_plot_height = scatter_height - scatter_margin.top - scatter_margin.bottom;
 
-
-
-d3.json("decathlon.json").then(function(dec){
+const init_scatterplot = function(){
 
 	// select the parent svg
 	var scatter_svg = d3.select("body").append("svg")
-			.attr('class','scatter-plot')
-			.attr("width", scatter_width)
-			.attr("height", scatter_height)
-			.style("margin-left", -scatter_margin.left + "px")
-			.style("float",'right')
-		.append("g")
-					.attr('class','scatter-pts')
-					.attr("transform", "translate(" + scatter_margin.left + "," + scatter_margin.top + ")")
-					
-	scatter_svg.append('rect')
-			.attr('width',scatter_plot_width)
-			.attr('height',scatter_plot_height)
-			.attr('fill',d3.rgb(252,252,252))
+		.attr('class','scatter-plot')
+		.attr("width", scatter_width)
+		.attr("height", scatter_height)
+		.style("margin-left", -scatter_margin.left + "px")
+		.style("float",'right')
+	.append("g")
+				.attr('class','scatter-pts')
+				.attr("transform", "translate(" + scatter_margin.left + "," + scatter_margin.top + ")")
 
 
 	// initialize the scatter data points
-	/*
 	var scatter_data = new Array(100).fill().map((a,i) => { 
-			return new Array(2).fill().map((b,j) => { return Math.random()*6 - 3 });
-	})
-	*/
-	var scatter_data = new Array(100).fill().map((a,i) => { 
-		return new Array(2).fill(NaN,0,1);
+			return new Array(2).fill(NaN,0,1);
 	})
 
-	// initialize axes
+	// initialize scale
 	var scatter_scale = d3.scaleLinear()
-			.domain([-3.5,3.5])
-			.range([0,scatter_plot_width])
+		.domain([-3.5,3.5])
+		.range([0,scatter_plot_width])
+
+	var scatter_y_scale = d3.scaleLinear()
+		.domain([-3.5,3.5])
+		.range([scatter_plot_width,0])
+
+	// initialize axes
 	d3.select('.scatter-pts')
 		.append('g')
-			.call(d3.axisLeft(scatter_scale).ticks(5).tickSize(0))
+			.call(d3.axisLeft(scatter_y_scale).ticks(5).tickSize(0))
 	d3.select('.scatter-pts')
 		.append('g')
 			.attr('transform','translate(0,' + scatter_plot_height + ')')
@@ -58,17 +48,19 @@ d3.json("decathlon.json").then(function(dec){
 			.attr('text-anchor','middle')
 			.attr('x',scatter_scale(0))
 			.attr('y',scatter_plot_height+30)
+			.attr('id','scatter-xlabel')
 			.text('feature x')
-			.style('font-size','14px')
+			.style('font-size','12px')
 
 	d3.select('.scatter-pts')
-			.append('text')
-				.attr('transform','rotate(-90)')
-				.attr('text-anchor','middle')
-				.attr('y',-25)
-				.attr('x',-scatter_scale(0))
-				.text('feature y')
-				.style('font-size','14px')
+		.append('text')
+			.attr('transform','rotate(-90)')
+			.attr('text-anchor','middle')
+			.attr('id','scatter-ylabel')
+			.attr('y',-25)
+			.attr('x',-scatter_scale(0))
+			.text('feature y')
+			.style('font-size','12px')
 
 	d3.select('.scatter-pts')
 			.selectAll('dot')
@@ -81,6 +73,6 @@ d3.json("decathlon.json").then(function(dec){
 			.attr('r',2)
 			.style('fill','none')
 
-	
-});
+	return scatter_scale;
 
+}

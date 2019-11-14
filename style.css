@@ -6,21 +6,29 @@ html{
 body{
   color: rgb(25,35,50);
   -webkit-font-smoothing: antialiased;
-  margin: 1em auto 4em auto;
-  width: 960px;
+  margin: 20px 100px;
+  width: 1200px;
   height: 850px;
-  max-width: 920px;
+  max-width: 1200px;
   position: absolute;
   font-family: "PT Serif", serif;
   top: 0px;
-  left: 200px;
 }
 
 h1{
   margin: 0.2em auto;
+  position: relative;
+  left: 300px;
 }
 
-aside{
+#quick-selections{
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 300px;
+}
+
+#instructions{
   position: absolute;
   right: 0px;
   top: 10px;
@@ -30,6 +38,11 @@ aside{
 svg {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
+}
+
+.matrix-svg{
+  position: absolute;
+  left: 300px;
 }
 
 text{
@@ -44,6 +57,11 @@ text{
   position: absolute;
   right: 0px;
   bottom: 107px;
+}
+
+.scatter-axes{
+  max-width: 200px;
+  max-height: 200px;
 }
 
 .mouseover-textbox{

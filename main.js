@@ -15,11 +15,12 @@ const scatter_plot_height = scatter_height - scatter_margin.top - scatter_margin
 // select the parent svg
 var svg = d3.select("body").append("svg")
     .attr("width", width)
-		.attr("height", height)
-		.style("margin-left", -margin.left + "px")
-		.style("float",'left')
+    .attr('class','matrix-svg')
+    .attr("height", height)
+    .style("margin-left", -margin.left + "px")
+    .style('float','left')
   .append("g")
-		.attr("transform", "translate(" + (margin.left-1) + "," + (margin.top+1) + ")")
+    .attr("transform", "translate(" + (margin.left-1) + "," + (margin.top+1) + ")")
 
 // define matrix color scale
 var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])

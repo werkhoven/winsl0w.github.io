@@ -104,15 +104,18 @@ const matrix_click = function(d,dec_data,scatter_scale){
 
 	d3.selectAll('.scatter-dot').remove()
 	d3.selectAll('.scatter-fit').remove()
+	d3.selectAll('.scatter-ci').remove()
 
 	var scatter_data = [];
-	for(let i=0; i<dec_data[0].full.data[d.x].length; i++){
-		let x = dec_data[0].full.data[d.x][i], y = dec_data[0].full.data[d.y][i];
-		let in_bounds = x > -3.5 && x < 3.5 && y > -3.5 && y < 3.5;
-		if(in_bounds){ scatter_data.push([x,y]) }
+	for(let i=0; i<dec_data[0].full.data.length; i++){
+		let x = dec_data[0].full.data[i][d.x], y = dec_data[0].full.data[i][d.y];
+		scatter_data.push([x,y]);
 	}
 
-	d3.select('.scatter-pts')
+	console.log(dec_data[0].full.data[d.x].length)
+	//console.log(scatter_data)
+
+	d3.select('.scatter-axes')
 		.selectAll('dot')
 			.data(scatter_data)
 			.enter()
@@ -120,11 +123,8 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			.attr('class','scatter-dot')
 			.attr('cx', function(dd){ return scatter_scale(dd[0])})
 			.attr('cy', function(dd){ return scatter_scale(-dd[1])})
-			.attr('r',2)
+			.attr('r',1)
 			.attr('fill','#000000')
-
-	d3.select('#scatter-xlabel').text(dec_data[0].full.fields[d.x])
-	d3.select('#scatter-ylabel').text(dec_data[0].full.fields[d.y])
 
 	const flip_xy = d.x > d.y;
 	var row, col;
@@ -142,30 +142,46 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			ci_idx = ci_idx + row - i - 1;
 		}
 	}
-	console.log(ci_idx)
-
 
 	d3.json('ci95s.json').then(function(ci_data){
 		var fit_x = ci_data.full[ci_idx-1].fit_x, fit_y = ci_data.full[ci_idx-1].fit_y;
 		fit_x = fit_x.map(function(a){ return scatter_scale(a) });
 		fit_y = fit_y.map(function(a){ return scatter_scale(-a) });
 
-		d3.select('.scatter-pts').append('path')
+		d3.select('.scatter-axes').append('path')
 				.attr('class','scatter-fit')
 				.attr('d',`M${fit_x[0]},${fit_y[0]}L${fit_x[1]},${fit_y[1]}`)
 				.attr('fill','none')
 				.attr('stroke','#000000')
 
-				/*
-		const upper_ci = ci_data.full[ci_idx-1].upper.map(function(d,i){ ci_data.full[ci_idx-1].upper[49-i] });
+
+		const n = ci_data.full[ci_idx-1].upper.length;
+		const upper_ci = ci_data.full[ci_idx-1].upper;
 		const lower_ci = ci_data.full[ci_idx-1].lower;
-		const xvals = d3.range(50).map(function(d){ scatter_scale(d) });
+		const xvals = d3.range(n).map(function(d){ return scatter_scale((d/(n-1))*7-3.5) });
+		const line_data = [];
+		for(let i=0; i<n*2; i++){
+			if(i<n){
+					line_data.push([xvals[i],scatter_scale(-lower_ci[i])]);
+			} else {
+				
+				line_data.push([xvals[n-i%n-1],scatter_scale(-upper_ci[n-i%n-1])]);
+			}
+		}
+
 		var lineGenerator = d3.line();
-		var pathString = lineGenerator(data);
-		d3.select('path').attr('d', pathString);
-		*/
+		var pathString = lineGenerator(line_data);
+		
+		d3.select('.scatter-axes').append('path')
+				.attr('d', pathString)
+				.attr('class','scatter-ci')
+				.attr('fill',d3.rgb(50,50,50))
+				.attr('fill-opacity',0.25);
 
 	})
+
+	d3.select('#scatter-xlabel').text(dec_data[0].full.fields[d.x])
+	d3.select('#scatter-ylabel').text(dec_data[0].full.fields[d.y])
 		
 }
 

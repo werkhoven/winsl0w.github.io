@@ -9,8 +9,8 @@ const init_scatterplot = function(){
 		.style("margin-left", -scatter_margin.left + "px")
 		.style("float",'right')
 	.append("g")
-				.attr('class','scatter-pts')
-				.attr("transform", "translate(" + scatter_margin.left + "," + scatter_margin.top + ")")
+		.attr('class','scatter-grp')
+		.attr("transform", "translate(" + scatter_margin.left + "," + scatter_margin.top + ")")
 
 
 	// initialize the scatter data points
@@ -28,14 +28,14 @@ const init_scatterplot = function(){
 		.range([scatter_plot_width,0])
 
 	// initialize axes
-	d3.select('.scatter-pts')
+	d3.select('.scatter-grp')
 		.append('g')
 			.call(d3.axisLeft(scatter_y_scale).ticks(5).tickSize(0))
-	d3.select('.scatter-pts')
+	d3.select('.scatter-grp')
 		.append('g')
 			.attr('transform','translate(0,' + scatter_plot_height + ')')
 			.call(d3.axisBottom(scatter_scale).ticks(5).tickSize(0))
-	d3.select('.scatter-pts')
+	d3.select('.scatter-grp')
 		.append('path')
 			.attr('d',`M0,0H${scatter_plot_width}V${scatter_plot_height}`)
 			.attr('stroke-width',1)
@@ -43,7 +43,7 @@ const init_scatterplot = function(){
 			.attr('fill','none')
 
 	// append axis labels
-	d3.select('.scatter-pts')
+	d3.select('.scatter-grp')
 		.append('text')
 			.attr('text-anchor','middle')
 			.attr('x',scatter_scale(0))
@@ -52,7 +52,7 @@ const init_scatterplot = function(){
 			.text('feature x')
 			.style('font-size','12px')
 
-	d3.select('.scatter-pts')
+	d3.select('.scatter-grp')
 		.append('text')
 			.attr('transform','rotate(-90)')
 			.attr('text-anchor','middle')
@@ -62,7 +62,13 @@ const init_scatterplot = function(){
 			.text('feature y')
 			.style('font-size','12px')
 
-	d3.select('.scatter-pts')
+	d3.select('.scatter-grp')
+		.append('svg')
+			.attr('class','scatter-axes')
+			.attr('width',200)
+			.attr('height',200)
+
+	d3.select('.scatter-axes')
 			.selectAll('dot')
 			.data(scatter_data)
 			.enter()

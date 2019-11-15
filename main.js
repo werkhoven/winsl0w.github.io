@@ -1,7 +1,7 @@
 
 // initialize matrix parameters
-const width = 850, height = 850;
-const margin = {right: 0, left: 200, top: 0, bottom: 200};
+const width = 650, height = 650;
+const margin = {right: 0, left: 0, top: 0, bottom: 0};
 const plot_width = width - margin.left - margin.right;
 const plot_height = height - margin.top - margin.bottom;
 var timerId = setTimeout(() => {console.log("hello")}, 1000);
@@ -20,7 +20,7 @@ var svg = d3.select("body").append("svg")
     .style("margin-left", -margin.left + "px")
     .style('float','left')
   .append("g")
-    .attr("transform", "translate(" + (margin.left-1) + "," + (margin.top+1) + ")")
+    .attr("transform", "translate(" + (margin.left) + "," + (margin.top) + ")")
 
 // define matrix color scale
 var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])
@@ -30,8 +30,8 @@ var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])
 // initialize background rectangle
 svg.append('rect')
 		.attr('class','background-rect')
-		.attr('width',plot_height)
-		.attr('height',plot_height)
+		.attr('width',plot_height+1)
+		.attr('height',plot_height+1)
 
 
 // initialize mouseover details box
@@ -49,7 +49,7 @@ const mouseover_text = mouseover_textgroup.selectAll('text')
 		.attr('x','.32em')
 		.attr('y',function(d,i){return 1.2 + i + 'em'})
 		.attr('pointer-events','none')
-		.text('HELLO')
+		.text('')
 
 
 d3.json("decathlon.json").then(function(dec){
@@ -95,6 +95,14 @@ d3.json("decathlon.json").then(function(dec){
 			.attr('width',xscale.bandwidth(0))
 			.attr('height',xscale.bandwidth(0))
 			.attr('id','hover-rect')
+
+	//define assay selections
+	const assays = getAssayNames(x_labels);
+	const unique_assays = assays.getUnique();
+	const assay_idx = unique_assays.map(assay => {
+		return d3.range(n).filter(i => { return assays[i] === assay })
+	});
+	init_qselections('assay',unique_assays,assay_idx)
 
 });
 

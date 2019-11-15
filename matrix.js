@@ -47,16 +47,6 @@ const hilightRowCol = function(d,scale,labels,obj){
     d3.select(obj).attr('stroke-opacity',0)
             .attr('stroke-width','2px')
 
-	/*
-    d3.selectAll(".row-ticklabel")
-        .filter(function(dd,ii){ return ii === d.x})
-            .attr('fill-opacity',1)
-
-    d3.selectAll(".col-ticklabel")
-        .filter(function(dd,ii){ return ii === d.y})
-			.attr('fill-opacity',1)
-	*/
-
     d3.select('#hover-rect')
             .attr('x',scale(labels[d.y]))
             .attr('y',scale(labels[d.x]))
@@ -78,16 +68,6 @@ const hilightRowCol = function(d,scale,labels,obj){
 const unhilightRowCol = function(d,scale,labels,obj){
 
     d3.select(obj).attr('stroke-opacity',0);
-
-	/*
-    d3.selectAll(".row-ticklabel")
-        .filter(function(dd,ii){ return ii === d.x})
-        .attr('fill-opacity',0)
-
-    d3.selectAll(".col-ticklabel")
-        .filter(function(dd,ii){ return ii === d.y})
-		.attr('fill-opacity',0)
-	*/
 
     d3.select('#hover-rect')
         .attr('x',scale(labels[d.y]))
@@ -126,12 +106,12 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			.attr('r',1)
 			.attr('fill','#000000')
 
-	const flip_xy = d.x > d.y;
+	const flip_xy = d.y > d.x;
 	var row, col;
 	if(flip_xy){
-		row = d.x + 1, col = d.y + 1;
-	} else {
 		row = d.y + 1, col = d.x + 1;
+	} else {
+		row = d.x + 1, col = d.y + 1;
 	}
 	const num_fields = dec_data[0].full.fields.length;
 	var ci_idx = 0;
@@ -144,7 +124,31 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	}
 
 	d3.json('ci95s.json').then(function(ci_data){
-		var fit_x = ci_data.full[ci_idx-1].fit_x, fit_y = ci_data.full[ci_idx-1].fit_y;
+
+		var fit_x, fit_y;
+		if(row===col){
+			fit_x = [-3.5,3.5];
+			fit_y = [-3.5,3.5];
+			fit_x = fit_x.map(function(a){ return scatter_scale(a) });
+			fit_y = fit_y.map(function(a){ return scatter_scale(-a) });
+
+			d3.select('.scatter-axes').append('path')
+					.attr('class','scatter-fit')
+					.attr('d',`M${fit_x[0]},${fit_y[0]}L${fit_x[1]},${fit_y[1]}`)
+					.attr('fill','none')
+					.attr('stroke','#000000')
+
+			return;
+		}
+
+		if(flip_xy){
+			fit_x = ci_data.full[ci_idx-1].fit_y;
+			fit_y = ci_data.full[ci_idx-1].fit_x;
+		} else {
+			fit_x = ci_data.full[ci_idx-1].fit_x;
+			fit_y = ci_data.full[ci_idx-1].fit_y;
+		}
+		
 		fit_x = fit_x.map(function(a){ return scatter_scale(a) });
 		fit_y = fit_y.map(function(a){ return scatter_scale(-a) });
 
@@ -161,12 +165,17 @@ const matrix_click = function(d,dec_data,scatter_scale){
 		const xvals = d3.range(n).map(function(d){ return scatter_scale((d/(n-1))*7-3.5) });
 		const line_data = [];
 		for(let i=0; i<n*2; i++){
+			var new_pt = [];
 			if(i<n){
-					line_data.push([xvals[i],scatter_scale(-lower_ci[i])]);
+				new_pt = [xvals[i],scatter_scale(-lower_ci[i])];
 			} else {
 				
-				line_data.push([xvals[n-i%n-1],scatter_scale(-upper_ci[n-i%n-1])]);
+				new_pt = [xvals[n-i%n-1],scatter_scale(-upper_ci[n-i%n-1])];
 			}
+			if(flip_xy){
+				new_pt = [new_pt[1],new_pt[0]];
+			}
+			line_data.push(new_pt);
 		}
 
 		var lineGenerator = d3.line();
@@ -204,8 +213,9 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
                     .attr('height',scale.bandwidth(i))
                     .attr('x', function(d){ return scale(labels[d.y])})
                     .attr('fill',function(d){return color(d.z)})
-                    .attr('stroke-opacity',0)
-                    .attr('stroke-width',0)
+					.attr('stroke-opacity',1)
+					.attr('stroke-color','#000000')
+                    .attr('stroke-width',0.5)
                     .on('mouseover',function(d){ hilightRowCol(d,scale,labels) })
 					.on('mouseout',function(d){ unhilightRowCol(d,scale,labels,this) })
 					.on('click', function(d){ matrix_click(d,dec_data,scatter_scale) });
@@ -242,3 +252,46 @@ const label_matrix_columns = function(columns,scale,labels){
         .text(function(d, i) { return labels[i]; })
 }
 
+
+const qselection_mouseover = function(){
+	d3.select(this).attr('class','qselection-div-active')
+}
+
+const qselection_mouseout = function(){
+	d3.select(this).attr('class','qselection-div-inactive')
+}
+
+const qselection_click = function(d){
+
+	const select_rects = d3.selectAll('.matrix-rect').filter(function(dd){
+			const in_row = d.some(v => v===dd.x)
+			const in_col = d.some(v => v===dd.y)
+			return !in_row || !in_col;
+		});
+
+	switch(d3.select(this).attr('data-status')){
+		case 'off':
+			select_rects.attr('fill-opacity',0.4);
+			d3.select(this).attr('data-status','on');
+			break;
+		case 'on':
+			select_rects.attr('fill-opacity',1);
+			d3.select(this).attr('data-status','off');
+			break
+	}
+}
+
+const init_qselections = function(selection,fields,selection_idx){
+
+	d3.select('#' + selection + '-selection-div').selectAll('div')
+			.data(selection_idx)
+			.enter()
+		.append('div')
+			.attr('class','qselection-div-inactive')
+			.attr('data-status','off')
+			.on('mouseover',qselection_mouseover)
+			.on('mouseout',qselection_mouseout)
+			.on('click',qselection_click)
+			.text(function(d,i){ return fields[i]; })	
+
+}

@@ -50,7 +50,7 @@ const hilightRowCol = function(d,scale,labels,obj){
     d3.select('#hover-rect')
             .attr('x',scale(labels[d.y]))
             .attr('y',scale(labels[d.x]))
-            .attr('stroke-opacity',1)
+            .style('stroke-opacity',1)
 
     mouseover_textgroup.raise()
 
@@ -72,7 +72,6 @@ const unhilightRowCol = function(d,scale,labels,obj){
     d3.select('#hover-rect')
         .attr('x',scale(labels[d.y]))
         .attr('y',scale(labels[d.x]))
-        .attr('stroke-opacity',0)
 
     mouseover_textgroup.attr('visibility','hidden')
 
@@ -252,36 +251,85 @@ const label_matrix_columns = function(columns,scale,labels){
         .text(function(d, i) { return labels[i]; })
 }
 
+//selections
+var curr_selection = [];
+var curr_quick_selection = '';
+
+const update_rect_selections = function(){
+
+	if(curr_selection.length<1){
+		d3.selectAll('.matrix-rect').style('fill-opacity',1);
+	} else {
+		const unselect_rects = d3.selectAll('.matrix-rect').filter(function(dd){
+				const in_row = curr_selection.some(v => v===dd.x)
+				const in_col = curr_selection.some(v => v===dd.y)
+				return !in_row || !in_col;
+		});
+		const select_rects = d3.selectAll('.matrix-rect').filter(function(dd){
+			const in_row = curr_selection.some(v => v===dd.x)
+			const in_col = curr_selection.some(v => v===dd.y)
+			return in_row && in_col;
+		});
+		select_rects.style('fill-opacity',1);
+		unselect_rects.style('fill-opacity',0.4);
+	}
+}
 
 const qselection_mouseover = function(){
-	d3.select(this).attr('class','qselection-div-active')
+	if(d3.select(this).attr('class')==='qselection-div-selected'){
+		return;
+	}
+		d3.select(this).attr('class','qselection-div-active')
+		d3.select('#hover-rect').style('stroke-opacity',0);
 }
 
 const qselection_mouseout = function(){
-	d3.select(this).attr('class','qselection-div-inactive')
+	if(d3.select(this).attr('class')==='qselection-div-selected'){
+		return;
+	}
+		d3.select(this).attr('class','qselection-div-inactive')
 }
 
 const qselection_click = function(d){
 
-	const select_rects = d3.selectAll('.matrix-rect').filter(function(dd){
-			const in_row = d.some(v => v===dd.x)
-			const in_col = d.some(v => v===dd.y)
-			return !in_row || !in_col;
-		});
+	d3.selectAll('#qselection-arrow').remove()
+	d3.select(this.parentNode)
+		.append('div')
+			.attr('id','qselection-arrow')
+			.style('top',this.offsetTop+'px')
+			.style('right','0px')
 
-	switch(d3.select(this).attr('data-status')){
-		case 'off':
-			select_rects.attr('fill-opacity',0.4);
-			d3.select(this).attr('data-status','on');
-			break;
-		case 'on':
-			select_rects.attr('fill-opacity',1);
-			d3.select(this).attr('data-status','off');
-			break
+	// check to see if selection is already activated
+	if(!curr_quick_selection || (curr_quick_selection === this.innerText) || d3.select(this).attr('data-status')==='off'){
+
+		if(d3.select(this).attr('data-status')==='off'){
+				d.idx.forEach(v => curr_selection.push(v-1));
+		} else {
+				curr_selection = curr_selection.filter((v) => { return !d.idx.some(vv => v===vv-1) });
+		}
+
+		update_rect_selections();
+
+		if(d3.select(this).attr('data-status')==='off'){
+				d3.select(this).attr('data-status','on')
+					.attr('class','qselection-div-selected');
+		} else {
+				d3.select(this).attr('data-status','off')
+					.attr('class','qselection-div-active');
+		}
 	}
+
+	
+	//define the current selection and initialize metric selection divs
+	const metric_selections = d.idx.map((v,i) => { return {field: d.fields[i], idx: v, list_idx: d.list_idx[i]} });
+	curr_quick_selection = this.innerText;
+	init_metric_selections(metric_selections);
+
 }
 
-const init_qselections = function(selection,fields,selection_idx){
+var prev_metric_selection;
+
+const init_qselections = function(selection,names,selection_idx){
 
 	d3.select('#' + selection + '-selection-div').selectAll('div')
 			.data(selection_idx)
@@ -292,6 +340,118 @@ const init_qselections = function(selection,fields,selection_idx){
 			.on('mouseover',qselection_mouseover)
 			.on('mouseout',qselection_mouseout)
 			.on('click',qselection_click)
-			.text(function(d,i){ return fields[i]; })	
+			.text(function(d,i){ return names[i]; })	
+
+}
+
+var prev_selected_element;
+var selection_idx = [];
+
+// define metric selection callbacks
+const metric_selection_click = function(d){
+
+	var new_selection_idx;
+	if(d3.event.shiftKey && !(prev_metric_selection==null)){
+		if(prev_metric_selection < d.list_idx){
+			new_selection_idx = d3.range(prev_metric_selection,d.list_idx+1,1);
+		} else {
+			new_selection_idx = d3.range(d.list_idx,prev_metric_selection+1,1);
+		}	
+	} else {
+		new_selection_idx = [d.list_idx];
+		prev_metric_selection = d.list_idx;
+		selection_idx = new_selection_idx;
+	}
+
+	// remove items from selection that are no longer in current selection
+	const trim_idx = selection_idx.filter(v => { 
+		return !new_selection_idx.some(vv => vv === v); 
+	});
+	selection_idx = new_selection_idx;
+	const trim_divs = d3.select(this.parentNode)
+		.selectAll('div')
+			.filter(function(dd){ 
+				return trim_idx.some(v => v === dd.list_idx) 
+			})
+
+
+	if(prev_selected_element){
+		prev_selected_element.style('border','none');
+	}
+	
+	prev_selected_element = d3.select(this.parentNode)
+		.selectAll('div')
+			.filter(function(dd){ 
+				return dd.list_idx === prev_metric_selection;
+			})
+			.style('border','1px dashed rgb(150,150,150)')
+
+	var selection_status = prev_selected_element.attr('data-status');
+	if(d3.event.shiftKey){
+		switch(selection_status){
+			case 'on':
+				selection_status = 'off';
+				break;
+			case 'off':
+				selection_status = 'on';
+				break;
+		}
+	}
+
+	// define selection elements
+	const selection_divs = d3.select(this.parentNode)
+		.selectAll('div')
+			.filter(function(dd){ 
+				return selection_idx.some(v => v === dd.list_idx) 
+			})
+	var metric_idx = selection_divs.data();
+	metric_idx = metric_idx.map(i => { return i.idx-1 });
+
+	if(selection_status==='off'){
+		metric_idx.forEach(i => curr_selection.push(i));
+	} else {
+		curr_selection = curr_selection.filter((v) => { return !metric_idx.some(vv => vv===v) });
+	}
+
+	// update matrix rects with new selection
+	update_rect_selections();
+	
+	// update metric selection div appearance
+	if(selection_status==='off'){
+		selection_divs
+			.attr('data-status','on')
+			.attr('class','metric-selection-div-active');
+		trim_divs
+			.attr('data-status','off')
+			.attr('class','metric-selection-div-inactive');
+	} else {
+		selection_divs
+			.attr('data-status','off')
+			.attr('class','metric-selection-div-inactive');
+		trim_divs
+			.attr('data-status','on')
+			.attr('class','metric-selection-div-active');
+	}
+}
+
+const init_metric_selections = function(metric_selections){
+
+	// remove old divs
+	d3.select('#metric-selections').selectAll('div').remove()
+	prev_metric_selection = null;
+
+	// initialize new divs
+	d3.select('#metric-selections').selectAll('div')
+			.data(metric_selections)
+			.enter()
+		.append('div')
+			.attr('class',function(d){
+				return curr_selection.some(v => v===d.idx-1) ? 'metric-selection-div-active' : 'metric-selection-div-inactive';
+			})
+			.attr('data-status',function(d){
+				return curr_selection.some(v => v===d.idx-1) ? 'on' : 'off';
+			})
+			.on('click',metric_selection_click)
+			.text(function(d,i){ return d.field; })	
 
 }

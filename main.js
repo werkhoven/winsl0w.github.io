@@ -1,7 +1,7 @@
 
 // initialize matrix parameters
 const width = 650, height = 650;
-const margin = {right: 0, left: 0, top: 0, bottom: 0};
+const margin = {right: 0, left: 2, top: 2, bottom: 0};
 const plot_width = width - margin.left - margin.right;
 const plot_height = height - margin.top - margin.bottom;
 var timerId = setTimeout(() => {console.log("hello")}, 1000);
@@ -20,7 +20,7 @@ var svg = d3.select("body").append("svg")
     .style("margin-left", -margin.left + "px")
     .style('float','left')
   .append("g")
-    .attr("transform", "translate(" + (margin.left) + "," + (margin.top) + ")")
+    .attr("transform", "translate(" + (margin.left-1) + "," + (margin.top-1) + ")")
 
 // define matrix color scale
 var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])
@@ -30,8 +30,8 @@ var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])
 // initialize background rectangle
 svg.append('rect')
 		.attr('class','background-rect')
-		.attr('width',plot_height+1)
-		.attr('height',plot_height+1)
+		.attr('width',plot_height+2)
+		.attr('height',plot_height+2)
 
 
 // initialize mouseover details box
@@ -102,7 +102,22 @@ d3.json("decathlon.json").then(function(dec){
 	const assay_idx = unique_assays.map(assay => {
 		return d3.range(n).filter(i => { return assays[i] === assay })
 	});
-	init_qselections('assay',unique_assays,assay_idx)
+	var assay_data = assay_idx.map(i => { 
+		return {idx: i.map(ii => { return ii+1; }), 
+						fields: i.map(ii => { return x_labels[ii] }),
+						list_idx: d3.range(i.length)} 
+	});
+	init_qselections('assay',unique_assays,assay_data);
+		
+	// define apriori grp selections
+	const apriori_grps = Object.keys(dec[0].full.apriori);
+	var apriori = apriori_grps.map(g => {return dec[0].full.apriori[g] });
+	for(let i=0; i<apriori.length; i++){
+		apriori[i].list_idx = d3.range(apriori[i].idx.length);
+	}
+	init_qselections('behavior',apriori_grps,apriori);
+
+	console.log(d3.range(5,1,-1));
 
 });
 

@@ -66,10 +66,18 @@ svg{
   font-size: 12px;
 }
 
-.matrix-svg{
+#svg-container{
+  width: 650px;
+  height: 650px;
   position: absolute;
   left: 420px;
   top: 50px;
+}
+
+.matrix-svg{
+  position: absolute;
+  left: 0px;
+  top: 0px;
 }
 
 text{

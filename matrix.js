@@ -141,11 +141,11 @@ const matrix_click = function(d,dec_data,scatter_scale){
 		}
 
 		if(flip_xy){
-			fit_x = ci_data.full[ci_idx-1].fit_y;
-			fit_y = ci_data.full[ci_idx-1].fit_x;
+			fit_x = ci_data[0].full[ci_idx-1].fit_y;
+			fit_y = ci_data[0].full[ci_idx-1].fit_x;
 		} else {
-			fit_x = ci_data.full[ci_idx-1].fit_x;
-			fit_y = ci_data.full[ci_idx-1].fit_y;
+			fit_x = ci_data[0].full[ci_idx-1].fit_x;
+			fit_y = ci_data[0].full[ci_idx-1].fit_y;
 		}
 		
 		fit_x = fit_x.map(function(a){ return scatter_scale(a) });
@@ -158,9 +158,9 @@ const matrix_click = function(d,dec_data,scatter_scale){
 				.attr('stroke','#000000')
 
 
-		const n = ci_data.full[ci_idx-1].upper.length;
-		const upper_ci = ci_data.full[ci_idx-1].upper;
-		const lower_ci = ci_data.full[ci_idx-1].lower;
+		const n = ci_data[0].full[ci_idx-1].upper.length;
+		const upper_ci = ci_data[0].full[ci_idx-1].upper;
+		const lower_ci = ci_data[0].full[ci_idx-1].lower;
 		const xvals = d3.range(n).map(function(d){ return scatter_scale((d/(n-1))*7-3.5) });
 		const line_data = [];
 		for(let i=0; i<n*2; i++){
@@ -279,8 +279,8 @@ const qselection_mouseover = function(){
 	if(d3.select(this).attr('class')==='qselection-div-selected'){
 		return;
 	}
-		d3.select(this).attr('class','qselection-div-active')
-		d3.select('#hover-rect').style('stroke-opacity',0);
+	d3.select(this).attr('class','qselection-div-active');
+	d3.select('#hover-rect').style('stroke-opacity',0);
 }
 
 const qselection_mouseout = function(){
@@ -328,6 +328,8 @@ const qselection_click = function(d){
 }
 
 var prev_metric_selection;
+var prev_selected_element;
+var selection_idx = [];
 
 const init_qselections = function(selection,names,selection_idx){
 
@@ -343,9 +345,6 @@ const init_qselections = function(selection,names,selection_idx){
 			.text(function(d,i){ return names[i]; })	
 
 }
-
-var prev_selected_element;
-var selection_idx = [];
 
 // define metric selection callbacks
 const metric_selection_click = function(d){
@@ -452,6 +451,6 @@ const init_metric_selections = function(metric_selections){
 				return curr_selection.some(v => v===d.idx-1) ? 'on' : 'off';
 			})
 			.on('click',metric_selection_click)
-			.text(function(d,i){ return d.field; })	
+			.text(function(d,i){ return d.field; });	
 
 }

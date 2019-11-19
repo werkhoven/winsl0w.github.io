@@ -13,14 +13,13 @@ const scatter_plot_width = scatter_width - scatter_margin.left - scatter_margin.
 const scatter_plot_height = scatter_height - scatter_margin.top - scatter_margin.bottom;
 
 // select the parent svg
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr('class','matrix-svg')
-    .attr("height", height)
-    .style("margin-left", -margin.left + "px")
-    .style('float','left')
-  .append("g")
-    .attr("transform", "translate(" + (margin.left-1) + "," + (margin.top-1) + ")")
+var svg = d3.select('#svg-container').append("svg")
+			.attr("width", width)
+			.attr('class','matrix-svg')
+			.attr("height", width)
+			.style('float','left')
+		.append("g")
+			.attr('transform','translate(1,1)')
 
 // define matrix color scale
 var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])
@@ -113,16 +112,20 @@ d3.json("decathlon.json").then(function(dec){
 	const apriori_grps = Object.keys(dec[0].full.apriori);
 	var apriori = apriori_grps.map(g => {return dec[0].full.apriori[g] });
 	for(let i=0; i<apriori.length; i++){
+		if(!Array.isArray(apriori[i].idx)){
+			apriori[i].idx = [apriori[i].idx];
+			console.log('not array')
+		}
 		apriori[i].list_idx = d3.range(apriori[i].idx.length);
 	}
 	init_qselections('behavior',apriori_grps,apriori);
-
-	console.log(d3.range(5,1,-1));
 
 });
 
 
 d3.select('.mouseover-textbox').raise()
+d3.select('#svg-container')
+	.on('mouseout',function(d){ d3.select('#hover-rect').style('stroke-opacity',0) })
 
 
 

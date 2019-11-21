@@ -276,18 +276,18 @@ const update_rect_selections = function(){
 }
 
 const qselection_mouseover = function(){
-	if(d3.select(this).attr('class')==='qselection-div-selected'){
+	if(d3.select(this).attr('class')==='selected'){
 		return;
 	}
-	d3.select(this).attr('class','qselection-div-active');
+	d3.select(this).attr('class','active');
 	d3.select('#hover-rect').style('stroke-opacity',0);
 }
 
 const qselection_mouseout = function(){
-	if(d3.select(this).attr('class')==='qselection-div-selected'){
+	if(d3.select(this).attr('class')==='selected'){
 		return;
 	}
-		d3.select(this).attr('class','qselection-div-inactive')
+		d3.select(this).attr('class','inactive')
 }
 
 const qselection_click = function(d){
@@ -312,10 +312,10 @@ const qselection_click = function(d){
 
 		if(d3.select(this).attr('data-status')==='off'){
 				d3.select(this).attr('data-status','on')
-					.attr('class','qselection-div-selected');
+					.attr('class','selected');
 		} else {
 				d3.select(this).attr('data-status','off')
-					.attr('class','qselection-div-active');
+					.attr('class','active');
 		}
 	}
 
@@ -334,10 +334,11 @@ var selection_idx = [];
 const init_qselections = function(selection,names,selection_idx){
 
 	d3.select('#' + selection + '-selection-div').selectAll('div')
+		.filter(function(){ return d3.select(this).attr('id')!=='qselection-arrow'; })
 			.data(selection_idx)
 			.enter()
 		.append('div')
-			.attr('class','qselection-div-inactive')
+			.attr('class','inactive')
 			.attr('data-status','off')
 			.on('mouseover',qselection_mouseover)
 			.on('mouseout',qselection_mouseout)

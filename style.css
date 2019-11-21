@@ -28,25 +28,41 @@ h1{
   left: 420px;
 }
 
-#qselections{
+#metric-select-parent{
   position: absolute;
-  left: 0px;
-  top: 0px;
-  width: 185px;
+  left: 190px;
+  top: 26px;
+  width: 210px;
+  height: 675px;
 }
-#qselections h2, h3{
-  position: relative;
-  left: 0px;
-  top: 0px;
-  width: 170px;
+
+#metric-select-all{
+  display: inline-block;
+  padding: 5px;
+  background-color: rgb(245,245,245);
+  border: 1px solid black;
+  width: 65px;
+  height: 10px;
+  text-align: center;
+  font-size: 12px;
+}
+
+#metric-deselect-all{
+  display: inline-block;
+  padding: 5px;
+  background-color: rgb(245,245,245);
+  border: 1px solid black;
+  width: 65px;
+  height: 10px;
+  text-align: center;
+  font-size: 12px;
 }
 
 #metric-selections{
   position: absolute;
-  left: 190px;
-  top: 50px;
-  width: 200px;
+  bottom: 0px;
   height: 638px;
+  width: 200px;
   padding: 5px;
   background-color: rgb(245,245,245);
   border: 1px solid black;
@@ -121,6 +137,20 @@ text{
   pointer-events: none;
 }
 
+#qselections{
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 185px;
+}
+
+#qselections h2, h3{
+  position: relative;
+  left: 0px;
+  top: 0px;
+  width: 170px;
+}
+
 #qselection-arrow{
   width: 0; 
   height: 0; 
@@ -131,7 +161,7 @@ text{
   top: 800px;
 }
 
-.qselection-div-inactive{
+#qselections div.inactive{
   font-size: 14px;
   text-align: center;
   margin: 3px 0px 3px 0px;
@@ -141,7 +171,7 @@ text{
   width: 170px;
 }
 
-.qselection-div-active{
+#qselections div.active{
   font-size: 14px;
   text-align: center;
   margin: 3px 0px 3px 0px;
@@ -151,7 +181,7 @@ text{
   width: 170px;
 }
 
-.qselection-div-selected{
+#qselections div.selected{
   font-size: 14px;
   text-align: center;
   margin: 3px 0px 3px 0px;

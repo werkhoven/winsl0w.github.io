@@ -85,10 +85,6 @@ d3.json("decathlon.json").then(function(dec){
 							return `translate(${xscale(x_labels[i])},${plot_height})rotate(-90)`; 
 					});
 
-	// append row labels to rows
-	//label_matrix_rows(rows,xscale,x_labels);
-	//label_matrix_columns(columns,xscale,x_labels)
-
 	// initialize matrix cursor rectangle
 	svg.append("rect")
 			.attr('width',xscale.bandwidth(0))
@@ -110,6 +106,7 @@ d3.json("decathlon.json").then(function(dec){
 		
 	// define apriori grp selections
 	const apriori_grps = Object.keys(dec[0].full.apriori);
+	console.log(apriori_grps)
 	var apriori = apriori_grps.map(g => {return dec[0].full.apriori[g] });
 	for(let i=0; i<apriori.length; i++){
 		if(!Array.isArray(apriori[i].idx)){

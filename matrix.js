@@ -224,33 +224,6 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
         
 };
 
-
-const label_matrix_rows = function(rows,scale,labels){
-
-    rows.append("text")
-        .attr("class","row-ticklabel")
-        .attr("x", 6)
-        .attr("y", (d,i) => { return scale.bandwidth(i)/2 })
-        .attr("dy",".32em")
-        .attr("dx", "-1em")
-        .attr("text-anchor", "end")
-        .attr("fill-opacity",0)
-        .text(function(d, i) { return labels[i]; });
-
-}
-
-const label_matrix_columns = function(columns,scale,labels){
-
-    columns.append("text")
-        .attr("class","col-ticklabel")
-        .attr("y", (d,i) => { return scale.bandwidth(i)/2 })
-        .attr("dy",".32em")
-        .attr("dx", "-.32em")
-        .attr("text-anchor", "end")
-        .attr("fill-opacity",0)
-        .text(function(d, i) { return labels[i]; })
-}
-
 //selections
 var curr_selection = [];
 var curr_quick_selection = '';
@@ -292,39 +265,30 @@ const qselection_mouseout = function(){
 
 const qselection_click = function(d){
 
+	// adjust current selection triangle indicator
 	d3.selectAll('#qselection-arrow').remove()
 	d3.select(this.parentNode)
 		.append('div')
 			.attr('id','qselection-arrow')
+			.attr('class','on')
 			.style('top',this.offsetTop+'px')
-			.style('right','0px')
+			.style('right','0px');
 
-	// check to see if selection is already activated
-	if(!curr_quick_selection || (curr_quick_selection === this.innerText) || d3.select(this).attr('data-status')==='off'){
+	// reset all other button appearance
+	d3.select('#qselections').selectAll('div')
+		.filter(function(){ return d3.select(this).attr('class')==='selected'; })
+			.attr('data-status','off')
+			.attr('class','inactive')
 
-		if(d3.select(this).attr('data-status')==='off'){
-				d.idx.forEach(v => curr_selection.push(v-1));
-		} else {
-				curr_selection = curr_selection.filter((v) => { return !d.idx.some(vv => v===vv-1) });
-		}
-
-		update_rect_selections();
-
-		if(d3.select(this).attr('data-status')==='off'){
-				d3.select(this).attr('data-status','on')
-					.attr('class','selected');
-		} else {
-				d3.select(this).attr('data-status','off')
-					.attr('class','active');
-		}
-	}
-
+	// change button appearance	
+	d3.select(this)
+		.attr('data-status','on')
+		.attr('class','selected');
 	
 	//define the current selection and initialize metric selection divs
 	const metric_selections = d.idx.map((v,i) => { return {field: d.fields[i], idx: v, list_idx: d.list_idx[i]} });
 	curr_quick_selection = this.innerText;
 	init_metric_selections(metric_selections);
-
 }
 
 var prev_metric_selection;
@@ -420,17 +384,17 @@ const metric_selection_click = function(d){
 	if(selection_status==='off'){
 		selection_divs
 			.attr('data-status','on')
-			.attr('class','metric-selection-div-active');
+			.attr('class','active');
 		trim_divs
 			.attr('data-status','off')
-			.attr('class','metric-selection-div-inactive');
+			.attr('class','inactive');
 	} else {
 		selection_divs
 			.attr('data-status','off')
-			.attr('class','metric-selection-div-inactive');
+			.attr('class','inactive');
 		trim_divs
 			.attr('data-status','on')
-			.attr('class','metric-selection-div-active');
+			.attr('class','active');
 	}
 }
 
@@ -446,7 +410,7 @@ const init_metric_selections = function(metric_selections){
 			.enter()
 		.append('div')
 			.attr('class',function(d){
-				return curr_selection.some(v => v===d.idx-1) ? 'metric-selection-div-active' : 'metric-selection-div-inactive';
+				return curr_selection.some(v => v===d.idx-1) ? 'active' : 'inactive';
 			})
 			.attr('data-status',function(d){
 				return curr_selection.some(v => v===d.idx-1) ? 'on' : 'off';
@@ -455,3 +419,39 @@ const init_metric_selections = function(metric_selections){
 			.text(function(d,i){ return d.field; });	
 
 }
+
+// toggle all metrics in selection ON
+const metric_toggle_all = function(){
+
+	// change button appearance to unpressed
+	d3.select(this).attr('class','active');
+
+	const curr_qselect = d3.select('#qselections')
+		.selectAll('div')
+		.filter(function(){ return this.innerText === curr_quick_selection});
+
+	if(this.innerText === 'Select All'){
+		curr_qselect.each(function(dd){ dd.idx.forEach(v => curr_selection.push(v-1)) });
+	} else {
+		curr_qselect.each(function(dd){
+			curr_selection = curr_selection.filter((v) => { return !dd.idx.some(vv => v===vv-1) });
+		})
+	}
+
+	//define the current selection and initialize metric selection divs
+	curr_qselect.each(function(dd){
+		const metric_selections = dd.idx.map((v,i) => {
+			return {field: dd.fields[i], idx: v, list_idx: dd.list_idx[i]};
+		});
+		curr_quick_selection = this.innerText;
+		init_metric_selections(metric_selections);
+	});
+	update_rect_selections();
+}
+
+// apply metric toggling to metric selection buttons
+d3.select('#metric-select-buttons').selectAll('div')
+	.on('mouseup',metric_toggle_all)
+	.on('mousedown',function(){ d3.select(this).attr('class','selected') })
+	.on('mouseover',function(){ d3.select(this).attr('class','active') })
+	.on('mouseout',function(){ d3.select(this).attr('class','inactive') })

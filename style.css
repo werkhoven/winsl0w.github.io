@@ -23,57 +23,16 @@ body{
 }
 
 h1{
-  margin: 10px auto;
+  margin: 10px 0px 10px 0px;
   position: relative;
   left: 420px;
-}
-
-#metric-select-parent{
-  position: absolute;
-  left: 190px;
-  top: 26px;
-  width: 210px;
-  height: 675px;
-}
-
-#metric-select-all{
-  display: inline-block;
-  padding: 5px;
-  background-color: rgb(245,245,245);
-  border: 1px solid black;
-  width: 65px;
-  height: 10px;
-  text-align: center;
-  font-size: 12px;
-}
-
-#metric-deselect-all{
-  display: inline-block;
-  padding: 5px;
-  background-color: rgb(245,245,245);
-  border: 1px solid black;
-  width: 65px;
-  height: 10px;
-  text-align: center;
-  font-size: 12px;
-}
-
-#metric-selections{
-  position: absolute;
-  bottom: 0px;
-  height: 638px;
-  width: 200px;
-  padding: 5px;
-  background-color: rgb(245,245,245);
-  border: 1px solid black;
-  overflow: hidden;
-  overflow-y: scroll;
+  font-size: 50px;
 }
 
 #instructions{
   position: absolute;
   right: 0px;
-  top: 10px;
+  top: 0px;
   width: 200px;
 }
 
@@ -124,7 +83,7 @@ text{
 }
 
 .background-rect{
-  fill: rgb(0,0,0);
+  fill: rgb(50,50,50);
   stroke: #000000;
   stroke-width: 1px;
 }
@@ -151,9 +110,12 @@ text{
   width: 170px;
 }
 
-#qselection-arrow{
+#qselection-arrow.on{
   width: 0; 
-  height: 0; 
+  height: 0;
+  margin: 0px;
+  padding: 0px;
+  border-left: none;
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
   border-right:10px solid black;
@@ -161,51 +123,88 @@ text{
   top: 800px;
 }
 
-#qselections div.inactive{
+#behavior-selection-div div,
+#assay-selection-div div{
   font-size: 14px;
   text-align: center;
   margin: 3px 0px 3px 0px;
   padding: 3px 0px 3px 0px;
   border: 1px solid black;
-  background-color: rgb(220,220,220);
   width: 170px;
+  height: 17px;
+  line-height: 17px;
+}
+
+#qselections div.inactive{
+  background-color: rgb(220,220,220);
 }
 
 #qselections div.active{
-  font-size: 14px;
-  text-align: center;
-  margin: 3px 0px 3px 0px;
-  padding: 3px 0px 3px 0px;
-  border: 1px solid black;
   background-color: rgb(240,240,240);
-  width: 170px;
 }
 
 #qselections div.selected{
-  font-size: 14px;
-  text-align: center;
-  margin: 3px 0px 3px 0px;
-  padding: 3px 0px 3px 0px;
-  border: 1px solid black;
   background-color: rgb(200,200,200);
   -webkit-box-shadow: inset 0px 0px 5px rgb(100,100,100);
   box-shadow: inset 0px 0px 5px rgb(100,100,100);
-  width: 170px;
 }
 
-.metric-selection-div-inactive{
-  color: rgb(100,100,100);
-  font-size: 12px;
-  padding: 0px 0px 0px 5px;
-  background-color: none;
-  cursor: default;
+#metric-select-parent{
+  position: absolute;
+  left: 190px;
+  top: 26px;
+  width: 212px;
+  height: 675px;
 }
 
-.metric-selection-div-active{
-  color: black;
+#metric-select-buttons div{
+  margin-left: 3px;
+  display: block;
+  padding: 5px;
+  float: right;
+  border: 1px solid black;
+  width: 65px;
+  height: 8px;
+  text-align: center;
+  line-height: 8px;
   font-size: 12px;
-  padding: 0px 0px 0px 5px;
+}
+#metric-select-buttons div.inactive{
+  background-color: rgb(220,220,220);
+}
+#metric-select-buttons div.active{
+  background-color: rgb(240,240,240);
+}
+#metric-select-buttons div.selected{
   background-color: rgb(200,200,200);
+  -webkit-box-shadow: inset 0px 0px 5px rgb(100,100,100);
+  box-shadow: inset 0px 0px 5px rgb(100,100,100);
+}
+
+
+#metric-selections{
+  position: absolute;
+  bottom: 0px;
+  height: 638px;
+  width: 200px;
+  padding: 5px;
+  background-color: rgb(245,245,245);
+  border: 1px solid black;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+#metric-selections div{
+  font-size: 12px;
+  padding: 0px 0px 0px 5px;
   cursor: default;
+}
+#metric-selections div.inactive{
+  color: rgb(100,100,100);
+  background-color: none;
+}
+#metric-selections div.active{
+  color: black;
+  background-color: rgb(200,200,200);
 }
 

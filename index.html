@@ -10,38 +10,43 @@
         <script type="text/javascript" src="main.js" defer></script>
     </head>
     <body>
-        <h1>Decathlon data browser</h1>
-        <aside id="qselections">
-            <h2 style="margin-top: 0px"><u>Quick Selections</u></h2>
-            <h3>Behavior Groups</h3>
-            <div id="behavior-selection-div"></div>
-            <h3>Assays</h3>
-            <div id="assay-selection-div"></div>
-        </aside>
-        <div id="metric-select-parent">
-            <div id="metric-select-all">Select All</div>
-            <div id="metric-select-all">Deselect All</div>
-            <div id="metric-selections"> 
-            </div>
+        <div style="position: relative">
+            <h1>Decathlon data browser</h1>
         </div>
-        <aside id="instructions">
-            <h2><u>Instructions</u></h2>
-            <ol style="padding-left: 0px;">
-                <li>Individual elements in the matrix 
-                    correspond to the pairwise correlations between 
-                    behavioral features.
-                </li>
-                <li>
-                    Mouseover individual correlations to see their
-                    corresponding behavioral features.
-                </li>
-                <li>
-                    Left-click correlations to see scatter plots of the
-                    individual behavioral scores and their contributions 
-                    to distilled matrix PCs.
-                </li>
-            </ol>
-        </aside>
-        <div id="svg-container"></div>
+        <div id="main-panel" style="position: relative; width: auto; height: 100%">
+            <aside id="qselections">
+                <h2 style="margin-top: 0px"><u>Quick Selections</u></h2>
+                <h3>Behavior Groups</h3>
+                <div id="behavior-selection-div"></div>
+                <h3>Assays</h3>
+                <div id="assay-selection-div"></div>
+            </aside>
+            <div id="metric-select-parent">
+                <div id="metric-select-buttons">
+                    <div class="inactive">Select All</div>
+                    <div class="inactive">Deselect All</div>
+                </div>
+                <div id="metric-selections"></div>
+            </div>
+            <aside id="instructions">
+                <h2 style="margin-top: 0px"><u>Instructions</u></h2>
+                <ol style="padding-left: 0px; margin-top: 15px;">
+                    <li>Individual elements in the matrix 
+                        correspond to the pairwise correlations between 
+                        behavioral features.
+                    </li>
+                    <li>
+                        Mouseover individual correlations to see their
+                        corresponding behavioral features.
+                    </li>
+                    <li>
+                        Left-click correlations to see scatter plots of the
+                        individual behavioral scores and their contributions 
+                        to distilled matrix PCs.
+                    </li>
+                </ol>
+            </aside>
+            <div id="svg-container"></div>
+        </div>
     </body>
 </html>

@@ -2,7 +2,7 @@
 const init_scatterplot = function(){
 
 	// select the parent svg
-	var scatter_svg = d3.select("#main-panel").append("svg")
+	var scatter_svg = d3.select("#matrix-div").append("svg")
 		.attr('class','scatter-plot')
 		.attr("width", scatter_width)
 		.attr("height", scatter_height)

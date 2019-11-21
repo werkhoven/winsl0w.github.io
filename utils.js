@@ -14,3 +14,9 @@ const getAssayNames = function(fields){
     var re = /([A-Z](-*)[A-z]+\s)+/g;
     return fields.map(d => { return d.match(re)[0].trim() });
 }
+
+const in_selection = function(selection,col,row){
+    const in_row = selection.some(v => v === row)
+    const in_col = selection.some(v => v === col)
+    return in_row && in_col;
+}

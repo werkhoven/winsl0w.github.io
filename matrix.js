@@ -1,4 +1,7 @@
 
+//selections
+var curr_selection = [];
+var curr_quick_selection = '';
 
 const update_mouseover_texbox = function(d,dx,dy){
 
@@ -43,14 +46,20 @@ const format_mouseover_text = function(d,i){
 
 // callback for mouseover of matrix elements
 const hilightRowCol = function(d,scale,labels,obj){
-
+	
     d3.select(obj).attr('stroke-opacity',0)
-            .attr('stroke-width','2px')
+			.attr('stroke-width','2px');
 
-    d3.select('#hover-rect')
-            .attr('x',scale(labels[d.y]))
-            .attr('y',scale(labels[d.x]))
-            .style('stroke-opacity',1)
+	if(in_selection(curr_selection,d.x,d.y) || curr_selection.length<1){
+		d3.select('#hover-rect')
+				.attr('x',scale(labels[d.y]))
+				.attr('y',scale(labels[d.x]))
+				.style('stroke-opacity',1);
+	} else {
+		d3.select('#hover-rect')
+			.style('stroke-opacity',0);
+		return;
+	}
 
     mouseover_textgroup.raise()
 
@@ -81,6 +90,10 @@ const unhilightRowCol = function(d,scale,labels,obj){
 
 const matrix_click = function(d,dec_data,scatter_scale){
 
+	if(!in_selection(curr_selection,d.x,d.y) && curr_selection.length>0){
+		return;
+	}
+
 	d3.selectAll('.scatter-dot').remove()
 	d3.selectAll('.scatter-fit').remove()
 	d3.selectAll('.scatter-ci').remove()
@@ -90,9 +103,6 @@ const matrix_click = function(d,dec_data,scatter_scale){
 		let x = dec_data[0].full.data[i][d.x], y = dec_data[0].full.data[i][d.y];
 		scatter_data.push([x,y]);
 	}
-
-	console.log(dec_data[0].full.data[d.x].length)
-	//console.log(scatter_data)
 
 	d3.select('.scatter-axes')
 		.selectAll('dot')
@@ -157,7 +167,6 @@ const matrix_click = function(d,dec_data,scatter_scale){
 				.attr('fill','none')
 				.attr('stroke','#000000')
 
-
 		const n = ci_data[0].full[ci_idx-1].upper.length;
 		const upper_ci = ci_data[0].full[ci_idx-1].upper;
 		const lower_ci = ci_data[0].full[ci_idx-1].lower;
@@ -212,9 +221,6 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
                     .attr('height',scale.bandwidth(i))
                     .attr('x', function(d){ return scale(labels[d.y])})
                     .attr('fill',function(d){return color(d.z)})
-					.attr('stroke-opacity',1)
-					.attr('stroke-color','#000000')
-                    .attr('stroke-width',0.5)
                     .on('mouseover',function(d){ hilightRowCol(d,scale,labels) })
 					.on('mouseout',function(d){ unhilightRowCol(d,scale,labels,this) })
 					.on('click', function(d){ matrix_click(d,dec_data,scatter_scale) });
@@ -224,24 +230,16 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
         
 };
 
-//selections
-var curr_selection = [];
-var curr_quick_selection = '';
-
 const update_rect_selections = function(){
 
 	if(curr_selection.length<1){
 		d3.selectAll('.matrix-rect').style('fill-opacity',1);
 	} else {
 		const unselect_rects = d3.selectAll('.matrix-rect').filter(function(dd){
-				const in_row = curr_selection.some(v => v===dd.x)
-				const in_col = curr_selection.some(v => v===dd.y)
-				return !in_row || !in_col;
+				return !in_selection(curr_selection,dd.x,dd.y);
 		});
 		const select_rects = d3.selectAll('.matrix-rect').filter(function(dd){
-			const in_row = curr_selection.some(v => v===dd.x)
-			const in_col = curr_selection.some(v => v===dd.y)
-			return in_row && in_col;
+			return in_selection(curr_selection,dd.x,dd.y);
 		});
 		select_rects.style('fill-opacity',1);
 		unselect_rects.style('fill-opacity',0.4);

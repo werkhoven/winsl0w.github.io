@@ -4,7 +4,7 @@ const width = 650, height = 650;
 const margin = {right: 0, left: 2, top: 2, bottom: 0};
 const plot_width = width - margin.left - margin.right;
 const plot_height = height - margin.top - margin.bottom;
-var timerId = setTimeout(() => {console.log("hello")}, 1000);
+var timerId = setTimeout(() => {}, 1000);
 
 // initialize scatter plot vars
 const scatter_width = 240, scatter_height = 240;
@@ -106,12 +106,10 @@ d3.json("decathlon.json").then(function(dec){
 		
 	// define apriori grp selections
 	const apriori_grps = Object.keys(dec[0].full.apriori);
-	console.log(apriori_grps)
 	var apriori = apriori_grps.map(g => {return dec[0].full.apriori[g] });
 	for(let i=0; i<apriori.length; i++){
 		if(!Array.isArray(apriori[i].idx)){
 			apriori[i].idx = [apriori[i].idx];
-			console.log('not array')
 		}
 		apriori[i].list_idx = d3.range(apriori[i].idx.length);
 	}

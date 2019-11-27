@@ -240,9 +240,14 @@ text{
 
 
 #tab-content{
-  border: 1px solid black;
-  border-top: none;
+  position: relative;
+  margin: 20px;
   display: block;
-  width: 100%;
-  height: 400px;
+  height: 1000px;
+}
+
+.loadings-svg{
+  position: absolute;
+  left: 180px;
+  top: 15px;
 }

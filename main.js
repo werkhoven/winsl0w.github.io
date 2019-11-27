@@ -71,7 +71,7 @@ d3.json("decathlon.json").then(function(dec){
 		.range([0,plot_height])
         .paddingOuter(0)
         
-    const scatter_scale = init_scatterplot();
+	const scatter_scale = init_scatterplot();
     
 		
 	// initalize matrix elements
@@ -114,6 +114,9 @@ d3.json("decathlon.json").then(function(dec){
 		apriori[i].list_idx = d3.range(apriori[i].idx.length);
 	}
 	init_qselections('behavior',apriori_grps,apriori);
+
+	console.log(dec[0].distilled.fields[0])
+	plot_loadings(dec[0].distilled.loadings[0],dec[0].distilled.loadings_labels[0],dec[0].distilled.fields[0]);
 
 });
 

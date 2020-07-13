@@ -129,7 +129,8 @@ d3.json("decathlon.json").then(function(dec){
 	const distilled_assay_idx = unique_distilled_assays.map(assay => {
 		return d3.range(distilled_assays.length).filter(i => { return distilled_assays[i] === assay })
 	});
-	console.log(distilled_assay_idx)
+	
+	// initialize all loadings graphs in current apriori grp
 	plot_loadings(dec[0].distilled.loadings[0],dec[0].distilled.loadings_labels[0],dec[0].distilled.fields[0]);
 
 });

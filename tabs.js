@@ -14,7 +14,7 @@ tab_links.on('click',function(){
 
 const plot_loadings = function(loadings,labels,title){
 
-    var loadings_width = 300, loadings_height = loadings.length*11;
+    var loadings_width = 300, loadings_height = loadings.length*12;
     var loadings_plot_width = loadings_width - loadings_margin.left - loadings_margin.right;
     var loadings_plot_height = loadings_height - loadings_margin.top - loadings_margin.bottom;
 
@@ -26,7 +26,7 @@ const plot_loadings = function(loadings,labels,title){
         .style("float",'right')
 
     const loadings_grp = loadings_svg.append("g")
-		.attr('class','loadings-grp')
+		.attr('class','axis')
         .attr("transform", "translate(" + loadings_margin.left + "," + loadings_margin.top + ")");
 
     var min = loadings.reduce((a,b) => { return Math.min(a,b) });
@@ -54,20 +54,27 @@ const plot_loadings = function(loadings,labels,title){
     // initialize axes
 	loadings_grp
         .append('g')
-            .call(d3.axisLeft(loadings_y_scale).ticks(0).tickSize(0));
+            .attr('class','axis')
+            .call(d3.axisLeft(loadings_y_scale).ticks(0).tickSize(0))
     loadings_grp
         .append('g')
+            .attr('class','axis')
             .attr('transform','translate(0,' + loadings_plot_height + ')')
             .call(d3.axisBottom(loadings_x_scale).ticks(3));
     loadings_grp
         .append('path')
-            .attr('d',`M0,0H${loadings_plot_width}V${loadings_plot_height}`)
+            .attr('d',
+                `M0,0
+                H${loadings_plot_width}
+                V${loadings_plot_height}
+                H0
+                V0`)
             .attr('stroke-width',1)
             .attr('stroke','#000000')
-            .attr('fill','none');
+            .attr('fill',d3.rgb(30,30,30));
 
     // append axis labels
-	loadings_grp
+    loadings_grp
         .append('text')
             .attr('text-anchor','middle')
             .attr('x',loadings_plot_width/2)
@@ -76,7 +83,7 @@ const plot_loadings = function(loadings,labels,title){
             .text('metric weight')
             .style('font-size','12px')
     // append axis labels
-	loadings_grp
+    loadings_grp
         .append('text')
             .attr('text-anchor','middle')
             .attr('x',loadings_plot_width/2)
@@ -102,7 +109,7 @@ const plot_loadings = function(loadings,labels,title){
         .attr('x', function(d,i){
             return d > 0 ? loadings_x_scale(0) : loadings_x_scale(d);
         })
-        .attr('fill',d3.rgb(100,100,200));
+        .attr('fill',d3.rgb(120,120,180));
 
 
     // draw indicator line at zero

@@ -113,7 +113,6 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			.attr('cx', function(dd){ return scatter_scale(dd[0])})
 			.attr('cy', function(dd){ return scatter_scale(-dd[1])})
 			.attr('r',1)
-			.attr('fill','#000000')
 
 	const flip_xy = d.y > d.x;
 	var row, col;
@@ -192,7 +191,8 @@ const matrix_click = function(d,dec_data,scatter_scale){
 		d3.select('.scatter-axes').append('path')
 				.attr('d', pathString)
 				.attr('class','scatter-ci')
-				.attr('fill',d3.rgb(50,50,50))
+				.attr('stroke','none')
+				.attr('fill',d3.rgb(150,150,150))
 				.attr('fill-opacity',0.25);
 
 	})
@@ -242,7 +242,7 @@ const update_rect_selections = function(){
 			return in_selection(curr_selection,dd.x,dd.y);
 		});
 		select_rects.style('fill-opacity',1);
-		unselect_rects.style('fill-opacity',0.4);
+		unselect_rects.style('fill-opacity',0.25);
 	}
 }
 
@@ -338,7 +338,7 @@ const metric_selection_click = function(d){
 
 
 	if(prev_selected_element){
-		prev_selected_element.style('border','none');
+		prev_selected_element.style('border','1px solid transparent');
 	}
 	
 	prev_selected_element = d3.select(this.parentNode)

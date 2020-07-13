@@ -1,4 +1,8 @@
 
+console.log("no no")
+console.log(getComputedStyle(document.documentElement)
+	.getPropertyValue('--inactive-txt-color'))
+
 // initialize matrix parameters
 const width = 650, height = 650;
 const margin = {right: 0, left: 2, top: 2, bottom: 0};
@@ -52,6 +56,7 @@ const mouseover_text = mouseover_textgroup.selectAll('text')
 
 
 d3.json("decathlon.json").then(function(dec){
+
 
 	// define axes scales and labels
 	var x_labels = dec[0].full.fields;
@@ -115,7 +120,16 @@ d3.json("decathlon.json").then(function(dec){
 	}
 	init_qselections('behavior',apriori_grps,apriori);
 
-	console.log(dec[0].distilled.fields[0])
+	// parse distilled matrix apriori grp selections
+	var curr_apriori_grp = 0;
+	const distilled_assays = getAssayNames(dec[0].distilled.fields);
+	const unique_distilled_assays = distilled_assays.getUnique();
+	console.log(unique_distilled_assays)
+	console.log(unique_distilled_assays.length)
+	const distilled_assay_idx = unique_distilled_assays.map(assay => {
+		return d3.range(distilled_assays.length).filter(i => { return distilled_assays[i] === assay })
+	});
+	console.log(distilled_assay_idx)
 	plot_loadings(dec[0].distilled.loadings[0],dec[0].distilled.loadings_labels[0],dec[0].distilled.fields[0]);
 
 });

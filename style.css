@@ -300,9 +300,23 @@ svg{
   position: relative;
   margin: 20px;
   display: block;
-  height: 1000px;
+  height: auto;
+  overflow: hidden;
+  overflow-x: scroll;
+  white-space: nowrap;
+}
+#tab-content::-webkit-scrollbar{
+  background-color: var(--secondary-bg-color);
+  width: 8px;
+}
+#tab-content::-webkit-scrollbar-thumb{
+  background: var(--active-bg-color);
 }
 
+.y-axis text{
+  fill: var(--med-emph-txt);
+  font-size: 10px;
+}
 .axis text{
   fill: var(--med-emph-txt);
   font-size: 10px;
@@ -315,7 +329,6 @@ svg{
 }
 
 .loadings-svg{
-  position: absolute;
-  left: 180px;
-  top: 15px;
+  display: inline;
+  padding: 10px;
 }

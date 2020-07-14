@@ -131,7 +131,7 @@ d3.json("decathlon.json").then(function(dec){
 	});
 	
 	// initialize all loadings graphs in current apriori grp
-	plot_loadings(dec[0].distilled.loadings[0],dec[0].distilled.loadings_labels[0],dec[0].distilled.fields[0]);
+	plot_apriori_barplots(dec[0].distilled,distilled_assay_idx[curr_apriori_grp])
 
 });
 

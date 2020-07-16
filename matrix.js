@@ -3,27 +3,36 @@
 var curr_selection = [];
 var curr_quick_selection = '';
 
+// define color and alpha presets
+const sel_alpha = 1;
+const unsel_alpha = 0.72;
+const sel_col = [240,160,0];    // selected text/rect color
+const act_col = [240,160,240];  // active text/rect color
+const irc = [160,160,240];      // inactive rect color
+const itc = [255,255,255];      // inactive text color
+
+
 const update_mouseover_texbox = function(d,dx,dy){
 
-	const new_text = [d.x_label, d.y_label, d.z, 100];
-	mouseover_text.data(new_text)
+	const new_text = [d.x_label, d.y_label, d.z, d.n];
+	d3.select('.mouseover-text').data(new_text)
 		.each(format_mouseover_text)
 
 	var text_widths = [];
-	mouseover_text.each(function(d){ text_widths.push(this.getComputedTextLength())})
+	d3.select('.mouseover-text').each(function(d){ text_widths.push(this.getComputedTextLength())})
 	const text_width = text_widths.reduce((a,b) => { return Math.max(a,b) }) + 10;
 
-	mouseover_textbox.attr('width',text_width)
-	mouseover_text.raise()
+	d3.select('.mouseover-textbox').attr('width',text_width)
+	d3.select('.mouseover-text').raise()
 
 	if(dx + text_width > plot_width){
 		dx = dx - text_width;
 	}
-	if(dy - mouseover_textbox.attr('height') < 0){
-		dy = dy + mouseover_textbox.attr('height') + 80;
+	if(dy - d3.select('.mouseover-textbox').attr('height') < 0){
+		dy = dy + d3.select('.mouseover-textbox').attr('height') + 80;
 	}
 
-	mouseover_textgroup.attr('visibility','visible')
+	d3.select('.mouseover-textgroup').attr('visibility','visible')
 		.attr('transform',`translate(${dx},${dy})`)
 }
 
@@ -61,12 +70,12 @@ const hilightRowCol = function(d,scale,labels,obj){
 		return;
 	}
 
-    mouseover_textgroup.raise()
+	d3.select('.mouseover-textgroup').raise()
 
-    const tf_text = mouseover_textgroup.attr('transform')
+    const tf_text = d3.select('.mouseover-textgroup').attr('transform')
     var re = /(\d+)(\.\d+)?/g;
     const prev_tform = tf_text.match(re);
-    mouseover_textgroup.attr('transform',
+    d3.select('.mouseover-textgroup').attr('transform',
             `translate(${-parseFloat(prev_tform[0])},${-parseFloat(prev_tform[1])})`);
 
     timerId = setTimeout(function(){
@@ -82,7 +91,7 @@ const unhilightRowCol = function(d,scale,labels,obj){
         .attr('x',scale(labels[d.y]))
         .attr('y',scale(labels[d.x]))
 
-    mouseover_textgroup.attr('visibility','hidden')
+    d3.select('.mouseover-textgroup').attr('visibility','hidden')
 
     clearTimeout(timerId);
 
@@ -205,7 +214,12 @@ const matrix_click = function(d,dec_data,scatter_scale){
 // render the matrix in svg from data
 var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
 
-    var rows = svg.selectAll(".row")
+	// define matrix color scale
+	var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])
+		.range([d3.rgb(0,255,255),d3.rgb(0,51,255),d3.rgb(0,10,50),
+		d3.rgb(42,4,0),d3.rgb(255,26,0),d3.rgb(255,230,0),d3.rgb(255,255,255)]);
+
+    var rows = d3.select('#matrix-svg').selectAll(".row")
             .data(data)
             .enter()
         .append('g')
@@ -232,8 +246,24 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
 
 const update_rect_selections = function(){
 
+	// update matrix rects
 	if(curr_selection.length<1){
 		d3.selectAll('.matrix-rect').style('fill-opacity',1);
+
+		// deselected loadings
+		d3.selectAll('.y-axis').each(function(){
+			d3.select(this).selectAll('text')
+				.attr('active',false)
+				.style('fill',d3.rgb(itc[0],itc[1],itc[2],unsel_alpha));
+			
+			d3.select(this.parentNode)
+				.select('.loadings-bar-parent')
+					.each(function(){ 
+						d3.select(this).selectAll('rect')
+						.attr('active',false)
+						.style('fill',d3.rgb(irc[0],irc[1],irc[2],unsel_alpha));
+					})
+		});
 	} else {
 		const unselect_rects = d3.selectAll('.matrix-rect').filter(function(dd){
 				return !in_selection(curr_selection,dd.x,dd.y);
@@ -243,6 +273,49 @@ const update_rect_selections = function(){
 		});
 		select_rects.style('fill-opacity',1);
 		unselect_rects.style('fill-opacity',0.25);
+
+		// query names of selected metrics
+		var selected_metrics = [];
+		select_rects
+			.filter(function(dd){
+				return dd.x === dd.y;
+			})
+			.each(function(dd,i){ selected_metrics.push(dd.x_label) });
+
+		// update selected loadings
+		d3.selectAll('.y-axis').each(function(){
+			var metric_idx = [];
+			d3.select(this).selectAll('text').each(function(t,i){
+				const curr_metric = d3.select(this).nodes()[0].innerHTML;
+				const is_selected = selected_metrics.some(function(m){ return m === curr_metric });
+				if(is_selected){
+					metric_idx.push(i);
+					d3.select(this)
+						.attr('active',true)
+						.style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],unsel_alpha));
+				} else {
+					d3.select(this)
+						.attr('active',false)
+						.style('fill',d3.rgb(itc[0],itc[1],itc[2],unsel_alpha));
+				}
+			})
+			
+			d3.select(this.parentNode)
+				.select('.loadings-bar-parent')
+					.each(function(){ 
+						d3.select(this).selectAll('rect').each(function(t,i){
+							if(metric_idx.some(function(v){ return v===i })){
+								d3.select(this)
+									.attr('active',true)
+									.style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],unsel_alpha));
+							} else {
+								d3.select(this)
+									.attr('active',false)
+									.style('fill',d3.rgb(irc[0],irc[1],irc[2],unsel_alpha));
+							}
+						})
+					})
+		})
 	}
 }
 

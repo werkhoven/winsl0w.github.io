@@ -2,33 +2,49 @@ const tab_div = d3.select('#tab-div');
 const tab_links = tab_div.selectAll('li');
 const tab_content = d3.select('#tab-content');
 
-// define color and alpha presets
-const sel_alpha = 1;
-const unsel_alpha = 0.72
-const sel_col = [240,160,0];    // selected text/rect color
-const act_col = [240,160,240];  // active text/rect color
-const irc = [160,160,240];      // inactive rect color
-const itc = [255,255,255];      // inactive text color
-
 // init loadings plot vars
 const loadings_margin = {right: 0, left: 150, top: 15, bottom: 40};
 
-tab_links.on('click',function(){
+
+const switch_tab = function(){
+    // set all tabs to inactive and activate selected tab
     tab_links.attr('class','inactive');
     d3.select(this).attr('class','active');
-})
+
+    // hide all tabs and set current tab to visible
+    d3.selectAll('.tab-parent').style('visibility','hidden');
+    const curr_tab_name = d3.select(this).nodes()[0].innerHTML;
+    switch(curr_tab_name){
+        case "Metric Loadings":
+            d3.select('#metric-loadings-tab').style('visibility','visible');
+            break;
+        case "Metric Summary":
+            d3.select('#metric-summary-tab').style('visibility','visible');
+            break;
+        case "Gene Search":
+            d3.select('#gene-search-tab').style('visibility','visible');
+            break;
+    }
+}
+tab_links.on('click',switch_tab)
 
 const str2rgb = function(str){
     str = str.replace(/[^\d\.?,]/g, '').split(',');
     return str.map(s => parseInt(s));
 }
 
-const plot_apriori_barplots = function(distilled_obj,apriori_gp_idx){
-    
-    for(let i=0; i<apriori_gp_idx.length; i++){
-        plot_loadings(distilled_obj.loadings[i],
-                distilled_obj.loadings_labels[i],
-                distilled_obj.fields[i]
+
+const plot_apriori_barplots = function(apriori_obj,grp_name){
+
+    // delete all existing plots
+    d3.selectAll('.loadings-svg').remove()
+
+    // get group names
+    const curr_grp_idx = apriori_obj.map( v=> v.name).indexOf(grp_name);
+    for(let i=0; i<apriori_obj[curr_grp_idx].dist_idx.length; i++){
+        plot_loadings(apriori_obj[curr_grp_idx].loadings[i],
+                apriori_obj[curr_grp_idx].loadings_labels[i],
+                apriori_obj[curr_grp_idx].dist_fields[i]
         );
     }
 }
@@ -113,16 +129,29 @@ const loading_click = function(metric_name,do_select){
                 if(is_match) metric_idx.push(i);
                 return  is_match;
             })
-                .each( function() { d3.select(this).style('fill',d3.rgb(tc[0],tc[1],tc[2],0.72)) })
                 .attr('selected',do_select)
+                .each( function() { 
+                    if(d3.select(this).attr('active') === "true" && !do_select){
+                        d3.select(this).style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],1))
+                    } else {
+                        d3.select(this).style('fill',d3.rgb(tc[0],tc[1],tc[2],0.72))
+                    }
+                })
+                
     });
     bar_par.each( function(d,j){
         d3.select(this)
             .selectAll('rect')
                 .attr('selected',false)
             .filter( function(t,i){ return i === metric_idx[j] })
-                .each( function() { d3.select(this).style('fill',d3.rgb(rc[0],rc[1],rc[2],0.72)) })
-                .attr('selected',do_select)
+            .attr('selected',do_select)
+                .each( function() { 
+                    if(d3.select(this).attr('active') === "true" && !do_select){
+                        d3.select(this).style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],1))
+                    } else {
+                        d3.select(this).style('fill',d3.rgb(rc[0],rc[1],rc[2],0.72))
+                    }
+                })
     })
 }
 
@@ -160,7 +189,9 @@ const loading_tick_click = function(){
 
 const plot_loadings = function(loadings,labels,title){
 
-    var loadings_width = 300, loadings_height = loadings.length*12;
+    
+    var loadings_width = 300;
+    var loadings_height = loadings.length*12 + loadings_margin.top + loadings_margin.bottom;
     var loadings_plot_width = loadings_width - loadings_margin.left - loadings_margin.right;
     var loadings_plot_height = loadings_height - loadings_margin.top - loadings_margin.bottom;
 
@@ -177,9 +208,10 @@ const plot_loadings = function(loadings,labels,title){
 
     var min = loadings.reduce((a,b) => { return Math.min(a,b) });
     min = Math.floor(min*10)/10;
+    if(min>0) min = 0;
     var max = loadings.reduce((a,b) => { return Math.max(a,b) });
     max = Math.ceil(max*10)/10;
-    
+    if(max<0) max=0;
 
     const loadings_y_scale = d3.scaleBand()
         .domain(labels)
@@ -196,8 +228,6 @@ const plot_loadings = function(loadings,labels,title){
         .append('g')
             .attr('class','y-axis')
             .call(d3.axisLeft(loadings_y_scale).ticks(0).tickSize(0));
-
-    console.log(y_axis_grp.selectAll('text').nodes()[0].innerHTML)
 
     loadings_grp
         .append('g')
@@ -277,4 +307,10 @@ const plot_loadings = function(loadings,labels,title){
             .attr('stroke','#000000')
             .attr('fill','none');
     
+}
+
+
+// switch apriori plots on dropdown menu change
+const dropdown_menu_change = function(){
+
 }

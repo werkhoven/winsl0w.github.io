@@ -29,6 +29,10 @@
                 </div>
                 <div id="metric-selections"></div>
             </div>
+            <div id="matrix-header">
+                <span>Select dataset:</span>
+                <select></select>
+            </div>
             <aside id="instructions">
                 <h2 style="margin-top: 0px"><u>Instructions</u></h2>
                 <ol style="padding-left: 0px; margin-top: 15px;">
@@ -51,13 +55,21 @@
         </div>
         <div id="tab-div" style="width: auto; height: auto">
             <ul style="width: 100%; height: 31px; margin: 0; padding: 0; border-bottom: 1px solid black;">
-                <li class="active">Metric Summary</li
-                ><li class="inactive">Metric Loadings</li
-                ><li class="inactive">Gene Ontology</li
+                <li class="active">Metric Loadings</li
+                ><li class="inactive">Metric Summary</li
                 ><li class="inactive">Gene Search</li>
             </ul>
-            <div id="tab-parent">
+            <div class="tab-parent" id="metric-loadings-tab">
+                <div id="tab-header">
+                    <span style="margin-right: -10px">Metric group:</span>
+                    <select></select>
+                    <h2 style="left: 400px">Activity PC</h2>
+                </div>
                 <div id="tab-content"></div>
+            </div>
+            <div class="tab-parent" id="metric-summary-tab" style="visibility: hidden">
+                </div>
+            <div class="tab-parent" id="gene-search-tab" style="visibility: hidden">
             </div>
         </div>
     </body>

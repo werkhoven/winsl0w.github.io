@@ -3,9 +3,19 @@
 var curr_selection = [];
 var curr_quick_selection = '';
 
+// define color and alpha presets
+const sel_alpha = 1;
+const unsel_alpha = 0.72;
+const sel_col = [240,160,0];    // selected text/rect color
+const act_col = [240,160,240];  // active text/rect color
+const irc = [160,160,240];      // inactive rect color
+const itc = [255,255,255];      // inactive text color
+
+
 const update_mouseover_texbox = function(d,dx,dy){
 
-	const new_text = [d.x_label, d.y_label, d.z, 100];
+	const new_text = [d.x_label, d.y_label, d.z, d.n];
+	const mouseover_text = d3.selectAll('.mouseover-text')
 	mouseover_text.data(new_text)
 		.each(format_mouseover_text)
 
@@ -13,17 +23,17 @@ const update_mouseover_texbox = function(d,dx,dy){
 	mouseover_text.each(function(d){ text_widths.push(this.getComputedTextLength())})
 	const text_width = text_widths.reduce((a,b) => { return Math.max(a,b) }) + 10;
 
-	mouseover_textbox.attr('width',text_width)
+	d3.select('.mouseover-textbox').attr('width',text_width)
 	mouseover_text.raise()
 
 	if(dx + text_width > plot_width){
 		dx = dx - text_width;
 	}
-	if(dy - mouseover_textbox.attr('height') < 0){
-		dy = dy + mouseover_textbox.attr('height') + 80;
+	if(dy - d3.select('.mouseover-textbox').attr('height') < 0){
+		dy = dy + d3.select('.mouseover-textbox').attr('height') + 80;
 	}
 
-	mouseover_textgroup.attr('visibility','visible')
+	d3.select('.mouseover-textgroup').attr('visibility','visible')
 		.attr('transform',`translate(${dx},${dy})`)
 }
 
@@ -61,12 +71,12 @@ const hilightRowCol = function(d,scale,labels,obj){
 		return;
 	}
 
-    mouseover_textgroup.raise()
+	d3.select('.mouseover-textgroup').raise()
 
-    const tf_text = mouseover_textgroup.attr('transform')
+    const tf_text = d3.select('.mouseover-textgroup').attr('transform')
     var re = /(\d+)(\.\d+)?/g;
     const prev_tform = tf_text.match(re);
-    mouseover_textgroup.attr('transform',
+    d3.select('.mouseover-textgroup').attr('transform',
             `translate(${-parseFloat(prev_tform[0])},${-parseFloat(prev_tform[1])})`);
 
     timerId = setTimeout(function(){
@@ -82,7 +92,7 @@ const unhilightRowCol = function(d,scale,labels,obj){
         .attr('x',scale(labels[d.y]))
         .attr('y',scale(labels[d.x]))
 
-    mouseover_textgroup.attr('visibility','hidden')
+    d3.select('.mouseover-textgroup').attr('visibility','hidden')
 
     clearTimeout(timerId);
 
@@ -99,8 +109,8 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	d3.selectAll('.scatter-ci').remove()
 
 	var scatter_data = [];
-	for(let i=0; i<dec_data[0].full.data.length; i++){
-		let x = dec_data[0].full.data[i][d.x], y = dec_data[0].full.data[i][d.y];
+	for(let i=0; i<dec_data.full.data.length; i++){
+		let x = dec_data.full.data[i][d.x], y = dec_data.full.data[i][d.y];
 		scatter_data.push([x,y]);
 	}
 
@@ -113,7 +123,6 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			.attr('cx', function(dd){ return scatter_scale(dd[0])})
 			.attr('cy', function(dd){ return scatter_scale(-dd[1])})
 			.attr('r',1)
-			.attr('fill','#000000')
 
 	const flip_xy = d.y > d.x;
 	var row, col;
@@ -122,7 +131,7 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	} else {
 		row = d.x + 1, col = d.y + 1;
 	}
-	const num_fields = dec_data[0].full.fields.length;
+	const num_fields = dec_data.full.fields.length;
 	var ci_idx = 0;
 	for(let i=0; i <= col-1; i++){
 		if(i < col-1){
@@ -133,6 +142,9 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	}
 
 	d3.json('ci95s.json').then(function(ci_data){
+
+		// get current dataset index
+		const dataset_idx = d3.select('#matrix-header').select('select').nodes()[0].value
 
 		var fit_x, fit_y;
 		if(row===col){
@@ -151,11 +163,11 @@ const matrix_click = function(d,dec_data,scatter_scale){
 		}
 
 		if(flip_xy){
-			fit_x = ci_data[0].full[ci_idx-1].fit_y;
-			fit_y = ci_data[0].full[ci_idx-1].fit_x;
+			fit_x = ci_data[dataset_idx].full[ci_idx-1].fit_y;
+			fit_y = ci_data[dataset_idx].full[ci_idx-1].fit_x;
 		} else {
-			fit_x = ci_data[0].full[ci_idx-1].fit_x;
-			fit_y = ci_data[0].full[ci_idx-1].fit_y;
+			fit_x = ci_data[dataset_idx].full[ci_idx-1].fit_x;
+			fit_y = ci_data[dataset_idx].full[ci_idx-1].fit_y;
 		}
 		
 		fit_x = fit_x.map(function(a){ return scatter_scale(a) });
@@ -167,9 +179,9 @@ const matrix_click = function(d,dec_data,scatter_scale){
 				.attr('fill','none')
 				.attr('stroke','#000000')
 
-		const n = ci_data[0].full[ci_idx-1].upper.length;
-		const upper_ci = ci_data[0].full[ci_idx-1].upper;
-		const lower_ci = ci_data[0].full[ci_idx-1].lower;
+		const n = ci_data[dataset_idx].full[ci_idx-1].upper.length;
+		const upper_ci = ci_data[dataset_idx].full[ci_idx-1].upper;
+		const lower_ci = ci_data[dataset_idx].full[ci_idx-1].lower;
 		const xvals = d3.range(n).map(function(d){ return scatter_scale((d/(n-1))*7-3.5) });
 		const line_data = [];
 		for(let i=0; i<n*2; i++){
@@ -192,20 +204,26 @@ const matrix_click = function(d,dec_data,scatter_scale){
 		d3.select('.scatter-axes').append('path')
 				.attr('d', pathString)
 				.attr('class','scatter-ci')
-				.attr('fill',d3.rgb(50,50,50))
+				.attr('stroke','none')
+				.attr('fill',d3.rgb(150,150,150))
 				.attr('fill-opacity',0.25);
 
 	})
 
-	d3.select('#scatter-xlabel').text(dec_data[0].full.fields[d.x])
-	d3.select('#scatter-ylabel').text(dec_data[0].full.fields[d.y])
+	d3.select('#scatter-xlabel').text(dec_data.full.fields[d.x])
+	d3.select('#scatter-ylabel').text(dec_data.full.fields[d.y])
 		
 }
 
 // render the matrix in svg from data
 var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
 
-    var rows = svg.selectAll(".row")
+	// define matrix color scale
+	var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])
+		.range([d3.rgb(0,255,255),d3.rgb(0,51,255),d3.rgb(0,10,50),
+		d3.rgb(42,4,0),d3.rgb(255,26,0),d3.rgb(255,230,0),d3.rgb(255,255,255)]);
+
+    var rows = d3.select('#matrix-svg-trans').selectAll(".row")
             .data(data)
             .enter()
         .append('g')
@@ -232,8 +250,24 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
 
 const update_rect_selections = function(){
 
+	// update matrix rects
 	if(curr_selection.length<1){
 		d3.selectAll('.matrix-rect').style('fill-opacity',1);
+
+		// deselected loadings
+		d3.selectAll('.y-axis').each(function(){
+			d3.select(this).selectAll('text')
+				.attr('active',false)
+				.style('fill',d3.rgb(itc[0],itc[1],itc[2],unsel_alpha));
+			
+			d3.select(this.parentNode)
+				.select('.loadings-bar-parent')
+					.each(function(){ 
+						d3.select(this).selectAll('rect')
+						.attr('active',false)
+						.style('fill',d3.rgb(irc[0],irc[1],irc[2],unsel_alpha));
+					})
+		});
 	} else {
 		const unselect_rects = d3.selectAll('.matrix-rect').filter(function(dd){
 				return !in_selection(curr_selection,dd.x,dd.y);
@@ -242,7 +276,50 @@ const update_rect_selections = function(){
 			return in_selection(curr_selection,dd.x,dd.y);
 		});
 		select_rects.style('fill-opacity',1);
-		unselect_rects.style('fill-opacity',0.4);
+		unselect_rects.style('fill-opacity',0.25);
+
+		// query names of selected metrics
+		var selected_metrics = [];
+		select_rects
+			.filter(function(dd){
+				return dd.x === dd.y;
+			})
+			.each(function(dd,i){ selected_metrics.push(dd.x_label) });
+
+		// update selected loadings
+		d3.selectAll('.y-axis').each(function(){
+			var metric_idx = [];
+			d3.select(this).selectAll('text').each(function(t,i){
+				const curr_metric = d3.select(this).nodes()[0].innerHTML;
+				const is_selected = selected_metrics.some(function(m){ return m === curr_metric });
+				if(is_selected){
+					metric_idx.push(i);
+					d3.select(this)
+						.attr('active',true)
+						.style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],unsel_alpha));
+				} else {
+					d3.select(this)
+						.attr('active',false)
+						.style('fill',d3.rgb(itc[0],itc[1],itc[2],unsel_alpha));
+				}
+			})
+			
+			d3.select(this.parentNode)
+				.select('.loadings-bar-parent')
+					.each(function(){ 
+						d3.select(this).selectAll('rect').each(function(t,i){
+							if(metric_idx.some(function(v){ return v===i })){
+								d3.select(this)
+									.attr('active',true)
+									.style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],unsel_alpha));
+							} else {
+								d3.select(this)
+									.attr('active',false)
+									.style('fill',d3.rgb(irc[0],irc[1],irc[2],unsel_alpha));
+							}
+						})
+					})
+		})
 	}
 }
 
@@ -338,7 +415,7 @@ const metric_selection_click = function(d){
 
 
 	if(prev_selected_element){
-		prev_selected_element.style('border','none');
+		prev_selected_element.style('border','1px solid transparent');
 	}
 	
 	prev_selected_element = d3.select(this.parentNode)

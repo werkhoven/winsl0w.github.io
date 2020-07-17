@@ -37,10 +37,15 @@ const init_scatterplot = function(){
 			.call(d3.axisBottom(scatter_scale).ticks(5).tickSize(0))
 	d3.select('.scatter-grp')
 		.append('path')
-			.attr('d',`M0,0H${scatter_plot_width}V${scatter_plot_height}`)
+			.attr('d',
+				`M0,0
+				H${scatter_plot_width}
+				V${scatter_plot_height}
+				H0
+				V0`)
 			.attr('stroke-width',1)
 			.attr('stroke','#000000')
-			.attr('fill','none')
+			.attr('fill',d3.rgb(25,25,25))
 
 	// append axis labels
 	d3.select('.scatter-grp')

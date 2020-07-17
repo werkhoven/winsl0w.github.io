@@ -15,15 +15,16 @@ const itc = [255,255,255];      // inactive text color
 const update_mouseover_texbox = function(d,dx,dy){
 
 	const new_text = [d.x_label, d.y_label, d.z, d.n];
-	d3.select('.mouseover-text').data(new_text)
+	const mouseover_text = d3.selectAll('.mouseover-text')
+	mouseover_text.data(new_text)
 		.each(format_mouseover_text)
 
 	var text_widths = [];
-	d3.select('.mouseover-text').each(function(d){ text_widths.push(this.getComputedTextLength())})
+	mouseover_text.each(function(d){ text_widths.push(this.getComputedTextLength())})
 	const text_width = text_widths.reduce((a,b) => { return Math.max(a,b) }) + 10;
 
 	d3.select('.mouseover-textbox').attr('width',text_width)
-	d3.select('.mouseover-text').raise()
+	mouseover_text.raise()
 
 	if(dx + text_width > plot_width){
 		dx = dx - text_width;
@@ -108,8 +109,8 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	d3.selectAll('.scatter-ci').remove()
 
 	var scatter_data = [];
-	for(let i=0; i<dec_data[0].full.data.length; i++){
-		let x = dec_data[0].full.data[i][d.x], y = dec_data[0].full.data[i][d.y];
+	for(let i=0; i<dec_data.full.data.length; i++){
+		let x = dec_data.full.data[i][d.x], y = dec_data.full.data[i][d.y];
 		scatter_data.push([x,y]);
 	}
 
@@ -130,7 +131,7 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	} else {
 		row = d.x + 1, col = d.y + 1;
 	}
-	const num_fields = dec_data[0].full.fields.length;
+	const num_fields = dec_data.full.fields.length;
 	var ci_idx = 0;
 	for(let i=0; i <= col-1; i++){
 		if(i < col-1){
@@ -141,6 +142,9 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	}
 
 	d3.json('ci95s.json').then(function(ci_data){
+
+		// get current dataset index
+		const dataset_idx = d3.select('#matrix-header').select('select').nodes()[0].value
 
 		var fit_x, fit_y;
 		if(row===col){
@@ -159,11 +163,11 @@ const matrix_click = function(d,dec_data,scatter_scale){
 		}
 
 		if(flip_xy){
-			fit_x = ci_data[0].full[ci_idx-1].fit_y;
-			fit_y = ci_data[0].full[ci_idx-1].fit_x;
+			fit_x = ci_data[dataset_idx].full[ci_idx-1].fit_y;
+			fit_y = ci_data[dataset_idx].full[ci_idx-1].fit_x;
 		} else {
-			fit_x = ci_data[0].full[ci_idx-1].fit_x;
-			fit_y = ci_data[0].full[ci_idx-1].fit_y;
+			fit_x = ci_data[dataset_idx].full[ci_idx-1].fit_x;
+			fit_y = ci_data[dataset_idx].full[ci_idx-1].fit_y;
 		}
 		
 		fit_x = fit_x.map(function(a){ return scatter_scale(a) });
@@ -175,9 +179,9 @@ const matrix_click = function(d,dec_data,scatter_scale){
 				.attr('fill','none')
 				.attr('stroke','#000000')
 
-		const n = ci_data[0].full[ci_idx-1].upper.length;
-		const upper_ci = ci_data[0].full[ci_idx-1].upper;
-		const lower_ci = ci_data[0].full[ci_idx-1].lower;
+		const n = ci_data[dataset_idx].full[ci_idx-1].upper.length;
+		const upper_ci = ci_data[dataset_idx].full[ci_idx-1].upper;
+		const lower_ci = ci_data[dataset_idx].full[ci_idx-1].lower;
 		const xvals = d3.range(n).map(function(d){ return scatter_scale((d/(n-1))*7-3.5) });
 		const line_data = [];
 		for(let i=0; i<n*2; i++){
@@ -206,8 +210,8 @@ const matrix_click = function(d,dec_data,scatter_scale){
 
 	})
 
-	d3.select('#scatter-xlabel').text(dec_data[0].full.fields[d.x])
-	d3.select('#scatter-ylabel').text(dec_data[0].full.fields[d.y])
+	d3.select('#scatter-xlabel').text(dec_data.full.fields[d.x])
+	d3.select('#scatter-ylabel').text(dec_data.full.fields[d.y])
 		
 }
 
@@ -219,7 +223,7 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
 		.range([d3.rgb(0,255,255),d3.rgb(0,51,255),d3.rgb(0,10,50),
 		d3.rgb(42,4,0),d3.rgb(255,26,0),d3.rgb(255,230,0),d3.rgb(255,255,255)]);
 
-    var rows = d3.select('#matrix-svg').selectAll(".row")
+    var rows = d3.select('#matrix-svg-trans').selectAll(".row")
             .data(data)
             .enter()
         .append('g')

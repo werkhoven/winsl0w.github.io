@@ -28,6 +28,7 @@ const init_page_from_dataset = function(dec){
 			.style('float','left')
 		.append("g")
 			.attr('transform','translate(1,1)')
+			.attr('id','matrix-svg-trans')
 
 	// initialize background rectangle
 	svg.append('rect')
@@ -141,6 +142,8 @@ const init_page_from_dataset = function(dec){
 	plot_apriori_barplots(apriori,'Activity');
 
 	// set loadings drop-down menu items
+	d3.select('#tab-header').selectAll('option').remove();
+
 	d3.select('#tab-header')
 		.select('select')
 			.attr('name','a priori group')

@@ -53,6 +53,10 @@ h3{
 ol{
   color: var(--med-emph-txt);
 }
+div .disabled{
+  pointer-events: none;
+  opacity: 0.5;
+}
 
 
 #instructions{
@@ -81,7 +85,7 @@ ol{
 }
 #colorbar{
   position: absolute;
-  right: 130px;
+  right: 150px;
   top: 290px;
 }
 

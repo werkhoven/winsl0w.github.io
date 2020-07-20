@@ -1,6 +1,4 @@
 
-console.log(getComputedStyle(document.documentElement)
-	.getPropertyValue('--inactive-txt-color'))
 
 // initialize matrix parameters
 const width = 650, height = 650;
@@ -14,8 +12,6 @@ const scatter_width = 240, scatter_height = 240;
 const scatter_margin = {right: 0, left: 40, top: 0, bottom: 40};
 const scatter_plot_width = scatter_width - scatter_margin.left - scatter_margin.right;
 const scatter_plot_height = scatter_height - scatter_margin.top - scatter_margin.bottom;
-
-console.log('hi')
 
 // initialize page
 const init_page_from_dataset = function(dec,matrix_type){
@@ -105,7 +101,16 @@ const init_page_from_dataset = function(dec,matrix_type){
 						fields: i.map(ii => { return x_labels[ii] }),
 						list_idx: d3.range(i.length)} 
 	});
-	init_qselections('assay',unique_assays,assay_data);
+
+	if(matrix_type === 'full'){
+		init_qselections('assay',unique_assays,assay_data);
+		d3.select('#assay-selection-div')
+			.attr('class','');
+	} else {
+		d3.select('#assay-selection-div')
+			.attr('class','disabled')
+	}
+	
 		
 
 	// parse distilled matrix apriori grp selections
@@ -135,13 +140,40 @@ const init_page_from_dataset = function(dec,matrix_type){
 			return distilled_assay_idx[i].some( ii => {return ii === j} )
 		});
 	}
+
+
+
 	apriori = apriori.map( i => {
 		i.fields = i.fields.map( j => { return j.replace('_',' ') } )
 		return i;
 	});
-	init_qselections('behavior',apriori_grps,apriori);
 
-	console.log(apriori)
+	if(matrix_type === 'distilled'){
+
+		
+
+		var dist_qselect_data = [];
+		for(let i=0; i<apriori_grps.length; i++){
+			dist_qselect_data.push({fields: [],idx: [],list_idx: []});
+		}
+		console.log(dist_qselect_data.length)
+		for(let i=0; i<apriori_grps.length; i++){
+			for(let j=0; j<apriori[i].dist_fields.length; j++){
+				dist_qselect_data[i].fields[j] = apriori[i].dist_fields[j];
+				dist_qselect_data[i].idx[j] = apriori[i].dist_idx[j] + 1;
+				dist_qselect_data[i].list_idx[j] = j;
+			}
+		}
+		
+		console.log(dist_qselect_data)
+		init_qselections('behavior',apriori_grps,dist_qselect_data);
+	} else {
+		init_qselections('behavior',apriori_grps,apriori);
+	}
+
+
+	
+
 	plot_apriori_barplots(apriori,'Activity');
 
 	// set loadings drop-down menu items
@@ -169,6 +201,43 @@ const init_page_from_dataset = function(dec,matrix_type){
 }
 
 
+// update page elements with new dataset
+const update_page_dataset = function(dec,matrix_type){
+
+	var color = d3.scaleLinear()
+		.domain([-1,-.64,-.004,.004,.316,.756,1])
+		.range([
+			d3.rgb(0,255,255),
+			d3.rgb(0,51,255),
+			d3.rgb(0,10,50),
+			d3.rgb(42,4,0),
+			d3.rgb(255,26,0),
+			d3.rgb(255,230,0),
+			d3.rgb(255,255,255)]);
+
+		var x_labels = dec[matrix_type].fields;
+		const n = x_labels.length;
+		var corr_data = [];
+		d3.range(n).forEach((d,i) => {
+			corr_data[i] = d3.range(n).map(j => {
+				return {x: i,
+					x_label: x_labels[i],
+					y: j,
+					y_label: x_labels[j],
+					z: dec[matrix_type].r[i][j],
+					n: dec[matrix_type].n[i][j]}});
+		});
+
+		d3.selectAll('.row')
+			.data(corr_data)
+			.each(function(row,i){
+				d3.select(this).selectAll('rect')
+					.data(row.map(d => { return d}))
+					.attr('fill',function(d){return color(d.z)})
+			})
+}
+
+
 d3.json("decathlon.json").then(function(dec){
 
 
@@ -191,8 +260,19 @@ d3.json("decathlon.json").then(function(dec){
 					.selectAll('option')
 					.filter(function(t,i){ return i === dataset_idx})
 					.nodes()[0].innerHTML.split('-')[1];
-				init_page_from_dataset(d[dataset_idx%2],matrix_type);
-			});
+
+				var prev_matrix_type;
+				if(d3.select('#matrix-svg').selectAll('rect').size()>3000){
+					prev_matrix_type = 'full';
+				} else {
+					prev_matrix_type = 'distilled';
+				}
+				if( matrix_type === prev_matrix_type){
+					update_page_dataset(d[dataset_idx%2],matrix_type)
+				} else {
+					init_page_from_dataset(d[dataset_idx%2],matrix_type);
+				}
+				})
 
 	// initialize page at start with inbred-full dataset
 	init_page_from_dataset(dec[0],'full');

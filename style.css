@@ -60,13 +60,14 @@ ol{
   right: 0px;
   top: 0px;
   width: 200px;
+  font-size: 14px;
 }
 #matrix-header{
   width: 200px;
   height: 20px;
   position: absolute;
   top: 25px;
-  left: 857px;
+  left: 830px;
 }
 #matrix-header select{
   position: absolute;
@@ -78,6 +79,12 @@ ol{
   bottom: 0px;
   font-size: 16px;
 }
+#colorbar{
+  position: absolute;
+  right: 130px;
+  top: 290px;
+}
+
 select{
   margin-left: 10px;
   background-color: var(--secondary-bg-color);
@@ -91,6 +98,7 @@ select:focus{
 svg{
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
+  shape-rendering: optimizeSpeed;
 }
 
 

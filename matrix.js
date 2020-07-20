@@ -11,6 +11,7 @@ const act_col = [240,160,240];  // active text/rect color
 const irc = [160,160,240];      // inactive rect color
 const itc = [255,255,255];      // inactive text color
 
+console.log('no')
 
 const update_mouseover_texbox = function(d,dx,dy){
 
@@ -109,8 +110,8 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	d3.selectAll('.scatter-ci').remove()
 
 	var scatter_data = [];
-	for(let i=0; i<dec_data.full.data.length; i++){
-		let x = dec_data.full.data[i][d.x], y = dec_data.full.data[i][d.y];
+	for(let i=0; i<dec_data.data.length; i++){
+		let x = dec_data.data[i][d.x], y = dec_data.data[i][d.y];
 		scatter_data.push([x,y]);
 	}
 
@@ -131,7 +132,7 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	} else {
 		row = d.x + 1, col = d.y + 1;
 	}
-	const num_fields = dec_data.full.fields.length;
+	const num_fields = dec_data.fields.length;
 	var ci_idx = 0;
 	for(let i=0; i <= col-1; i++){
 		if(i < col-1){
@@ -144,7 +145,12 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	d3.json('ci95s.json').then(function(ci_data){
 
 		// get current dataset index
-		const dataset_idx = d3.select('#matrix-header').select('select').nodes()[0].value
+		var dataset_idx = parseInt(d3.select('#matrix-header').select('select').nodes()[0].value,10);
+		const matrix_type = d3.select('#matrix-header').select('select')
+					.selectAll('option')
+					.filter(function(t,i){ return i === dataset_idx})
+					.nodes()[0].innerHTML.split('-')[1];
+		dataset_idx = dataset_idx % 2;
 
 		var fit_x, fit_y;
 		if(row===col){
@@ -162,12 +168,13 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			return;
 		}
 
+		console.log(ci_data[dataset_idx][matrix_type]);
 		if(flip_xy){
-			fit_x = ci_data[dataset_idx].full[ci_idx-1].fit_y;
-			fit_y = ci_data[dataset_idx].full[ci_idx-1].fit_x;
+			fit_x = ci_data[dataset_idx][matrix_type][ci_idx-1].fit_y;
+			fit_y = ci_data[dataset_idx][matrix_type][ci_idx-1].fit_x;
 		} else {
-			fit_x = ci_data[dataset_idx].full[ci_idx-1].fit_x;
-			fit_y = ci_data[dataset_idx].full[ci_idx-1].fit_y;
+			fit_x = ci_data[dataset_idx][matrix_type][ci_idx-1].fit_x;
+			fit_y = ci_data[dataset_idx][matrix_type][ci_idx-1].fit_y;
 		}
 		
 		fit_x = fit_x.map(function(a){ return scatter_scale(a) });
@@ -179,9 +186,9 @@ const matrix_click = function(d,dec_data,scatter_scale){
 				.attr('fill','none')
 				.attr('stroke','#000000')
 
-		const n = ci_data[dataset_idx].full[ci_idx-1].upper.length;
-		const upper_ci = ci_data[dataset_idx].full[ci_idx-1].upper;
-		const lower_ci = ci_data[dataset_idx].full[ci_idx-1].lower;
+		const n = ci_data[dataset_idx][matrix_type][ci_idx-1].upper.length;
+		const upper_ci = ci_data[dataset_idx][matrix_type][ci_idx-1].upper;
+		const lower_ci = ci_data[dataset_idx][matrix_type][ci_idx-1].lower;
 		const xvals = d3.range(n).map(function(d){ return scatter_scale((d/(n-1))*7-3.5) });
 		const line_data = [];
 		for(let i=0; i<n*2; i++){
@@ -198,6 +205,9 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			line_data.push(new_pt);
 		}
 
+		console.log(upper_ci);
+		console.log(lower_ci);
+
 		var lineGenerator = d3.line();
 		var pathString = lineGenerator(line_data);
 		
@@ -210,8 +220,8 @@ const matrix_click = function(d,dec_data,scatter_scale){
 
 	})
 
-	d3.select('#scatter-xlabel').text(dec_data.full.fields[d.x])
-	d3.select('#scatter-ylabel').text(dec_data.full.fields[d.y])
+	d3.select('#scatter-xlabel').text(dec_data.fields[d.x])
+	d3.select('#scatter-ylabel').text(dec_data.fields[d.y])
 		
 }
 
@@ -522,6 +532,83 @@ const metric_toggle_all = function(){
 		init_metric_selections(metric_selections);
 	});
 	update_rect_selections();
+}
+
+
+// ititialize colorbar
+const init_colorbar = function(){
+
+	    // define matrix color scale
+		const caxis_domain = [-1,-.64,-.004,.004,.316,.756,1];
+		const min = caxis_domain.reduce((a,b) => { return Math.min(a,b) });
+		var caxis_pct = caxis_domain.map( v => v + (0-min));
+		const max = caxis_pct.reduce((a,b) => { return Math.max(a,b) });
+		caxis_pct = caxis_pct.map( v => v / max * 100);
+		console.log(caxis_pct)
+		const caxis_colors = [
+				d3.rgb(0,255,255),
+				d3.rgb(0,51,255),
+				d3.rgb(0,10,50),
+				d3.rgb(42,4,0),
+				d3.rgb(255,26,0),
+				d3.rgb(255,230,0),
+				d3.rgb(255,255,255)];
+		var color = d3.scaleLinear()
+			.domain(caxis_domain)
+			.range(caxis_colors);
+			
+		var w = 70, h = 140;
+		const w_pad = w - 20;
+	
+		var key = d3.select("#colorbar")
+		  .append("svg")
+		  .attr("width", w)
+		  .attr("height", h + 20)
+		  .attr('class','axis');
+	
+		var legend = key.append("defs")
+		  .append("svg:linearGradient")
+		  .attr("id", "gradient")
+		  .attr("x1", "100%")
+		  .attr("y1", "0%")
+		  .attr("x2", "100%")
+		  .attr("y2", "100%")
+		  .attr("spreadMethod", "pad");
+	
+		legend.selectAll('stop')
+				.data(caxis_pct)
+				.enter()
+			.append('stop')
+				.attr('offset', function(d){ return d + '%' })
+				.attr('stop-color', function(d,i){ return caxis_colors[i] })
+				.attr('stop-opacity',1);
+	
+		key.append("rect")
+		  .attr("width", w - w_pad)
+		  .attr("height", h)
+		  .attr('stroke','#000000')
+		  .style("fill", "url(#gradient)")
+		  .attr("transform", "translate(0,10)");
+	
+		var y = d3.scaleLinear()
+		  .range([h, 0])
+		  .domain([1, -1]);
+	
+		var yAxis = d3.axisRight()
+		  .scale(y)
+		  .ticks(5);
+	
+		key.append("g")
+		  .attr("class", "y-axis")
+		  .attr("transform", `translate(${w-w_pad},10)`)
+		  .call(yAxis)
+	
+		key.append('text')
+			.text('correlation coefficient')
+			.attr('text-anchor','middle')
+			.attr('transform',`translate(${w},${(h+20)/2}) rotate(-90)`)
+			.style('font-size','14px')
+
 }
 
 // apply metric toggling to metric selection buttons

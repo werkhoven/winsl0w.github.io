@@ -1,10 +1,42 @@
 const tab_div = d3.select('#tab-div');
 const tab_links = tab_div.selectAll('li');
-const tab_content = d3.select('#tab-content');
+
 
 // init loadings plot vars
 const loadings_margin = {right: 0, left: 150, top: 15, bottom: 40};
 
+const get_selected_metric = function(){
+
+    // search metric selection list
+    var selected_metric = 
+        d3.select('#metric-selections')
+            .selectAll('div.active')
+            .filter(function(){
+                const style = d3.select(this).attr('style');
+                if(typeof(style)==='string'){
+                    return style.includes('dashed');
+                } 
+            })
+            .nodes()[0];
+
+    if(!selected_metric){
+        const selected_label = d3.select('#metric-loadings-tab')
+            .select('.tab-content')
+            .select('text[selected=true]');
+        if(selected_label.nodes()[0]){
+            selected_metric = selected_label.nodes()[0].innerHTML;
+        }
+    } else {
+        selected_metric = selected_metric.innerHTML;
+    }
+    if(!selected_metric){
+        d3.select('#matrix-header')
+            .select('select')
+                .each(function(d){ 
+                    selected_metric = d[0]['full'].fields[0] })
+    }
+    return selected_metric;
+}
 
 const switch_tab = function(){
     // set all tabs to inactive and activate selected tab
@@ -20,6 +52,20 @@ const switch_tab = function(){
             break;
         case "Metric Summary":
             d3.select('#metric-summary-tab').style('visibility','visible');
+
+            var all_metrics = [];
+            d3.select('#matrix-header')
+                .select('select')
+                    .each(function(d){ 
+                        all_metrics = d[0]['full'].fields })
+            d3.select('#metric-summary-tab').select('select')
+                .selectAll('option')
+                    .data(all_metrics)
+                    .enter()
+                .append('option')
+                    .attr('value',function(d){ return d; })
+                    .text(function(d){ return d; });
+            load_metric_summary(get_selected_metric());
             break;
         case "Gene Search":
             d3.select('#gene-search-tab').style('visibility','visible');
@@ -195,10 +241,12 @@ const plot_loadings = function(loadings,labels,title){
     var loadings_plot_width = loadings_width - loadings_margin.left - loadings_margin.right;
     var loadings_plot_height = loadings_height - loadings_margin.top - loadings_margin.bottom;
 
-    const loadings_svg = tab_content.append('svg')
-        .attr('class','loadings-svg')
-		.attr("width", loadings_width)
-        .attr("height", loadings_height)
+    const loadings_svg = d3.select('#metric-loadings-tab')
+            .select('.tab-content')
+        .append('svg')
+            .attr('class','loadings-svg')
+            .attr("width", loadings_width)
+            .attr("height", loadings_height)
 		//.style("margin-left", -loadings_margin.left + "px")
         //.style("float",'right')
 
@@ -309,8 +357,80 @@ const plot_loadings = function(loadings,labels,title){
     
 }
 
-
 // switch apriori plots on dropdown menu change
-const dropdown_menu_change = function(){
+const load_metric_summary = function(metric_name){
 
+    d3.select('#metric-summary-tab')
+        .selectAll('tr')
+        .filter(function(d,i){ return i>0 })
+        .remove();
+
+    d3.csv('metric_glossary.csv').then(function(metric_table){
+
+        const metric_idx = metric_table.map((d,i) => { return d.Metric; }).indexOf(metric_name)
+        const assay_name = metric_table[metric_idx].Assay;
+        var cols = ['header'];
+        metric_table.columns.forEach( i => { cols.push(i) });
+
+        d3.select('#metric-summary-tab').select('table')
+            .selectAll('tr')
+                .data(cols)
+                .enter()
+            .append('tr')
+                .each(function(d,i){
+                    d3.select(this)
+                        .selectAll('td')
+                            .data(d3.range(3))
+                            .enter()
+                        .append('td')
+                            .each(function(dd,j){
+                                switch(j){
+                                    case 0:
+                                        d3.select(this).style('width','20%').append('p').text(d+':').style('font-weight','bold')
+                                        break;
+                                    case 1:
+                                        d3.select(this).style('width','20%').append('p').text(metric_table[metric_idx][d])
+                                        break;
+                                    case 2:
+                                        break;
+                                }
+                            })
+                })
+
+        d3.csv('assay_glossary.csv').then(function(assay_table){
+
+            const assay_idx = assay_table.map((d,i) => { return d.Name; }).indexOf(assay_name)
+            const assay_cols = assay_table.columns.slice(1,4);
+            assay_cols.forEach( i => { cols.push(i) });
+
+            d3.select('#metric-summary-tab').select('table')
+            .selectAll('tr')
+                .data(cols)
+                .enter()
+            .append('tr')
+                .each(function(d,i){
+                    d3.select(this)
+                        .selectAll('td')
+                            .data(d3.range(3))
+                            .enter()
+                        .append('td')
+                            .each(function(dd,j){
+                                switch(j){
+                                    case 0:
+                                        d3.select(this).append('p').text('Assay '+d+':').style('font-weight','bold')
+                                        break;
+                                    case 1:
+                                        d3.select(this).append('p').text(assay_table[assay_idx][d])
+                                        break;
+                                    case 2:
+                                        break;
+                                }
+                            })
+                })
+        })
+    })
 }
+
+d3.select('#metric-summary-tab')
+    .select('select')
+        .on('change',function(){ load_metric_summary(this.value) })

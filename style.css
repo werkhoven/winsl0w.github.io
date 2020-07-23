@@ -21,7 +21,7 @@ body{
   color: var(--high-emph-txt);
   margin: auto;
   width: 1320px;
-  height: auto;
+  height: 1725px;
   max-width: 1320px;
   position: relative;
   font-family: "Arial", sans-serif;
@@ -67,22 +67,40 @@ div .disabled{
   font-size: 14px;
 }
 #matrix-header{
-  width: 200px;
+  width: 650px;
   height: 20px;
   position: absolute;
   top: 25px;
-  left: 830px;
+  left: 420px;
 }
 #matrix-header select{
   position: absolute;
   bottom: 0px;
-  left: 100px;
+  right: 0px;
+  width: 130px;
 }
 #matrix-header span{
   position: absolute;
   bottom: 0px;
+  right: 140px;
   font-size: 16px;
 }
+#clear-selections{
+  position: absolute;
+  bottom: 0px;
+  display: block;
+  padding: 5px;
+  float: right;
+  border: 1px solid black;
+  width: 120px;
+  height: 8px;
+  text-align: center;
+  line-height: 8px;
+  font-size: 12px;
+}
+
+
+
 #colorbar{
   position: absolute;
   right: 150px;
@@ -97,6 +115,25 @@ select{
 }
 select:focus{
   outline: none;
+}
+th{
+  margin: 0px;
+  padding: 10px 10px 10px 55px;
+  text-align: left;
+  vertical-align: top;
+}
+td{
+  margin: 0px;
+  padding: 10px 10px 20px 55px;
+  text-align: left;
+  vertical-align: top;
+}
+th p, th span, td p, td span{
+  margin: 0px;
+  padding: 0px;
+  font-size: 16px;
+  font-weight: 100;
+  fill: var(--med-emph-txt);
 }
 
 svg{
@@ -247,24 +284,26 @@ svg{
   padding: 5px;
   float: right;
   border: 1px solid black;
-  width: 65px;
+  width: 86px;
   height: 8px;
   text-align: center;
   line-height: 8px;
   font-size: 12px;
 }
-#metric-select-buttons div.inactive{
+#metric-select-buttons div.inactive,
+#clear-selections.inactive{
   background-color: var(--inactive-bg-color);
 }
-#metric-select-buttons div.active{
+#metric-select-buttons div.active,
+#clear-selections.active{
   background-color: var(--active-bg-color);
 }
-#metric-select-buttons div.selected{
+#metric-select-buttons div.selected,
+#clear-selections.selected{
   background-color: rgb(200,200,200);
   -webkit-box-shadow: inset 0px 0px 5px rgb(100,100,100);
   box-shadow: inset 0px 0px 5px rgb(100,100,100);
 }
-
 
 #metric-selections{
   position: absolute;
@@ -307,7 +346,7 @@ svg{
   border-top: none;
   display: block;
   width: 100%;
-  height: 800px;
+  height: 875px;
   position: absolute;
   background-color: var(--active-tab-color);
 }
@@ -349,19 +388,21 @@ svg{
   outline: none;
 }
 
-#tab-content{
+.tab-content{
   margin: 20px;
   display: block;
   height: auto;
+}
+#metric-loadings-tab div.tab-content{
   overflow: hidden;
   overflow-x: scroll;
   white-space: nowrap;
 }
-#tab-content::-webkit-scrollbar{
+.tab-content::-webkit-scrollbar{
   background-color: var(--secondary-bg-color);
   width: 8px;
 }
-#tab-content::-webkit-scrollbar-thumb{
+.tab-content::-webkit-scrollbar-thumb{
   background: var(--active-bg-color);
 }
 

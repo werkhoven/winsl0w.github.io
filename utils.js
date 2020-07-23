@@ -20,3 +20,14 @@ const in_selection = function(selection,col,row){
     const in_col = selection.some(v => v === col)
     return in_row && in_col;
 }
+
+const format_loadings_labels = function(labels){
+    for(let i=0; i<labels.length; i++){
+        for(let j=0; j<labels[i].length; j++){
+            labels[i][j] = labels[i][j].replace('_',' ')
+        }
+    }
+    return labels;
+}
+
+

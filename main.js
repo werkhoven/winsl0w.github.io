@@ -139,8 +139,8 @@ const init_page_from_dataset = function(dec,matrix_type){
 		apriori[i].loadings_labels = dec.distilled.loadings_labels.filter( function(ll,j){
 			return distilled_assay_idx[i].some( ii => {return ii === j} )
 		});
+		apriori[i].loadings_labels = format_loadings_labels(apriori[i].loadings_labels);
 	}
-
 
 
 	apriori = apriori.map( i => {
@@ -150,13 +150,10 @@ const init_page_from_dataset = function(dec,matrix_type){
 
 	if(matrix_type === 'distilled'){
 
-		
-
 		var dist_qselect_data = [];
 		for(let i=0; i<apriori_grps.length; i++){
 			dist_qselect_data.push({fields: [],idx: [],list_idx: []});
 		}
-		console.log(dist_qselect_data.length)
 		for(let i=0; i<apriori_grps.length; i++){
 			for(let j=0; j<apriori[i].dist_fields.length; j++){
 				dist_qselect_data[i].fields[j] = apriori[i].dist_fields[j];
@@ -164,8 +161,6 @@ const init_page_from_dataset = function(dec,matrix_type){
 				dist_qselect_data[i].list_idx[j] = j;
 			}
 		}
-		
-		console.log(dist_qselect_data)
 		init_qselections('behavior',apriori_grps,dist_qselect_data);
 	} else {
 		init_qselections('behavior',apriori_grps,apriori);
@@ -197,7 +192,6 @@ const init_page_from_dataset = function(dec,matrix_type){
 			.text(function(d){ return d })
 
 		init_colorbar();
-
 }
 
 
@@ -271,6 +265,7 @@ d3.json("decathlon.json").then(function(dec){
 					update_page_dataset(d[dataset_idx%2],matrix_type)
 				} else {
 					init_page_from_dataset(d[dataset_idx%2],matrix_type);
+					document.getElementById('clear-selections').click();
 				}
 				})
 

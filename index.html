@@ -24,14 +24,15 @@
             </aside>
             <div id="metric-select-parent">
                 <div id="metric-select-buttons">
-                    <div class="inactive">Select All</div>
-                    <div class="inactive">Deselect All</div>
+                    <div class="inactive">Select Group</div>
+                    <div class="inactive">Deselect Group</div>
                 </div>
                 <div id="metric-selections"></div>
             </div>
             <div id="matrix-header">
                 <span>Select dataset:</span>
                 <select></select>
+                <div id="clear-selections" class="inactive">Clear All Selections</div>
             </div>
             <aside id="instructions">
                 <h2 style="margin-top: 0px"><u>Instructions</u></h2>
@@ -66,12 +67,30 @@
                     <select></select>
                     <h2 style="left: 400px">Activity PC</h2>
                 </div>
-                <div id="tab-content"></div>
+                <div class="tab-content"></div>
             </div>
             <div class="tab-parent" id="metric-summary-tab" style="visibility: hidden">
+                <div class="tab-content">
+                    <table style="width: 100%; height: 100%">
+                        <tr>
+                            <th colspan="2" style="width: 40%; height: auto">
+                                <span>Select metric: &nbsp;</span>
+                                <select style="margin: 0px; padding: 0px;">word up</select>
+                            </th>
+                            <th style="width: 60%; height: 80px">
+                            </th>
+                        </tr>
+                    </table>
                 </div>
-            <div class="tab-parent" id="gene-search-tab" style="visibility: hidden">
             </div>
+            <div class="tab-parent" id="gene-search-tab" style="visibility: hidden">
+                <div class="tab-content">
+                    
+                </div>
+            </div>
+        </div>
+        <div style="display: inline-block; width: 100%; height: 50px; position: absolute; bottom: 0px">
+            <span></span>
         </div>
     </body>
 </html>

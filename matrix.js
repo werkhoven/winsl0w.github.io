@@ -510,12 +510,18 @@ const metric_toggle_all = function(){
 		.selectAll('div')
 		.filter(function(){ return this.innerText === curr_quick_selection});
 
-	if(this.innerText === 'Select All'){
-		curr_qselect.each(function(dd){ dd.idx.forEach(v => curr_selection.push(v-1)) });
-	} else {
-		curr_qselect.each(function(dd){
-			curr_selection = curr_selection.filter((v) => { return !dd.idx.some(vv => v===vv-1) });
-		})
+	switch(this.innerText){
+		case "Select Group":
+			curr_qselect.each(function(dd){ dd.idx.forEach(v => curr_selection.push(v-1)) });
+			break;
+		case "Deselect Group":
+			curr_qselect.each(function(dd){
+				curr_selection = curr_selection.filter((v) => { return !dd.idx.some(vv => v===vv-1) });
+			})
+			break;
+		case "Clear All Selections":
+			curr_selection = [];
+			break;
 	}
 
 	//define the current selection and initialize metric selection divs
@@ -612,3 +618,10 @@ d3.select('#metric-select-buttons').selectAll('div')
 	.on('mousedown',function(){ d3.select(this).attr('class','selected') })
 	.on('mouseover',function(){ d3.select(this).attr('class','active') })
 	.on('mouseout',function(){ d3.select(this).attr('class','inactive') })
+
+// apply metric toggling to metric selection buttons
+d3.select('#clear-selections')
+	.on('mousedown',function(){ d3.select(this).attr('class','selected') })
+	.on('mouseover',function(){ d3.select(this).attr('class','active') })
+	.on('mouseout',function(){ d3.select(this).attr('class','inactive') })
+	.on('click',metric_toggle_all)

@@ -65,6 +65,28 @@ const switch_tab = function(){
                 .append('option')
                     .attr('value',function(d){ return d; })
                     .text(function(d){ return d; });
+
+            d3.select('#metric-summary-tab')
+                .selectAll('tr')
+                    .filter(function(d,i){ return i>0 })
+                    .remove();
+
+            d3.select('#metric-summary-tab')
+                .select('table')
+                .selectAll('tr')
+                    .data(d3.range(8))
+                    .enter()
+                .append('tr')
+                    .each(function(d){
+                        d3.select(this).selectAll('td')
+                            .data(d3.range(3))
+                            .enter()
+                        .append('td')
+                            .each(function(){ d3.select(this).append('p') })
+                    })
+
+            console.log(d3.select('#metric-summary-tab').selectAll('tr').size())
+
             load_metric_summary(get_selected_metric());
             break;
         case "Gene Search":
@@ -360,11 +382,6 @@ const plot_loadings = function(loadings,labels,title){
 // switch apriori plots on dropdown menu change
 const load_metric_summary = function(metric_name){
 
-    d3.select('#metric-summary-tab')
-        .selectAll('tr')
-        .filter(function(d,i){ return i>0 })
-        .remove();
-
     d3.csv('metric_glossary.csv').then(function(metric_table){
 
         const metric_idx = metric_table.map((d,i) => { return d.Metric; }).indexOf(metric_name)
@@ -375,21 +392,24 @@ const load_metric_summary = function(metric_name){
         d3.select('#metric-summary-tab').select('table')
             .selectAll('tr')
                 .data(cols)
-                .enter()
-            .append('tr')
+                .filter(function(d,i){ return i > 0 && i < 6 })
                 .each(function(d,i){
                     d3.select(this)
                         .selectAll('td')
-                            .data(d3.range(3))
-                            .enter()
-                        .append('td')
                             .each(function(dd,j){
                                 switch(j){
                                     case 0:
-                                        d3.select(this).style('width','20%').append('p').text(d+':').style('font-weight','bold')
+                                        d3.select(this)
+                                            .style('width','20%')
+                                            .select('p')
+                                                .text(d+':')
+                                                .style('font-weight','bold')
                                         break;
                                     case 1:
-                                        d3.select(this).style('width','20%').append('p').text(metric_table[metric_idx][d])
+                                        d3.select(this)
+                                            .style('width','25%')
+                                            .select('p')
+                                                .text(metric_table[metric_idx][d])
                                         break;
                                     case 2:
                                         break;
@@ -404,29 +424,26 @@ const load_metric_summary = function(metric_name){
             assay_cols.forEach( i => { cols.push(i) });
 
             d3.select('#metric-summary-tab').select('table')
-            .selectAll('tr')
-                .data(cols)
-                .enter()
-            .append('tr')
-                .each(function(d,i){
-                    d3.select(this)
-                        .selectAll('td')
-                            .data(d3.range(3))
-                            .enter()
-                        .append('td')
-                            .each(function(dd,j){
-                                switch(j){
-                                    case 0:
-                                        d3.select(this).append('p').text('Assay '+d+':').style('font-weight','bold')
-                                        break;
-                                    case 1:
-                                        d3.select(this).append('p').text(assay_table[assay_idx][d])
-                                        break;
-                                    case 2:
-                                        break;
-                                }
-                            })
-                })
+                .selectAll('tr')
+                    .data(cols)
+                    .filter(function(d,i){ return i > 5 })
+                    .each(function(d,i){
+                        d3.select(this)
+                            .selectAll('td')
+                                .each(function(dd,j){
+                                    switch(j){
+                                        case 0:
+                                        console.log(j)
+                                            d3.select(this).select('p').text('Assay '+d+':').style('font-weight','bold')
+                                            break;
+                                        case 1:
+                                            d3.select(this).select('p').text(assay_table[assay_idx][d])
+                                            break;
+                                        case 2:
+                                            break;
+                                    }
+                                })
+                    })
         })
     })
 }

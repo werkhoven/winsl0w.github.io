@@ -1,10 +1,42 @@
 const tab_div = d3.select('#tab-div');
 const tab_links = tab_div.selectAll('li');
-const tab_content = d3.select('#tab-content');
+
 
 // init loadings plot vars
 const loadings_margin = {right: 0, left: 150, top: 15, bottom: 40};
 
+const get_selected_metric = function(){
+
+    // search metric selection list
+    var selected_metric = 
+        d3.select('#metric-selections')
+            .selectAll('div.active')
+            .filter(function(){
+                const style = d3.select(this).attr('style');
+                if(typeof(style)==='string'){
+                    return style.includes('dashed');
+                } 
+            })
+            .nodes()[0];
+
+    if(!selected_metric){
+        const selected_label = d3.select('#metric-loadings-tab')
+            .select('.tab-content')
+            .select('text[selected=true]');
+        if(selected_label.nodes()[0]){
+            selected_metric = selected_label.nodes()[0].innerHTML;
+        }
+    } else {
+        selected_metric = selected_metric.innerHTML;
+    }
+    if(!selected_metric){
+        d3.select('#matrix-header')
+            .select('select')
+                .each(function(d){ 
+                    selected_metric = d[0]['full'].fields[0] })
+    }
+    return selected_metric;
+}
 
 const switch_tab = function(){
     // set all tabs to inactive and activate selected tab
@@ -20,6 +52,46 @@ const switch_tab = function(){
             break;
         case "Metric Summary":
             d3.select('#metric-summary-tab').style('visibility','visible');
+
+            var all_metrics = [];
+            d3.select('#matrix-header')
+                .select('select')
+                    .each(function(d){ 
+                        all_metrics = d[0]['full'].fields })
+            d3.select('#metric-summary-tab').select('select')
+                .selectAll('option')
+                    .data(all_metrics)
+                    .enter()
+                .append('option')
+                    .attr('value',function(d){ return d; })
+                    .text(function(d){ return d; });
+
+            d3.select('#metric-summary-tab')
+                .selectAll('tr')
+                    .filter(function(d,i){ return i>0 })
+                    .remove();
+
+            d3.select('#metric-summary-tab')
+                .select('table')
+                .selectAll('tr')
+                    .data(d3.range(8))
+                    .enter()
+                .append('tr')
+                    .each(function(d){
+                        d3.select(this).selectAll('td')
+                            .data(d3.range(3))
+                            .enter()
+                        .append('td')
+                            .each(function(){ d3.select(this).append('p') })
+                    })
+
+            console.log(d3.select('#metric-summary-tab').selectAll('tr').size())
+
+            const selected_metric_name = get_selected_metric();
+            //load_metric_summary(selected_metric_name);
+            var element = document.getElementById('metric-summary-tab-select');
+            var event = new Event('change', {value: selected_metric_name});
+            element.dispatchEvent(event);
             break;
         case "Gene Search":
             d3.select('#gene-search-tab').style('visibility','visible');
@@ -195,10 +267,12 @@ const plot_loadings = function(loadings,labels,title){
     var loadings_plot_width = loadings_width - loadings_margin.left - loadings_margin.right;
     var loadings_plot_height = loadings_height - loadings_margin.top - loadings_margin.bottom;
 
-    const loadings_svg = tab_content.append('svg')
-        .attr('class','loadings-svg')
-		.attr("width", loadings_width)
-        .attr("height", loadings_height)
+    const loadings_svg = d3.select('#metric-loadings-tab')
+            .select('.tab-content')
+        .append('svg')
+            .attr('class','loadings-svg')
+            .attr("width", loadings_width)
+            .attr("height", loadings_height)
 		//.style("margin-left", -loadings_margin.left + "px")
         //.style("float",'right')
 
@@ -309,8 +383,194 @@ const plot_loadings = function(loadings,labels,title){
     
 }
 
+const plot_raw_histogram = function(data,x_min,x_max,ylabel,plot_color,xlabel,append_xlabel){
+
+    // init plotting params
+    var hist_margin = {top: 5, right: 5, bottom: 30, left: 50};
+    var width = 500 - hist_margin.left - hist_margin.right,
+        height = 180 - hist_margin.top - hist_margin.bottom;
+    if(append_xlabel) hist_margin.bottom = 60;
+
+    var x = d3.scaleLinear()
+        .domain([x_min, x_max])
+        .range([0, width]);
+    var hist = d3.histogram()
+        .value(function(d){ return d; })
+        .domain(x.domain())
+        .thresholds(x.ticks(30));
+    var binned_data = hist(data);
+    var y_max = Math.ceil(d3.max(binned_data, function(d){ return d.length })*1.1);
+    var y = d3.scaleLinear()
+        .domain([0, y_max])
+        .range([height, 0]);
+
+    // initialize axes
+    var bar_svg = d3.select('#hist-div').append('svg')
+        .attr('class','axis')
+        .attr("width", width + hist_margin.left + hist_margin.right)
+        .attr("height", height + hist_margin.top + hist_margin.bottom)
+      .append("g")
+        .attr("transform",`translate(${hist_margin.left},${hist_margin.top})`);
+    bar_svg.append('path')
+        .attr('d',
+            `M0,1
+            H${x(x_max)-x(x_min)}
+            V${y(0)}
+            H0
+            V0`)
+        .attr('stroke-width',1)
+        .attr('stroke','#000000')
+        .attr('fill',d3.rgb(30,30,30));
+    var xAxis = d3.axisBottom()
+        .scale(x)
+        .ticks(10);
+    bar_svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(xAxis);
+    var yAxis = d3.axisLeft()
+        .scale(y)
+        .ticks(5);
+    bar_svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+    bar_svg.append('text')
+        .text(ylabel)
+        .attr('text-anchor','middle')
+        .attr('transform',`translate(-40,${y(0)/2}) rotate(-90)`)
+        .style('font-size','14px')
+        .style('fill',plot_color);
+
+    if(append_xlabel){
+        bar_svg.append('text')
+            .text(xlabel)
+            .attr('text-anchor','middle')
+            .attr('transform',`translate(${x(x_max)/2},${y(0)+50})`)
+            .style('font-size','14px');     
+    }
+    
+
+    // initialize bar elements
+    var bar = bar_svg.selectAll(".bar")
+        .data(binned_data)
+        .enter().append("g")
+            .attr("class", "bar")
+            .attr("transform", function(d) { return `translate(${x(d.x0)},${y(d.length)})`; });
+    bar.append("rect")
+        .attr("x", 1)
+        .attr("width", function(d) { return Math.max(Math.abs(x(d.x1) - x(d.x0)) -1,0) ; })
+        .attr("height", function(d) { return height - y(d.length); })
+        .attr('fill',plot_color);
+}
+
 
 // switch apriori plots on dropdown menu change
-const dropdown_menu_change = function(){
+const load_metric_summary = function(metric_name){
 
+    // add metric glossary entry
+    var metric_idx;
+    d3.csv('metric_glossary.csv').then(function(metric_table){
+
+        metric_idx = metric_table.map((d,i) => { return d.Metric; }).indexOf(metric_name)
+        const assay_name = metric_table[metric_idx].Assay;
+        var cols = ['header'];
+        metric_table.columns.forEach( i => { cols.push(i) });
+
+        d3.select('#metric-summary-tab').select('table')
+            .selectAll('tr')
+                .data(cols)
+                .filter(function(d,i){ return i > 0 && i < 6 })
+                .each(function(d,i){
+                    d3.select(this)
+                        .selectAll('td')
+                            .each(function(dd,j){
+                                switch(j){
+                                    case 0:
+                                        d3.select(this)
+                                            .style('width','40%')
+                                            .select('p')
+                                                .text(d+':')
+                                                .style('font-weight','bold')
+                                        break;
+                                    case 1:
+                                        d3.select(this)
+                                            .style('width','60%')
+                                            .select('p')
+                                                .text(metric_table[metric_idx][d])
+                                        break;
+                                    case 2:
+                                        break;
+                                }
+                            })
+                })
+
+        // add assay glossary entry
+        d3.csv('assay_glossary.csv').then(function(assay_table){
+
+            const assay_idx = assay_table.map((d,i) => { return d.Name; }).indexOf(assay_name)
+            const assay_cols = assay_table.columns.slice(1,4);
+            assay_cols.forEach( i => { cols.push(i) });
+
+            d3.select('#metric-summary-tab').select('table')
+                .selectAll('tr')
+                    .data(cols)
+                    .filter(function(d,i){ return i > 5 })
+                    .each(function(d,i){
+                        d3.select(this)
+                            .selectAll('td')
+                                .each(function(dd,j){
+                                    switch(j){
+                                        case 0:
+                                            d3.select(this).select('p').text('Assay '+d+':').style('font-weight','bold')
+                                            break;
+                                        case 1:
+                                            d3.select(this).select('p').text(assay_table[assay_idx][d])
+                                            break;
+                                        case 2:
+                                            break;
+                                    }
+                                })
+                    })
+        })
+    })
+
+    // append histograms
+    d3.select('#hist-div').selectAll('svg').remove()
+    d3.json('decathlon_raw_data.json').then(function(raw){
+
+        var x_min = 0;
+        var x_max = 1;
+        var d_raw = [];
+        var ylabels = ['inbred batch[1]','inbred batch[2]','outbred batch[1]'];
+        var plot_colors = ['rgb(220,150,220)','rgb(220,150,120)','rgb(150,150,220)']
+
+        console.log(raw)
+
+        for(let i=0; i<raw.length; i++){
+            var metric_idx = raw[i].fields.indexOf(metric_name);
+            var raw_data = raw[i].data.map( d => { return d[metric_idx] }).filter( d => { return d !== null});
+            d_raw.push(raw_data)
+
+            if(raw_data.some( d => {return d})){
+                x_max = Math.max(d3.max(raw_data),x_max);
+                x_min = Math.min(d3.min(raw_data),x_min);
+            }
+        }
+
+        console.log(d_raw)
+
+        for(let i=0; i<3; i++){
+            if(d_raw[i].some( d => {return d})){
+                plot_raw_histogram(d_raw[i],x_min,x_max,ylabels[i],plot_colors[i],metric_name,i+1===raw.length);
+            }
+        }
+    })
+    
+    
+
+    
 }
+
+d3.select('#metric-summary-tab')
+    .select('select')
+        .on('change',function(){ load_metric_summary(this.value) })

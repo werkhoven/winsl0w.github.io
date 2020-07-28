@@ -11,7 +11,6 @@ const act_col = [240,160,240];  // active text/rect color
 const irc = [160,160,240];      // inactive rect color
 const itc = [255,255,255];      // inactive text color
 
-console.log('no')
 
 const update_mouseover_texbox = function(d,dx,dy){
 
@@ -168,7 +167,6 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			return;
 		}
 
-		console.log(ci_data[dataset_idx][matrix_type]);
 		if(flip_xy){
 			fit_x = ci_data[dataset_idx][matrix_type][ci_idx-1].fit_y;
 			fit_y = ci_data[dataset_idx][matrix_type][ci_idx-1].fit_x;
@@ -204,9 +202,6 @@ const matrix_click = function(d,dec_data,scatter_scale){
 			}
 			line_data.push(new_pt);
 		}
-
-		console.log(upper_ci);
-		console.log(lower_ci);
 
 		var lineGenerator = d3.line();
 		var pathString = lineGenerator(line_data);
@@ -369,7 +364,7 @@ const qselection_click = function(d){
 	d3.select(this)
 		.attr('data-status','on')
 		.attr('class','selected');
-	
+
 	//define the current selection and initialize metric selection divs
 	const metric_selections = d.idx.map((v,i) => { return {field: d.fields[i], idx: v, list_idx: d.list_idx[i]} });
 	curr_quick_selection = this.innerText;
@@ -481,6 +476,24 @@ const metric_selection_click = function(d){
 			.attr('data-status','on')
 			.attr('class','active');
 	}
+
+	// update metric summary tab
+	var selected_metric = 
+        d3.select('#metric-selections')
+            .selectAll('div.active')
+            .filter(function(){
+                const style = d3.select(this).attr('style');
+                if(typeof(style)==='string'){
+                    return style.includes('dashed');
+                } 
+            })
+            .nodes()[0]
+	if(selected_metric){
+		var element = document.getElementById('metric-summary-tab-select');
+		element.value = selected_metric.innerHTML;
+		var event = new Event('change', {value: selected_metric.innerHTML});
+		element.dispatchEvent(event);
+	}
 }
 
 const init_metric_selections = function(metric_selections){
@@ -515,12 +528,18 @@ const metric_toggle_all = function(){
 		.selectAll('div')
 		.filter(function(){ return this.innerText === curr_quick_selection});
 
-	if(this.innerText === 'Select All'){
-		curr_qselect.each(function(dd){ dd.idx.forEach(v => curr_selection.push(v-1)) });
-	} else {
-		curr_qselect.each(function(dd){
-			curr_selection = curr_selection.filter((v) => { return !dd.idx.some(vv => v===vv-1) });
-		})
+	switch(this.innerText){
+		case "Select Group":
+			curr_qselect.each(function(dd){ dd.idx.forEach(v => curr_selection.push(v-1)) });
+			break;
+		case "Deselect Group":
+			curr_qselect.each(function(dd){
+				curr_selection = curr_selection.filter((v) => { return !dd.idx.some(vv => v===vv-1) });
+			})
+			break;
+		case "Clear All Selections":
+			curr_selection = [];
+			break;
 	}
 
 	//define the current selection and initialize metric selection divs
@@ -544,7 +563,6 @@ const init_colorbar = function(){
 		var caxis_pct = caxis_domain.map( v => v + (0-min));
 		const max = caxis_pct.reduce((a,b) => { return Math.max(a,b) });
 		caxis_pct = caxis_pct.map( v => v / max * 100);
-		console.log(caxis_pct)
 		const caxis_colors = [
 				d3.rgb(0,255,255),
 				d3.rgb(0,51,255),
@@ -588,11 +606,12 @@ const init_colorbar = function(){
 		  .attr("height", h)
 		  .attr('stroke','#000000')
 		  .style("fill", "url(#gradient)")
-		  .attr("transform", "translate(0,10)");
+		  .attr('transform-origin','center center')
+		  .attr("transform", `translate(${-30},${-10}) rotate(180)`);
 	
 		var y = d3.scaleLinear()
-		  .range([h, 0])
-		  .domain([1, -1]);
+		  .range([h,  0])
+		  .domain([-1, 1]);
 	
 		var yAxis = d3.axisRight()
 		  .scale(y)
@@ -600,13 +619,13 @@ const init_colorbar = function(){
 	
 		key.append("g")
 		  .attr("class", "y-axis")
-		  .attr("transform", `translate(${w-w_pad},10)`)
+		  .attr("transform", `translate(${w_pad-10},10)`)
 		  .call(yAxis)
 	
 		key.append('text')
 			.text('correlation coefficient')
 			.attr('text-anchor','middle')
-			.attr('transform',`translate(${w},${(h+20)/2}) rotate(-90)`)
+			.attr('transform',`translate(10,${(h+20)/2}) rotate(-90)`)
 			.style('font-size','14px')
 
 }
@@ -617,3 +636,10 @@ d3.select('#metric-select-buttons').selectAll('div')
 	.on('mousedown',function(){ d3.select(this).attr('class','selected') })
 	.on('mouseover',function(){ d3.select(this).attr('class','active') })
 	.on('mouseout',function(){ d3.select(this).attr('class','inactive') })
+
+// apply metric toggling to metric selection buttons
+d3.select('#clear-selections')
+	.on('mousedown',function(){ d3.select(this).attr('class','selected') })
+	.on('mouseover',function(){ d3.select(this).attr('class','active') })
+	.on('mouseout',function(){ d3.select(this).attr('class','inactive') })
+	.on('click',metric_toggle_all)

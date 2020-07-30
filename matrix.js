@@ -476,6 +476,24 @@ const metric_selection_click = function(d){
 			.attr('data-status','on')
 			.attr('class','active');
 	}
+
+	// update metric summary tab
+	var selected_metric = 
+        d3.select('#metric-selections')
+            .selectAll('div.active')
+            .filter(function(){
+                const style = d3.select(this).attr('style');
+                if(typeof(style)==='string'){
+                    return style.includes('dashed');
+                } 
+            })
+            .nodes()[0]
+	if(selected_metric){
+		var element = document.getElementById('metric-summary-tab-select');
+		element.value = selected_metric.innerHTML;
+		var event = new Event('change', {value: selected_metric.innerHTML});
+		element.dispatchEvent(event);
+	}
 }
 
 const init_metric_selections = function(metric_selections){

@@ -1,9 +1,10 @@
 const tab_div = d3.select('#tab-div');
 const tab_links = tab_div.selectAll('li');
+var curr_gene_name, curr_gene_idx;
 
 
 // init loadings plot vars
-const loadings_margin = {right: 0, left: 150, top: 15, bottom: 40};
+const loadings_margin = {right: 10, left: 150, top: 15, bottom: 40};
 
 const get_selected_metric = function(){
 
@@ -87,10 +88,15 @@ const switch_tab = function(){
 
             console.log(d3.select('#metric-summary-tab').selectAll('tr').size())
 
-            load_metric_summary(get_selected_metric());
+            const selected_metric_name = get_selected_metric();
+            //load_metric_summary(selected_metric_name);
+            var element = document.getElementById('metric-summary-tab-select');
+            var event = new Event('change', {value: selected_metric_name});
+            element.dispatchEvent(event);
             break;
         case "Gene Search":
             d3.select('#gene-search-tab').style('visibility','visible');
+            init_gene_search_table();
             break;
     }
 }
@@ -254,62 +260,66 @@ const loading_tick_click = function(){
 }
 
 
+const new_plot = function(){
+    var plot = {
+        svg: null, svg_width: null, svg_height: null, trans_g: null,
+        margin: null, width: null, height: null,
+        xaxis: null, xscale: null, xmin: null, xmax: null, xlabel: null,
+        yaxis: null, yscale: null, ymin: null, ymax: null, ylabel: null,
+        data: null, labels: null, title: null,
+    }
+    return plot;
+}
 
-const plot_loadings = function(loadings,labels,title){
+const plot_hbar = function(plot){
 
-    
-    var loadings_width = 300;
-    var loadings_height = loadings.length*12 + loadings_margin.top + loadings_margin.bottom;
-    var loadings_plot_width = loadings_width - loadings_margin.left - loadings_margin.right;
-    var loadings_plot_height = loadings_height - loadings_margin.top - loadings_margin.bottom;
+    plot.svg_height = plot.data.length*12 + plot.margin.top + plot.margin.bottom;
+    plot.width = plot.svg_width - plot.margin.left - plot.margin.right;
+    plot.height = plot.svg_height - plot.margin.top - plot.margin.bottom;
 
-    const loadings_svg = d3.select('#metric-loadings-tab')
-            .select('.tab-content')
-        .append('svg')
-            .attr('class','loadings-svg')
-            .attr("width", loadings_width)
-            .attr("height", loadings_height)
-		//.style("margin-left", -loadings_margin.left + "px")
-        //.style("float",'right')
+    plot.svg
+        .attr("width", plot.svg_width)
+        .attr("height", plot.svg_height)
 
-    const loadings_grp = loadings_svg.append("g")
+    plot.trans_g = plot.svg.append("g")
 		.attr('class','axis')
-        .attr("transform", "translate(" + loadings_margin.left + "," + loadings_margin.top + ")");
+        .attr("transform", "translate(" + plot.margin.left + "," + plot.margin.top + ")");
 
-    var min = loadings.reduce((a,b) => { return Math.min(a,b) });
-    min = Math.floor(min*10)/10;
-    if(min>0) min = 0;
-    var max = loadings.reduce((a,b) => { return Math.max(a,b) });
-    max = Math.ceil(max*10)/10;
-    if(max<0) max=0;
+    // set x-axis upper and lower bounds
+    plot.xmin = plot.data.reduce((a,b) => { return Math.min(a,b) });
+    plot.xmin = Math.floor(plot.xmin*10)/10;
+    if(plot.xmin>0) plot.xmin = 0;
+    plot.xmax = plot.data.reduce((a,b) => { return Math.max(a,b) });
+    plot.xmax = Math.ceil(plot.xmax*10)/10;
+    if(plot.xmax<0) plot.xmax=0;
 
-    const loadings_y_scale = d3.scaleBand()
-        .domain(labels)
-        .range([0,loadings_plot_height])
+    plot.yscale = d3.scaleBand()
+        .domain(plot.labels)
+        .range([0,plot.height])
         .paddingOuter(.1)
         .paddingInner(.1)
 
-    var loadings_x_scale = d3.scaleLinear()
-        .domain([min,max])
-        .range([0,loadings_plot_width])
+    plot.xscale = d3.scaleLinear()
+        .domain([plot.xmin,plot.xmax])
+        .range([0,plot.width])
 
     // initialize axes
-	const y_axis_grp = loadings_grp
+	plot.yaxis = plot.trans_g
         .append('g')
             .attr('class','y-axis')
-            .call(d3.axisLeft(loadings_y_scale).ticks(0).tickSize(0));
+            .call(d3.axisLeft(plot.yscale).ticks(0).tickSize(0));
 
-    loadings_grp
+    plot.trans_g
         .append('g')
-            .attr('transform','translate(0,' + loadings_plot_height + ')')
-            .call(d3.axisBottom(loadings_x_scale).ticks(3));
+            .attr('transform','translate(0,' + plot.height + ')')
+            .call(d3.axisBottom(plot.xscale).ticks(5));
 
-    loadings_grp
+    plot.trans_g
         .append('path')
             .attr('d',
                 `M0,0
-                H${loadings_plot_width}
-                V${loadings_plot_height}
+                H${plot.width}
+                V${plot.height}
                 H0
                 V0`)
             .attr('stroke-width',1)
@@ -317,52 +327,75 @@ const plot_loadings = function(loadings,labels,title){
             .attr('fill',d3.rgb(30,30,30));
 
     // append axis labels
-    loadings_grp
+    plot.trans_g
         .append('text')
             .attr('text-anchor','middle')
-            .attr('x',loadings_plot_width/2)
-            .attr('y',loadings_plot_height+30)
+            .attr('x',plot.width/2)
+            .attr('y',plot.height+30)
             .attr('id','loadings-xlabel')
-            .text('metric weight')
+            .text(plot.xlabel)
             .style('font-size','12px')
     // append axis labels
-    loadings_grp
+    plot.trans_g
         .append('text')
             .attr('text-anchor','middle')
-            .attr('x',loadings_plot_width/2)
+            .attr('x',plot.width/2)
             .attr('y',-5)
             .attr('id','loadings-xlabel')
-            .text(title)
+            .text(plot.title)
             .style('font-size','12px')
 
     // initialize plot bars
-    const loadings_rects = loadings_grp
+    plot.trans_g
         .append('g')
             .attr('class','loadings-bar-parent')
             .selectAll('rect')
-                .data(loadings)
+                .data(plot.data)
                 .enter()
             .append('rect')
                 .attr('selected',false)
                 .attr('height',function(d,i){
-                    return loadings_y_scale.bandwidth(i);
+                    return plot.yscale.bandwidth(i);
                 })
                 .attr('width',function(d,i){
-                    return Math.abs(loadings_x_scale(0)-loadings_x_scale(d));
+                    return Math.abs(plot.xscale(0)-plot.xscale(d));
                 })
                 .attr('y', function(d,i){
-                    return loadings_y_scale(labels[i])
+                    return plot.yscale(plot.labels[i])
                 })
                 .attr('x', function(d,i){
-                    return d > 0 ? loadings_x_scale(0) : loadings_x_scale(d);
+                    return d > 0 ? plot.xscale(0) : plot.xscale(d);
                 })
-                .attr('fill',d3.rgb(irc[0],irc[1],irc[2],0.72))
-                .on('mouseover', function(d,i){ loading_bar_mouseover(this,i,y_axis_grp) })
-                .on('mouseout', function(d,i){ loading_bar_mouseout(this,i,y_axis_grp) })
-                .on('click', function(d,i){ loading_bar_click(this,i,y_axis_grp) });
+
+    return plot;
+    
+}
+
+const plot_loadings = function(loadings,labels,title){
+
+
+    var plot = new_plot();
+    
+    plot.svg_width = 300;
+    plot.margin = loadings_margin;
+    plot.svg = d3.select('#metric-loadings-tab').select('.tab-content').append('svg').attr('class','loadings-svg')
+    plot.data = loadings;
+    plot.labels = labels;
+    plot.title = title;
+    plot.xlabel = 'metric weight';
+
+    plot = plot_hbar(plot);
+
+    const loadings_rects = plot.svg.selectAll('rect')
+
+    loadings_rects
+        .attr('fill',d3.rgb(irc[0],irc[1],irc[2],0.72))
+        .on('mouseover', function(d,i){ loading_bar_mouseover(this,i,plot.yaxis) })
+        .on('mouseout', function(d,i){ loading_bar_mouseout(this,i,plot.yaxis) })
+        .on('click', function(d,i){ loading_bar_click(this,i,plot.yaxis) });
 
     // attach axis tick mouseover callback
-    y_axis_grp
+    plot.yaxis
         .selectAll('text')
         .attr('selected',false)
             .on('mouseover', function(d,i){ loading_tick_mouseover(this,i,loadings_rects) })
@@ -370,21 +403,103 @@ const plot_loadings = function(loadings,labels,title){
             .on('click',loading_tick_click);
 
     // draw indicator line at zero
-    loadings_grp
+    plot.yaxis
         .append('path')
-            .attr('d',`M${loadings_x_scale(0)},0V${loadings_plot_height}`)
+            .attr('d',`M${plot.xscale(0)},0V${plot.height}`)
             .attr('stroke-width',1)
             .attr('stroke','#000000')
             .attr('fill','none');
-    
 }
+
+const plot_raw_histogram = function(data,x_min,x_max,ylabel,plot_color,xlabel,append_xlabel){
+
+    // init plotting params
+    var hist_margin = {top: 5, right: 5, bottom: 30, left: 50};
+    var width = 500 - hist_margin.left - hist_margin.right,
+        height = 180 - hist_margin.top - hist_margin.bottom;
+    if(append_xlabel) hist_margin.bottom = 60;
+
+    var x = d3.scaleLinear()
+        .domain([x_min, x_max])
+        .range([0, width]);
+    var hist = d3.histogram()
+        .value(function(d){ return d; })
+        .domain(x.domain())
+        .thresholds(x.ticks(30));
+    var binned_data = hist(data);
+    var y_max = Math.ceil(d3.max(binned_data, function(d){ return d.length })*1.1);
+    var y = d3.scaleLinear()
+        .domain([0, y_max])
+        .range([height, 0]);
+
+    // initialize axes
+    var bar_svg = d3.select('#hist-div').append('svg')
+        .attr('class','axis')
+        .attr("width", width + hist_margin.left + hist_margin.right)
+        .attr("height", height + hist_margin.top + hist_margin.bottom)
+      .append("g")
+        .attr("transform",`translate(${hist_margin.left},${hist_margin.top})`);
+    bar_svg.append('path')
+        .attr('d',
+            `M0,1
+            H${x(x_max)-x(x_min)}
+            V${y(0)}
+            H0
+            V0`)
+        .attr('stroke-width',1)
+        .attr('stroke','#000000')
+        .attr('fill',d3.rgb(30,30,30));
+    var xAxis = d3.axisBottom()
+        .scale(x)
+        .ticks(10);
+    bar_svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(xAxis);
+    var yAxis = d3.axisLeft()
+        .scale(y)
+        .ticks(5);
+    bar_svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+    bar_svg.append('text')
+        .text(ylabel)
+        .attr('text-anchor','middle')
+        .attr('transform',`translate(-40,${y(0)/2}) rotate(-90)`)
+        .style('font-size','14px')
+        .style('fill',plot_color);
+
+    if(append_xlabel){
+        bar_svg.append('text')
+            .text(xlabel)
+            .attr('text-anchor','middle')
+            .attr('transform',`translate(${x(x_max)/2},${y(0)+50})`)
+            .style('font-size','14px');     
+    }
+    
+
+    // initialize bar elements
+    var bar = bar_svg.selectAll(".bar")
+        .data(binned_data)
+        .enter().append("g")
+            .attr("class", "bar")
+            .attr("transform", function(d) { return `translate(${x(d.x0)},${y(d.length)})`; });
+    bar.append("rect")
+        .attr("x", 1)
+        .attr("width", function(d) { return Math.max(Math.abs(x(d.x1) - x(d.x0)) -1,0) ; })
+        .attr("height", function(d) { return height - y(d.length); })
+        .attr('fill',plot_color);
+}
+
 
 // switch apriori plots on dropdown menu change
 const load_metric_summary = function(metric_name){
 
+    // add metric glossary entry
+    var metric_idx;
     d3.csv('metric_glossary.csv').then(function(metric_table){
 
-        const metric_idx = metric_table.map((d,i) => { return d.Metric; }).indexOf(metric_name)
+        metric_idx = metric_table.map((d,i) => { return d.Metric; }).indexOf(metric_name)
         const assay_name = metric_table[metric_idx].Assay;
         var cols = ['header'];
         metric_table.columns.forEach( i => { cols.push(i) });
@@ -400,14 +515,14 @@ const load_metric_summary = function(metric_name){
                                 switch(j){
                                     case 0:
                                         d3.select(this)
-                                            .style('width','20%')
+                                            .style('width','40%')
                                             .select('p')
                                                 .text(d+':')
                                                 .style('font-weight','bold')
                                         break;
                                     case 1:
                                         d3.select(this)
-                                            .style('width','25%')
+                                            .style('width','60%')
                                             .select('p')
                                                 .text(metric_table[metric_idx][d])
                                         break;
@@ -417,6 +532,7 @@ const load_metric_summary = function(metric_name){
                             })
                 })
 
+        // add assay glossary entry
         d3.csv('assay_glossary.csv').then(function(assay_table){
 
             const assay_idx = assay_table.map((d,i) => { return d.Name; }).indexOf(assay_name)
@@ -433,7 +549,6 @@ const load_metric_summary = function(metric_name){
                                 .each(function(dd,j){
                                     switch(j){
                                         case 0:
-                                        console.log(j)
                                             d3.select(this).select('p').text('Assay '+d+':').style('font-weight','bold')
                                             break;
                                         case 1:
@@ -446,8 +561,247 @@ const load_metric_summary = function(metric_name){
                     })
         })
     })
+
+    // append histograms
+    d3.select('#hist-div').selectAll('svg').remove()
+    d3.json('decathlon_raw_data.json').then(function(raw){
+
+        var x_min = 0;
+        var x_max = 1;
+        var d_raw = [];
+        var ylabels = ['inbred batch[1]','inbred batch[2]','outbred batch[1]'];
+        var plot_colors = ['rgb(220,150,220)','rgb(220,150,120)','rgb(150,150,220)']
+
+        for(let i=0; i<raw.length; i++){
+            var metric_idx = raw[i].fields.indexOf(metric_name);
+            var raw_data = raw[i].data.map( d => { return d[metric_idx] }).filter( d => { return d !== null});
+            d_raw.push(raw_data)
+
+            if(raw_data.some( d => {return d})){
+                x_max = Math.max(d3.max(raw_data),x_max);
+                x_min = Math.min(d3.min(raw_data),x_min);
+            }
+        }
+
+        for(let i=0; i<3; i++){
+            if(d_raw[i].some( d => {return d})){
+                plot_raw_histogram(d_raw[i],x_min,x_max,ylabels[i],plot_colors[i],metric_name,i+1===raw.length);
+            }
+        }
+    })
 }
 
 d3.select('#metric-summary-tab')
     .select('select')
         .on('change',function(){ load_metric_summary(this.value) })
+
+
+const init_gene_search_table = function(){
+
+    const row_labels = ['Gene Name:','FlyBase-ID:','KEGG-ID:','Num. Behaviors:','Enrichment Categories:'];
+    d3.select('#gene-search-tab')
+        .select('table')
+         .selectAll('tr')
+            .data(row_labels)
+            .enter()
+        .append('tr')
+            .each(function(d){
+                for(let j=0; j<2; j++){
+                    if(!j){
+                        d3.select(this).append('td').append('a').text(d)
+                    } else {
+                        d3.select(this).append('td').append('a').text('-')
+                    }
+                }
+            })
+
+    d3.select('#gene-search-tab').select('table')
+        .append('tr')
+        .append('td')
+            .attr('colspan',2)
+        .append('a')
+            .text('');
+
+}
+
+
+const update_selected_gene = function(gene_idx,rnaseq){
+
+    d3.select('#gene-search-results-div').select('svg').remove()
+
+    var sig_idx = rnaseq.model[0].log_p[gene_idx].reduce(function(arr,d,i){
+        if(d>0) arr.push(i);
+        return arr;
+    }, []);
+    var sig_logp = sig_idx.map( i => { return rnaseq.model[0].log_p[gene_idx][i] })
+    var sig_fields = sig_idx.map( i => { return rnaseq.fields[i] })
+
+    var sorted_logp = sig_logp.slice(0).sort();
+    var sorted_order = sorted_logp.map( (v,i) => { return sig_logp.indexOf(v) });
+    var sorted_fields = sorted_order.map( v => { return sig_fields[v] })
+    
+    var plot = new_plot();
+    plot.svg_width = 300;
+    plot.margin = loadings_margin;
+    plot.svg = d3.select('#gene-search-results-div').append('svg')
+    plot.data = sorted_logp;
+    plot.labels = sorted_fields;
+    plot.title = 'Significant Behaviors';
+    plot.xlabel = '-log[p-value]';
+
+    plot = plot_hbar(plot);
+    plot.svg.attr('transform-origin','top right').attr('transform','scale(1.25)').style('padding','0px')
+    plot.svg.selectAll('rect')
+        .style('fill',d3.rgb(150,150,220))
+
+    var gene_fbgn = rnaseq['fbgn'][gene_idx]
+    var gene_hit_idx = rnaseq['hits'][0]['fbgn'].indexOf(gene_fbgn);
+    var gene_cats = rnaseq['hits'][0]['cats'][gene_hit_idx];
+    if(!gene_cats) gene_cats = 'none';
+
+    var gene_id_types = ['gene_name','fbgn','kegg'];
+    gene_ids = gene_id_types.map( v => { return rnaseq[v][gene_idx] });
+    gene_ids.push(sig_logp.length,null,gene_cats);
+
+    d3.select('#gene-search-tab')
+    .select('table')
+    .selectAll('tr')
+        .data(gene_ids)
+        .each(function(d,i){
+            d3.select(this).selectAll('td')
+                .each(function(dd,j){
+                    if(j){
+                        var href = null;
+                        switch(i){
+                            case 0:
+                                href = null;
+                                break;
+                            case 1:
+                                href = 'https://flybase.org/reports/' + d;
+                                d3.select(this).select('a').attr('class','active-link')
+                                break;
+                            case 2:
+                                href = 'https://www.genome.jp/dbget-bin/www_bget?dme:' + d;
+                                d3.select(this).select('a').attr('class','active-link')
+                                break;
+                        }
+                        d3.select(this)
+                        .select('a')
+                            .attr('href',href)
+                            .nodes()[0].innerHTML = d;
+                    } else if (i===5){
+                        console.log(d)
+                        d3.select(this)
+                        .select('a')
+                            .attr('href',href)
+                            .nodes()[0].innerHTML = d;
+                    }
+                })
+        })
+}
+
+
+const find_all_genes = function(gene_ids,rnaseq){
+
+    var gene_idx = [];
+    for(let i=0; i<gene_ids.length; i++){
+
+        // get input type
+        var input_type, input_txt;
+        input_txt = gene_ids[i].toLowerCase();
+        if(input_txt.includes('fbgn')){
+            input_type = 'fbgn';
+        } else if(input_txt.includes('dmel')){
+            input_type = 'kegg';
+        } else {
+            input_type = 'gene_name';
+        }
+        gene_idx.push(rnaseq[input_type].map( v => { return v.toLowerCase()}).indexOf(input_txt));
+    }
+
+    return gene_idx;
+}
+
+const parse_input_list = function(input_txt){
+
+    var split_txt = input_txt.split(/\n/);
+    const spc_split = input_txt.split(' ');
+    if( spc_split > split_txt.length){
+        split_txt = spc_split;
+    }
+
+    return split_txt;   
+}
+
+const update_matching_id_div = function(gene_idx,gene_list,rnaseq){
+
+    d3.select('#gene-result-textbox').selectAll('div').remove()
+
+    d3.select('#gene-result-textbox')
+        .selectAll('div')
+            .data(gene_idx)
+            .enter()
+        .append('div')
+            .each(function(d,i){
+                if(i){
+                    d3.select(this).attr('class','inactive').attr('selected',false);
+                } else {
+                    d3.select(this).attr('class','active').attr('selected',true);
+                }
+            })
+            .text(function(d,i){ return gene_list[i] })
+            .on('click',function(d){
+
+                d3.select('#gene-result-textbox')
+                    .selectAll('div')
+                        .attr('class','inactive')
+                        .attr('selected',false)
+                        .style('color','rgba(255,255,255,0.38)');
+                d3.select(this)
+                    .attr('class','active')
+                    .attr('selected',true)
+                    .style('color','rgba(255,255,255,0.72)');
+
+                update_selected_gene(d,rnaseq);
+            })
+            .on('mouseover',function(){ d3.select(this).style('color','rgba(255,255,255,0.87)') })
+            .on('mouseout',function(){
+                if(d3.select(this).attr('selected') === 'true' ){
+                    d3.select(this).style('color','rgba(255,255,255,0.72)');
+                } else {
+                    d3.select(this).style('color','rgba(255,255,255,0.38)');
+                }
+            })
+}
+
+
+// GENE SEARCH TAB
+const search_genes = function(input_txt){
+
+    d3.json('decathlon_rnaseq_results.json').then(function(rnaseq){
+        
+        var input_list = parse_input_list(input_txt);
+        var matched_idx = find_all_genes(input_list,rnaseq)
+        var matched_list = matched_idx.reduce(function(arr,d,i){
+            if(d>=0) arr.push(input_list[i]);
+            return arr;
+        }, []);
+        matched_idx = matched_idx.filter( i => { return i>=0; });
+        update_matching_id_div(matched_idx,matched_list,rnaseq);
+        
+        // append data to the search tab
+        d3.select('#gene-search-tab').data(rnaseq);
+
+        if(matched_idx.length){
+            update_selected_gene(matched_idx[0],rnaseq);
+        }
+    })
+}
+
+d3.select('#gene-search-textbox')
+    .on("keydown",function(d){
+        if(d3.event.key === 'Enter'){
+            this.blur();
+            search_genes(this.value)
+        }
+    })

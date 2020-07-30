@@ -53,6 +53,15 @@ h3{
 ol{
   color: var(--med-emph-txt);
 }
+hr{
+  border: 1px solid var(--low-emph-txt)
+}
+a.active-link{
+  color: rgb(170,170,255);
+}
+a.inactive-link{
+  color: var(--med-emph-txt);
+}
 div .disabled{
   pointer-events: none;
   opacity: 0.5;
@@ -113,18 +122,23 @@ select{
   color: var(--med-emph-txt);
   font-size: 15px;
 }
-select:focus{
+textarea{
+  width: 100%;
+  resize: none;
+  overflow-y: scroll;
+}
+textarea::-webkit-scrollbar{
+  background-color: var(--inactive-tab-color);
+  width: 8px;
+}
+textarea:-webkit-scrollbar-thumb{
+  background: var(--active-bg-color);
+}
+select:focus, textarea:focus{
   outline: none;
 }
-th{
-  margin: 0px;
-  padding: 10px 10px 10px 55px;
-  text-align: left;
-  vertical-align: top;
-}
-td{
-  margin: 0px;
-  padding: 10px 10px 20px 55px;
+th, td{
+  padding: 20px 20px 0px 0px;
   text-align: left;
   vertical-align: top;
 }
@@ -135,6 +149,7 @@ th p, th span, td p, td span{
   font-weight: 100;
   fill: var(--med-emph-txt);
 }
+
 
 svg{
   font-family: Arial, Helvetica, sans-serif;
@@ -310,6 +325,9 @@ svg{
   top: 50px;
   height: 638px;
   width: 200px;
+}
+.scroll-div{
+  color: var(--med-emph-txt);
   padding: 5px;
   background-color: var(--secondary-bg-color);
   border: 1px solid black;
@@ -318,25 +336,25 @@ svg{
   scrollbar-color: var(--active-bg-color) var(--inactive-tab-color);
   scrollbar-width: 8px;
 }
-#metric-selections::-webkit-scrollbar{
+.scroll-div::-webkit-scrollbar{
   background-color: var(--inactive-tab-color);
   width: 8px;
 }
-#metric-selections::-webkit-scrollbar-thumb{
+.scroll-div::-webkit-scrollbar-thumb{
   background: var(--active-bg-color);
 }
 
-#metric-selections div{
+.scroll-div div{
   border: 1px solid transparent;
   font-size: 12px;
   padding: 0px 0px 0px 5px;
   cursor: default;
 }
-#metric-selections div.inactive{
+.scroll-div div.inactive{
   color: var(--low-emph-txt);
   background-color: none;
 }
-#metric-selections div.active{
+.scroll-div div.active{
   color: var(--med-emph-txt);
   background-color: var(--inactive-bg-color);
 }
@@ -424,5 +442,17 @@ svg{
 .loadings-svg{
   display: inline;
   padding: 10px;
+}
+.pval-svg{
+  display: inline;
+  padding: 10px;
+}
+
+#hist-div{
+  width: 40%;
+  height: auto;
+  float: right;
+  margin-top: 15px;
+  margin-right: 50px;
 }
 

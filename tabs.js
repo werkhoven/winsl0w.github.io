@@ -71,6 +71,7 @@ const switch_tab = function(){
                 .selectAll('tr')
                     .filter(function(d,i){ return i>0 })
                     .remove();
+<<<<<<< HEAD
 
             d3.select('#metric-summary-tab')
                 .select('table')
@@ -273,6 +274,210 @@ const new_plot = function(){
 
 const plot_hbar = function(plot){
 
+=======
+
+            d3.select('#metric-summary-tab')
+                .select('table')
+                .selectAll('tr')
+                    .data(d3.range(8))
+                    .enter()
+                .append('tr')
+                    .each(function(d){
+                        d3.select(this).selectAll('td')
+                            .data(d3.range(3))
+                            .enter()
+                        .append('td')
+                            .each(function(){ d3.select(this).append('p') })
+                    })
+
+            console.log(d3.select('#metric-summary-tab').selectAll('tr').size())
+
+            const selected_metric_name = get_selected_metric();
+            //load_metric_summary(selected_metric_name);
+            var element = document.getElementById('metric-summary-tab-select');
+            var event = new Event('change', {value: selected_metric_name});
+            element.dispatchEvent(event);
+            break;
+        case "Gene Search":
+            d3.select('#gene-search-tab').style('visibility','visible');
+            init_gene_search_table();
+            break;
+    }
+}
+tab_links.on('click',switch_tab)
+
+const str2rgb = function(str){
+    str = str.replace(/[^\d\.?,]/g, '').split(',');
+    return str.map(s => parseInt(s));
+}
+
+
+const plot_apriori_barplots = function(apriori_obj,grp_name){
+
+    // delete all existing plots
+    d3.selectAll('.loadings-svg').remove()
+
+    // get group names
+    const curr_grp_idx = apriori_obj.map( v=> v.name).indexOf(grp_name);
+    for(let i=0; i<apriori_obj[curr_grp_idx].dist_idx.length; i++){
+        plot_loadings(apriori_obj[curr_grp_idx].loadings[i],
+                apriori_obj[curr_grp_idx].loadings_labels[i],
+                apriori_obj[curr_grp_idx].dist_fields[i]
+        );
+    }
+}
+
+// hilight-unhighlight axis labels on barplot mouseover
+const loading_bar_mouseover = function(d,i,y_grp){
+    // get current colors
+    const rect_col = str2rgb(d3.select(d).style('fill'));
+    const text_elem = y_grp.selectAll('text').filter(function(dd,ii){ return i === ii })
+    const text_col = str2rgb(text_elem.style('fill'));
+
+    //set new colors
+    d3.select(d).style('fill',d3.rgb(rect_col[0],rect_col[1],rect_col[2],1))
+    text_elem.style('fill',d3.rgb(text_col[0],text_col[1],text_col[2],1))
+}
+const loading_bar_mouseout = function(d,i,y_grp){
+
+    // get current colors
+    const rect_col = str2rgb(d3.select(d).style('fill'));
+    const text_elem = y_grp.selectAll('text').filter(function(dd,ii){ return i === ii })
+    const text_col = str2rgb(text_elem.style('fill'));
+
+    //set new colors
+    d3.select(d).style('fill',d3.rgb(rect_col[0],rect_col[1],rect_col[2],0.72))
+    text_elem.style('fill',d3.rgb(text_col[0],text_col[1],text_col[2],0.72))
+}
+const loading_bar_click = function(d,i,y_grp){
+
+    const text_elem = y_grp.selectAll('text').filter(function(dd,ii){ return i === ii })
+    if(text_elem.attr('selected') === 'true'){
+        loading_click(text_elem.nodes()[0].innerHTML,false);
+    } else {
+        loading_click(text_elem.nodes()[0].innerHTML,true);
+    }
+}
+const loading_click = function(metric_name,do_select){
+
+    // select all y-axis label parents
+    const y_lab_par = d3.selectAll('.y-axis');
+    const bar_par = d3.selectAll('.loadings-bar-parent');
+
+    // reset all color of all selected elements
+    y_lab_par.each( function(){
+        d3.select(this)
+            .selectAll('text[selected="true"]')
+                .each( function(){
+                    if(d3.select(this).attr('active') === 'true'){
+                        d3.select(this).style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],0.72))
+                    } else {
+                        d3.select(this).style('fill',d3.rgb(itc[0],itc[1],itc[2],0.72))
+                    }
+                })
+    })
+    bar_par.each( function(){
+        d3.select(this)
+            .selectAll('rect[selected="true"]')
+                .each( function(){
+                    if(d3.select(this).attr('active') === 'true'){
+                        d3.select(this).style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],0.72))
+                    } else {
+                        d3.select(this).style('fill',d3.rgb(irc[0],irc[1],irc[2],0.72))
+                    }
+                })
+    })      
+
+    // select new colors
+    var tc, rc;
+    if(do_select){
+        tc = sel_col; rc = sel_col;
+    } else {
+        tc = itc; rc = irc;
+    }
+
+    // update color of matching axis label on each plot
+    const metric_idx = [];
+    y_lab_par.each( function(){
+        d3.select(this)
+            .selectAll('text')
+                .attr('selected',false)
+            .filter( function(t,i){
+                const is_match = d3.select(this).nodes()[0].innerHTML === metric_name;
+                if(is_match) metric_idx.push(i);
+                return  is_match;
+            })
+                .attr('selected',do_select)
+                .each( function() { 
+                    if(d3.select(this).attr('active') === "true" && !do_select){
+                        d3.select(this).style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],1))
+                    } else {
+                        d3.select(this).style('fill',d3.rgb(tc[0],tc[1],tc[2],0.72))
+                    }
+                })
+                
+    });
+    bar_par.each( function(d,j){
+        d3.select(this)
+            .selectAll('rect')
+                .attr('selected',false)
+            .filter( function(t,i){ return i === metric_idx[j] })
+            .attr('selected',do_select)
+                .each( function() { 
+                    if(d3.select(this).attr('active') === "true" && !do_select){
+                        d3.select(this).style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],1))
+                    } else {
+                        d3.select(this).style('fill',d3.rgb(rc[0],rc[1],rc[2],0.72))
+                    }
+                })
+    })
+}
+
+// hilight-unhighlight barplot on axis tick mouseover
+const loading_tick_mouseover = function(d,i,y_grp){
+     // get current colors
+    const text_col = str2rgb(d3.select(d).style('fill'));
+    const rect_elem = y_grp.filter(function(dd,ii){ return i === ii })
+    const rect_col = str2rgb(rect_elem.style('fill'));
+
+    //set new colors
+    d3.select(d).style('fill',d3.rgb(text_col[0],text_col[1],text_col[2],1))
+    rect_elem.style('fill',d3.rgb(rect_col[0],rect_col[1],rect_col[2],1))
+}
+const loading_tick_mouseout = function(d,i,y_grp){
+     // get current colors
+     const text_col = str2rgb(d3.select(d).style('fill'));
+     const rect_elem = y_grp.filter(function(dd,ii){ return i === ii })
+     const rect_col = str2rgb(rect_elem.style('fill'));
+ 
+     //set new colors
+     d3.select(d).style('fill',d3.rgb(text_col[0],text_col[1],text_col[2],0.72))
+     rect_elem.style('fill',d3.rgb(rect_col[0],rect_col[1],rect_col[2],0.72))
+}
+const loading_tick_click = function(){
+  
+    if(d3.select(this).attr('selected') === 'true'){
+        loading_click(d3.select(this).nodes()[0].innerHTML,false);
+    } else {
+        loading_click(d3.select(this).nodes()[0].innerHTML,true);
+    }
+}
+
+
+const new_plot = function(){
+    var plot = {
+        svg: null, svg_width: null, svg_height: null, trans_g: null,
+        margin: null, width: null, height: null,
+        xaxis: null, xscale: null, xmin: null, xmax: null, xlabel: null,
+        yaxis: null, yscale: null, ymin: null, ymax: null, ylabel: null,
+        data: null, labels: null, title: null,
+    }
+    return plot;
+}
+
+const plot_hbar = function(plot){
+
+>>>>>>> 7d6e34e995cac4d42b25b1d1a3132ec4ce4f50f7
     plot.svg_height = plot.data.length*12 + plot.margin.top + plot.margin.bottom;
     plot.width = plot.svg_width - plot.margin.left - plot.margin.right;
     plot.height = plot.svg_height - plot.margin.top - plot.margin.bottom;
@@ -370,6 +575,7 @@ const plot_hbar = function(plot){
     return plot;
     
 }
+<<<<<<< HEAD
 
 const plot_loadings = function(loadings,labels,title){
 
@@ -394,6 +600,32 @@ const plot_loadings = function(loadings,labels,title){
         .on('mouseout', function(d,i){ loading_bar_mouseout(this,i,plot.yaxis) })
         .on('click', function(d,i){ loading_bar_click(this,i,plot.yaxis) });
 
+=======
+
+const plot_loadings = function(loadings,labels,title){
+
+
+    var plot = new_plot();
+    
+    plot.svg_width = 300;
+    plot.margin = loadings_margin;
+    plot.svg = d3.select('#metric-loadings-tab').select('.tab-content').append('svg').attr('class','loadings-svg')
+    plot.data = loadings;
+    plot.labels = labels;
+    plot.title = title;
+    plot.xlabel = 'metric weight';
+
+    plot = plot_hbar(plot);
+
+    const loadings_rects = plot.svg.selectAll('rect')
+
+    loadings_rects
+        .attr('fill',d3.rgb(irc[0],irc[1],irc[2],0.72))
+        .on('mouseover', function(d,i){ loading_bar_mouseover(this,i,plot.yaxis) })
+        .on('mouseout', function(d,i){ loading_bar_mouseout(this,i,plot.yaxis) })
+        .on('click', function(d,i){ loading_bar_click(this,i,plot.yaxis) });
+
+>>>>>>> 7d6e34e995cac4d42b25b1d1a3132ec4ce4f50f7
     // attach axis tick mouseover callback
     plot.yaxis
         .selectAll('text')
@@ -411,6 +643,7 @@ const plot_loadings = function(loadings,labels,title){
             .attr('fill','none');
 }
 
+<<<<<<< HEAD
 const plot_hist = function(plot){
 
     plot.width = plot.svg_width - plot.margin.left - plot.margin.right;
@@ -453,11 +686,47 @@ const plot_hist = function(plot){
             `M0,1
             H${plot.xscale(plot.xmax)-plot.xscale(plot.xmin)}
             V${plot.yscale(0)}
+=======
+const plot_raw_histogram = function(data,x_min,x_max,ylabel,plot_color,xlabel,append_xlabel){
+
+    // init plotting params
+    var hist_margin = {top: 5, right: 5, bottom: 30, left: 50};
+    var width = 500 - hist_margin.left - hist_margin.right,
+        height = 180 - hist_margin.top - hist_margin.bottom;
+    if(append_xlabel) hist_margin.bottom = 60;
+
+    var x = d3.scaleLinear()
+        .domain([x_min, x_max])
+        .range([0, width]);
+    var hist = d3.histogram()
+        .value(function(d){ return d; })
+        .domain(x.domain())
+        .thresholds(x.ticks(30));
+    var binned_data = hist(data);
+    var y_max = Math.ceil(d3.max(binned_data, function(d){ return d.length })*1.1);
+    var y = d3.scaleLinear()
+        .domain([0, y_max])
+        .range([height, 0]);
+
+    // initialize axes
+    var bar_svg = d3.select('#hist-div').append('svg')
+        .attr('class','axis')
+        .attr("width", width + hist_margin.left + hist_margin.right)
+        .attr("height", height + hist_margin.top + hist_margin.bottom)
+      .append("g")
+        .attr("transform",`translate(${hist_margin.left},${hist_margin.top})`);
+    bar_svg.append('path')
+        .attr('d',
+            `M0,1
+            H${x(x_max)-x(x_min)}
+            V${y(0)}
+>>>>>>> 7d6e34e995cac4d42b25b1d1a3132ec4ce4f50f7
             H0
             V0`)
         .attr('stroke-width',1)
         .attr('stroke','#000000')
         .attr('fill',d3.rgb(30,30,30));
+<<<<<<< HEAD
 
     plot.xaxis = plot.trans_g.append("g")
         .attr("class", "x-axis")
@@ -822,6 +1091,337 @@ const search_genes = function(input_txt){
 
     
 
+=======
+    var xAxis = d3.axisBottom()
+        .scale(x)
+        .ticks(10);
+    bar_svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(xAxis);
+    var yAxis = d3.axisLeft()
+        .scale(y)
+        .ticks(5);
+    bar_svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+    bar_svg.append('text')
+        .text(ylabel)
+        .attr('text-anchor','middle')
+        .attr('transform',`translate(-40,${y(0)/2}) rotate(-90)`)
+        .style('font-size','14px')
+        .style('fill',plot_color);
+
+    if(append_xlabel){
+        bar_svg.append('text')
+            .text(xlabel)
+            .attr('text-anchor','middle')
+            .attr('transform',`translate(${x(x_max)/2},${y(0)+50})`)
+            .style('font-size','14px');     
+    }
+    
+
+    // initialize bar elements
+    var bar = bar_svg.selectAll(".bar")
+        .data(binned_data)
+        .enter().append("g")
+            .attr("class", "bar")
+            .attr("transform", function(d) { return `translate(${x(d.x0)},${y(d.length)})`; });
+    bar.append("rect")
+        .attr("x", 1)
+        .attr("width", function(d) { return Math.max(Math.abs(x(d.x1) - x(d.x0)) -1,0) ; })
+        .attr("height", function(d) { return height - y(d.length); })
+        .attr('fill',plot_color);
+}
+
+
+// switch apriori plots on dropdown menu change
+const load_metric_summary = function(metric_name){
+
+    // add metric glossary entry
+    var metric_idx;
+    d3.csv('metric_glossary.csv').then(function(metric_table){
+
+        metric_idx = metric_table.map((d,i) => { return d.Metric; }).indexOf(metric_name)
+        const assay_name = metric_table[metric_idx].Assay;
+        var cols = ['header'];
+        metric_table.columns.forEach( i => { cols.push(i) });
+
+        d3.select('#metric-summary-tab').select('table')
+            .selectAll('tr')
+                .data(cols)
+                .filter(function(d,i){ return i > 0 && i < 6 })
+                .each(function(d,i){
+                    d3.select(this)
+                        .selectAll('td')
+                            .each(function(dd,j){
+                                switch(j){
+                                    case 0:
+                                        d3.select(this)
+                                            .style('width','40%')
+                                            .select('p')
+                                                .text(d+':')
+                                                .style('font-weight','bold')
+                                        break;
+                                    case 1:
+                                        d3.select(this)
+                                            .style('width','60%')
+                                            .select('p')
+                                                .text(metric_table[metric_idx][d])
+                                        break;
+                                    case 2:
+                                        break;
+                                }
+                            })
+                })
+
+        // add assay glossary entry
+        d3.csv('assay_glossary.csv').then(function(assay_table){
+
+            const assay_idx = assay_table.map((d,i) => { return d.Name; }).indexOf(assay_name)
+            const assay_cols = assay_table.columns.slice(1,4);
+            assay_cols.forEach( i => { cols.push(i) });
+
+            d3.select('#metric-summary-tab').select('table')
+                .selectAll('tr')
+                    .data(cols)
+                    .filter(function(d,i){ return i > 5 })
+                    .each(function(d,i){
+                        d3.select(this)
+                            .selectAll('td')
+                                .each(function(dd,j){
+                                    switch(j){
+                                        case 0:
+                                            d3.select(this).select('p').text('Assay '+d+':').style('font-weight','bold')
+                                            break;
+                                        case 1:
+                                            d3.select(this).select('p').text(assay_table[assay_idx][d])
+                                            break;
+                                        case 2:
+                                            break;
+                                    }
+                                })
+                    })
+        })
+    })
+
+    // append histograms
+    d3.select('#hist-div').selectAll('svg').remove()
+    d3.json('decathlon_raw_data.json').then(function(raw){
+
+        var x_min = 0;
+        var x_max = 1;
+        var d_raw = [];
+        var ylabels = ['inbred batch[1]','inbred batch[2]','outbred batch[1]'];
+        var plot_colors = ['rgb(220,150,220)','rgb(220,150,120)','rgb(150,150,220)']
+
+        for(let i=0; i<raw.length; i++){
+            var metric_idx = raw[i].fields.indexOf(metric_name);
+            var raw_data = raw[i].data.map( d => { return d[metric_idx] }).filter( d => { return d !== null});
+            d_raw.push(raw_data)
+
+            if(raw_data.some( d => {return d})){
+                x_max = Math.max(d3.max(raw_data),x_max);
+                x_min = Math.min(d3.min(raw_data),x_min);
+            }
+        }
+
+        for(let i=0; i<3; i++){
+            if(d_raw[i].some( d => {return d})){
+                plot_raw_histogram(d_raw[i],x_min,x_max,ylabels[i],plot_colors[i],metric_name,i+1===raw.length);
+            }
+        }
+    })
+}
+
+d3.select('#metric-summary-tab')
+    .select('select')
+        .on('change',function(){ load_metric_summary(this.value) })
+
+
+const init_gene_search_table = function(){
+
+    const row_labels = ['Gene Name:','FlyBase-ID:','KEGG-ID:','Num. Behaviors:','Enrichment Categories:'];
+    d3.select('#gene-search-tab')
+        .select('table')
+         .selectAll('tr')
+            .data(row_labels)
+            .enter()
+        .append('tr')
+            .each(function(d){
+                for(let j=0; j<2; j++){
+                    if(!j){
+                        d3.select(this).append('td').append('a').text(d)
+                    } else {
+                        d3.select(this).append('td').append('a').text('-')
+                    }
+                }
+            })
+
+    d3.select('#gene-search-tab').select('table')
+        .append('tr')
+        .append('td')
+            .attr('colspan',2)
+        .append('a')
+            .text('');
+
+}
+
+
+const update_selected_gene = function(gene_idx,rnaseq){
+
+    d3.select('#gene-search-results-div').select('svg').remove()
+
+    var sig_idx = rnaseq.model[0].log_p[gene_idx].reduce(function(arr,d,i){
+        if(d>0) arr.push(i);
+        return arr;
+    }, []);
+    var sig_logp = sig_idx.map( i => { return rnaseq.model[0].log_p[gene_idx][i] })
+    var sig_fields = sig_idx.map( i => { return rnaseq.fields[i] })
+
+    var sorted_logp = sig_logp.slice(0).sort();
+    var sorted_order = sorted_logp.map( (v,i) => { return sig_logp.indexOf(v) });
+    var sorted_fields = sorted_order.map( v => { return sig_fields[v] })
+    
+    var plot = new_plot();
+    plot.svg_width = 300;
+    plot.margin = loadings_margin;
+    plot.svg = d3.select('#gene-search-results-div').append('svg')
+    plot.data = sorted_logp;
+    plot.labels = sorted_fields;
+    plot.title = 'Significant Behaviors';
+    plot.xlabel = '-log[p-value]';
+
+    plot = plot_hbar(plot);
+    plot.svg.attr('transform-origin','top right').attr('transform','scale(1.25)').style('padding','0px')
+    plot.svg.selectAll('rect')
+        .style('fill',d3.rgb(150,150,220))
+
+    var gene_fbgn = rnaseq['fbgn'][gene_idx]
+    var gene_hit_idx = rnaseq['hits'][0]['fbgn'].indexOf(gene_fbgn);
+    var gene_cats = rnaseq['hits'][0]['cats'][gene_hit_idx];
+    if(!gene_cats) gene_cats = 'none';
+
+    var gene_id_types = ['gene_name','fbgn','kegg'];
+    gene_ids = gene_id_types.map( v => { return rnaseq[v][gene_idx] });
+    gene_ids.push(sig_logp.length,null,gene_cats);
+
+    d3.select('#gene-search-tab')
+    .select('table')
+    .selectAll('tr')
+        .data(gene_ids)
+        .each(function(d,i){
+            d3.select(this).selectAll('td')
+                .each(function(dd,j){
+                    if(j){
+                        var href = null;
+                        switch(i){
+                            case 0:
+                                href = null;
+                                break;
+                            case 1:
+                                href = 'https://flybase.org/reports/' + d;
+                                d3.select(this).select('a').attr('class','active-link')
+                                break;
+                            case 2:
+                                href = 'https://www.genome.jp/dbget-bin/www_bget?dme:' + d;
+                                d3.select(this).select('a').attr('class','active-link')
+                                break;
+                        }
+                        d3.select(this)
+                        .select('a')
+                            .attr('href',href)
+                            .nodes()[0].innerHTML = d;
+                    } else if (i===5){
+                        console.log(d)
+                        d3.select(this)
+                        .select('a')
+                            .attr('href',href)
+                            .nodes()[0].innerHTML = d;
+                    }
+                })
+        })
+}
+
+
+const find_all_genes = function(gene_ids,rnaseq){
+
+    var gene_idx = [];
+    for(let i=0; i<gene_ids.length; i++){
+
+        // get input type
+        var input_type, input_txt;
+        input_txt = gene_ids[i].toLowerCase();
+        if(input_txt.includes('fbgn')){
+            input_type = 'fbgn';
+        } else if(input_txt.includes('dmel')){
+            input_type = 'kegg';
+        } else {
+            input_type = 'gene_name';
+        }
+        gene_idx.push(rnaseq[input_type].map( v => { return v.toLowerCase()}).indexOf(input_txt));
+    }
+
+    return gene_idx;
+}
+
+const parse_input_list = function(input_txt){
+
+    var split_txt = input_txt.split(/\n/);
+    const spc_split = input_txt.split(' ');
+    if( spc_split > split_txt.length){
+        split_txt = spc_split;
+    }
+
+    return split_txt;   
+}
+
+const update_matching_id_div = function(gene_idx,gene_list,rnaseq){
+
+    d3.select('#gene-result-textbox').selectAll('div').remove()
+
+    d3.select('#gene-result-textbox')
+        .selectAll('div')
+            .data(gene_idx)
+            .enter()
+        .append('div')
+            .each(function(d,i){
+                if(i){
+                    d3.select(this).attr('class','inactive').attr('selected',false);
+                } else {
+                    d3.select(this).attr('class','active').attr('selected',true);
+                }
+            })
+            .text(function(d,i){ return gene_list[i] })
+            .on('click',function(d){
+
+                d3.select('#gene-result-textbox')
+                    .selectAll('div')
+                        .attr('class','inactive')
+                        .attr('selected',false)
+                        .style('color','rgba(255,255,255,0.38)');
+                d3.select(this)
+                    .attr('class','active')
+                    .attr('selected',true)
+                    .style('color','rgba(255,255,255,0.72)');
+
+                update_selected_gene(d,rnaseq);
+            })
+            .on('mouseover',function(){ d3.select(this).style('color','rgba(255,255,255,0.87)') })
+            .on('mouseout',function(){
+                if(d3.select(this).attr('selected') === 'true' ){
+                    d3.select(this).style('color','rgba(255,255,255,0.72)');
+                } else {
+                    d3.select(this).style('color','rgba(255,255,255,0.38)');
+                }
+            })
+}
+
+
+// GENE SEARCH TAB
+const search_genes = function(input_txt){
+
+>>>>>>> 7d6e34e995cac4d42b25b1d1a3132ec4ce4f50f7
     d3.json('decathlon_rnaseq_results.json').then(function(rnaseq){
         
         var input_list = parse_input_list(input_txt);
@@ -832,6 +1432,7 @@ const search_genes = function(input_txt){
         }, []);
         matched_idx = matched_idx.filter( i => { return i>=0; });
         update_matching_id_div(matched_idx,matched_list,rnaseq);
+<<<<<<< HEAD
 
         if(matched_idx.length){
             d3.select('#gene-search-results-div').selectAll('svg').remove()
@@ -860,6 +1461,8 @@ const search_genes = function(input_txt){
             .attr('id','num-behaviors')
             .attr('transform-origin','top right')
             .attr('transform','scale(1.25)');
+=======
+>>>>>>> 7d6e34e995cac4d42b25b1d1a3132ec4ce4f50f7
         
         // append data to the search tab
         d3.select('#gene-search-tab').data(rnaseq);
@@ -867,6 +1470,7 @@ const search_genes = function(input_txt){
         if(matched_idx.length){
             update_selected_gene(matched_idx[0],rnaseq);
         }
+<<<<<<< HEAD
 
     })
 }
@@ -893,3 +1497,15 @@ fileInput.addEventListener('change', function(e) {
     }
 });
 
+=======
+    })
+}
+
+d3.select('#gene-search-textbox')
+    .on("keydown",function(d){
+        if(d3.event.key === 'Enter'){
+            this.blur();
+            search_genes(this.value)
+        }
+    })
+>>>>>>> 7d6e34e995cac4d42b25b1d1a3132ec4ce4f50f7

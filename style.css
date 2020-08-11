@@ -66,6 +66,23 @@ div .disabled{
   pointer-events: none;
   opacity: 0.5;
 }
+ol{
+  color: var(--med-emph-txt);
+}
+hr{
+  border: 1px solid var(--low-emph-txt)
+}
+a.active-link{
+  color: rgb(170,170,255);
+}
+a.inactive-link{
+  color: var(--med-emph-txt);
+}
+div .disabled{
+  pointer-events: none;
+  opacity: 0.5;
+}
+
 
 
 #instructions{

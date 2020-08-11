@@ -95,25 +95,35 @@
                     <div style="margin: 40px 50px 0px 50px">
                         <h2>Gene Search</h2>
                         <hr>
-                        <p style="margin-bottom: 40px">Search genes by entering a valid gene identifiers (Gene Name, FlyBase gene number, or KEGG-ID) into the box below.
+                        <p style="margin-bottom: 40px">Search genes by entering a valid gene identifiers (Gene Symbol, FlyBase gene number, or KEGG-ID) into the box below.
+                                    For example, to search for Notch enter: "N", "FBgn0004647", or "Dmel_CG3936".
                                     To search multiple entries simultaneously, separate identifiers by a space or newline (no commas or other delimiters).</p>
                         <div style="display: inline-block; width: 20%; vertical-align: top">
                             <div>
                                 <label for="gene-search-textbox" style="display: block">Enter gene identifier(s):</label>
-                                <textarea id="gene-search-textbox" class="scroll-div" placeholder="Gene ID" rows="8" wrap="physical" spellcheck="false"></textarea>
+                                <textarea id="gene-search-textbox" class="scroll-div" placeholder="Gene ID"
+                                rows="8" spellcheck="false" style="width: 224px; font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;"></textarea>
+                                <div class="buttons" style="width: 100%; text-align: right">
+                                    <form id="import-form" method="POST" enctype="multipart/form-data" style="visibility: hidden; width: 0px; height: 0px">
+                                        <input id='fileid' type='file' name='filename' style="width: 0px; margin: 0px; padding: 0px; visibility: hidden"/>
+                                    </form>
+                                    <div class="inactive" id="gene-search-import">Import File</div>
+                                    <div class="inactive" id="gene-search-submit">Submit</div>
+                                </div>
+                                
                                 <label for="gene-result-textbox" style="display: block; margin-top: 20px">Valid matching identifier(s):</label>
-                                <div id="gene-result-textbox" class="scroll-div" style="height: 300px; width: 100%"></div>
+                                <div id="gene-result-textbox" class="scroll-div" style="height: 300px; width: 224px; font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;"></div>
                             </div>
                         </div>
-                        <div style="display: inline-block; width: 30%; vertical-align: top; padding: 0px 30px 0px 65px">
+                        <div style="display: inline-block; width: 40%; vertical-align: top; padding: 0px 30px 0px 65px">
                                 <p style="margin: 0px; font-weight: 500">Summary</p>
                                 <hr style="margin: 0px;">
-                                <table>
+                                <table style="font-size: 14px">
                                 </table>
                         </div>
                         <div style="float: right">
-                                <div id="gene-search-results-div">
-                                </div>
+                            <div id="gene-search-results-div" style="display: block">
+                            </div>
                         </div>
                     </div>
                 </div>

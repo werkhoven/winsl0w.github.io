@@ -305,16 +305,32 @@ svg{
   line-height: 8px;
   font-size: 12px;
 }
+.buttons div, .buttons input{
+  margin: 5px 0px 5px 5px;
+  padding: 5px;
+  display: inline-block;
+  border: 1px solid black;
+  width: 86px;
+  height: 8px;
+  text-align: center;
+  line-height: 8px;
+  font-size: 12px;
+}
 #metric-select-buttons div.inactive,
-#clear-selections.inactive{
+#clear-selections.inactive,
+.buttons div.inactive,
+.buttons input.inactive{
   background-color: var(--inactive-bg-color);
 }
 #metric-select-buttons div.active,
-#clear-selections.active{
+#clear-selections.active,
+.buttons div.active,
+.buttons input.active{
   background-color: var(--active-bg-color);
 }
 #metric-select-buttons div.selected,
-#clear-selections.selected{
+#clear-selections.selected,
+.buttons div.selected{
   background-color: rgb(200,200,200);
   -webkit-box-shadow: inset 0px 0px 5px rgb(100,100,100);
   box-shadow: inset 0px 0px 5px rgb(100,100,100);
@@ -455,4 +471,3 @@ svg{
   margin-top: 15px;
   margin-right: 50px;
 }
-

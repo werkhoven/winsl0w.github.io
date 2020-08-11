@@ -266,7 +266,7 @@ const new_plot = function(){
         margin: null, width: null, height: null,
         xaxis: null, xscale: null, xmin: null, xmax: null, xlabel: null,
         yaxis: null, yscale: null, ymin: null, ymax: null, ylabel: null,
-        data: null, labels: null, title: null,
+        data: null, labels: null, title: null, color: null
     }
     return plot;
 }
@@ -411,84 +411,90 @@ const plot_loadings = function(loadings,labels,title){
             .attr('fill','none');
 }
 
-const plot_raw_histogram = function(data,x_min,x_max,ylabel,plot_color,xlabel,append_xlabel){
+const plot_hist = function(plot){
 
-    // init plotting params
-    var hist_margin = {top: 5, right: 5, bottom: 30, left: 50};
-    var width = 500 - hist_margin.left - hist_margin.right,
-        height = 180 - hist_margin.top - hist_margin.bottom;
-    if(append_xlabel) hist_margin.bottom = 60;
+    plot.width = plot.svg_width - plot.margin.left - plot.margin.right;
+    plot.height = plot.svg_height - plot.margin.top - plot.margin.bottom;
 
-    var x = d3.scaleLinear()
-        .domain([x_min, x_max])
-        .range([0, width]);
+    plot.svg
+        .attr("width", plot.svg_width)
+        .attr("height", plot.svg_height)
+
+    plot.trans_g = plot.svg.append("g")
+		.attr('class','axis')
+        .attr("transform",`translate(${plot.margin.left},${plot.margin.top})`);
+
+    // set x-axis upper and lower bounds
+    if(plot.xmin === null){
+        plot.xmin = plot.data.reduce((a,b) => { return Math.min(a,b) });
+        if(plot.xmin>0) plot.xmin = 0;
+    }
+    if(plot.xmax){
+        plot.xmax = plot.data.reduce((a,b) => { return Math.max(a,b) });
+        if(plot.xmax<0) plot.xmax=0;
+    }
+
+    plot.xscale = d3.scaleLinear()
+        .domain([plot.xmin, plot.xmax])
+        .range([0, plot.width]);
     var hist = d3.histogram()
         .value(function(d){ return d; })
-        .domain(x.domain())
-        .thresholds(x.ticks(30));
-    var binned_data = hist(data);
+        .domain(plot.xscale.domain())
+        .thresholds(plot.xscale.ticks(30));
+    var binned_data = hist(plot.data);
     var y_max = Math.ceil(d3.max(binned_data, function(d){ return d.length })*1.1);
-    var y = d3.scaleLinear()
+    plot.yscale = d3.scaleLinear()
         .domain([0, y_max])
-        .range([height, 0]);
+        .range([plot.height, 0]);
 
-    // initialize axes
-    var bar_svg = d3.select('#hist-div').append('svg')
-        .attr('class','axis')
-        .attr("width", width + hist_margin.left + hist_margin.right)
-        .attr("height", height + hist_margin.top + hist_margin.bottom)
-      .append("g")
-        .attr("transform",`translate(${hist_margin.left},${hist_margin.top})`);
-    bar_svg.append('path')
+
+    plot.trans_g.append('path')
         .attr('d',
             `M0,1
-            H${x(x_max)-x(x_min)}
-            V${y(0)}
+            H${plot.xscale(plot.xmax)-plot.xscale(plot.xmin)}
+            V${plot.yscale(0)}
             H0
             V0`)
         .attr('stroke-width',1)
         .attr('stroke','#000000')
         .attr('fill',d3.rgb(30,30,30));
-    var xAxis = d3.axisBottom()
-        .scale(x)
-        .ticks(10);
-    bar_svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", `translate(0,${height})`)
-        .call(xAxis);
-    var yAxis = d3.axisLeft()
-        .scale(y)
-        .ticks(5);
-    bar_svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
-    bar_svg.append('text')
-        .text(ylabel)
-        .attr('text-anchor','middle')
-        .attr('transform',`translate(-40,${y(0)/2}) rotate(-90)`)
-        .style('font-size','14px')
-        .style('fill',plot_color);
 
-    if(append_xlabel){
-        bar_svg.append('text')
-            .text(xlabel)
-            .attr('text-anchor','middle')
-            .attr('transform',`translate(${x(x_max)/2},${y(0)+50})`)
-            .style('font-size','14px');     
-    }
-    
+    plot.xaxis = plot.trans_g.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${plot.height})`)
+        .call(d3.axisBottom().scale(plot.xscale).ticks(10));
+
+    plot.yaxis = plot.trans_g.append("g")
+        .attr("class", "y-axis")
+        .call(d3.axisLeft().scale(plot.yscale).ticks(5));
+    plot.trans_g.append('text')
+        .text(plot.ylabel)
+        .attr('text-anchor','middle')
+        .attr('transform',`translate(-40,${plot.yscale(0)/2}) rotate(-90)`)
+        .style('font-size','14px')
+        .style('fill',plot.color);
+
+    plot.trans_g.append('text')
+        .text(plot.xlabel)
+        .attr('text-anchor','middle')
+        .attr('transform',`translate(${plot.xscale(plot.xmax)/2},${plot.yscale(0)+50})`)
+        .style('font-size','14px');
 
     // initialize bar elements
-    var bar = bar_svg.selectAll(".bar")
+    var bar = plot.trans_g.selectAll(".bar")
         .data(binned_data)
         .enter().append("g")
             .attr("class", "bar")
-            .attr("transform", function(d) { return `translate(${x(d.x0)},${y(d.length)})`; });
+            .attr("transform", function(d) {
+                return `translate(${plot.xscale(d.x0)},${plot.yscale(d.length)})`;
+            });
     bar.append("rect")
         .attr("x", 1)
-        .attr("width", function(d) { return Math.max(Math.abs(x(d.x1) - x(d.x0)) -1,0) ; })
-        .attr("height", function(d) { return height - y(d.length); })
-        .attr('fill',plot_color);
+        .attr("width", function(d) {
+            return Math.max(Math.abs(plot.xscale(d.x1) - plot.xscale(d.x0)) -1,0);
+        })
+        .attr("height", function(d) { return plot.height - plot.yscale(d.length); })
+        .attr('fill',plot.color);
 }
 
 
@@ -566,6 +572,7 @@ const load_metric_summary = function(metric_name){
     d3.select('#hist-div').selectAll('svg').remove()
     d3.json('decathlon_raw_data.json').then(function(raw){
 
+        // initialize plot parameters and data
         var x_min = 0;
         var x_max = 1;
         var d_raw = [];
@@ -583,9 +590,26 @@ const load_metric_summary = function(metric_name){
             }
         }
 
+        // init plotting params
+        var plot = new_plot();
+        plot.svg_width = 500;
+        plot.svg_height = 180;
+        plot.margin = {top: 5, right: 5, bottom: 30, left: 50};
+        plot.xlabel = null;
+        plot.xmin = x_min;
+        plot.xmax = x_max;
+
         for(let i=0; i<3; i++){
             if(d_raw[i].some( d => {return d})){
-                plot_raw_histogram(d_raw[i],x_min,x_max,ylabels[i],plot_colors[i],metric_name,i+1===raw.length);
+                plot.ylabel = ylabels[i];
+                plot.color = plot_colors[i];
+                plot.svg = d3.select('#hist-div').append('svg');
+                plot.data = d_raw[i];
+                if(i+1===raw.length){
+                    plot.xlabel = metric_name;
+                    plot.margin.bottom = 60;
+                }
+                plot_hist(plot);
             }
         }
     })
@@ -595,10 +619,20 @@ d3.select('#metric-summary-tab')
     .select('select')
         .on('change',function(){ load_metric_summary(this.value) })
 
+d3.select('.buttons')
+    .selectAll('div')
+        .on('mouseover', function(){ d3.select(this).attr('class','active') })
+        .on('mouseout', function(){ d3.select(this).attr('class','inactive') })
+
+d3.select('#gene-search-import')
+    .on('click', function(){ 
+        d3.select('#fileid').nodes()[0].click()
+     })
+
 
 const init_gene_search_table = function(){
 
-    const row_labels = ['Gene Name:','FlyBase-ID:','KEGG-ID:','Num. Behaviors:','Enrichment Categories:'];
+    const row_labels = ['Gene Name:','Gene Symbol:','FlyBase-ID:','KEGG-ID:','Num. Behaviors:','Enrichment Categories:'];
     d3.select('#gene-search-tab')
         .select('table')
          .selectAll('tr')
@@ -608,26 +642,20 @@ const init_gene_search_table = function(){
             .each(function(d){
                 for(let j=0; j<2; j++){
                     if(!j){
-                        d3.select(this).append('td').append('a').text(d)
+                        d3.select(this)
+                            .append('td')
+                                .style('width','38%')
+                            .append('a').text(d)
                     } else {
                         d3.select(this).append('td').append('a').text('-')
                     }
                 }
             })
 
-    d3.select('#gene-search-tab').select('table')
-        .append('tr')
-        .append('td')
-            .attr('colspan',2)
-        .append('a')
-            .text('');
-
 }
 
 
 const update_selected_gene = function(gene_idx,rnaseq){
-
-    d3.select('#gene-search-results-div').select('svg').remove()
 
     var sig_idx = rnaseq.model[0].log_p[gene_idx].reduce(function(arr,d,i){
         if(d>0) arr.push(i);
@@ -639,19 +667,30 @@ const update_selected_gene = function(gene_idx,rnaseq){
     var sorted_logp = sig_logp.slice(0).sort();
     var sorted_order = sorted_logp.map( (v,i) => { return sig_logp.indexOf(v) });
     var sorted_fields = sorted_order.map( v => { return sig_fields[v] })
-    
+        
     var plot = new_plot();
-    plot.svg_width = 300;
-    plot.margin = loadings_margin;
-    plot.svg = d3.select('#gene-search-results-div').append('svg')
+    plot.svg_width = 320;
+    plot.margin = {top: 50, right: 10, bottom: 60, left: 160};
+
+    console.log(d3.select('#pval-plot').size())
+    if(d3.select('#pval-plot').size()){
+        plot.svg = d3.select('#pval-plot')
+        plot.svg.select('.axis').remove()
+    } else {
+        plot.svg = d3.select('#gene-search-results-div').append('svg')
+    }
     plot.data = sorted_logp;
     plot.labels = sorted_fields;
     plot.title = 'Significant Behaviors';
     plot.xlabel = '-log[p-value]';
 
     plot = plot_hbar(plot);
-    plot.svg.attr('transform-origin','top right').attr('transform','scale(1.25)').style('padding','0px')
-    plot.svg.selectAll('rect')
+    plot.svg
+        .attr('id','pval-plot')
+        .attr('transform-origin','top right')
+        .attr('transform','scale(1.25)')
+        .style('padding','0px')
+    .selectAll('rect')
         .style('fill',d3.rgb(150,150,220))
 
     var gene_fbgn = rnaseq['fbgn'][gene_idx]
@@ -659,9 +698,13 @@ const update_selected_gene = function(gene_idx,rnaseq){
     var gene_cats = rnaseq['hits'][0]['cats'][gene_hit_idx];
     if(!gene_cats) gene_cats = 'none';
 
-    var gene_id_types = ['gene_name','fbgn','kegg'];
+    gene_cats = gene_cats.split(',').map( i => { return (i + ',<br>').trim() });
+    gene_cats = gene_cats.reduce(function(arr,i){ return arr + i }, [])
+    console.log(gene_cats)
+
+    var gene_id_types = ['gene_names','gene_symbols','fbgn','kegg'];
     gene_ids = gene_id_types.map( v => { return rnaseq[v][gene_idx] });
-    gene_ids.push(sig_logp.length,null,gene_cats);
+    gene_ids.push(sig_logp.length,gene_cats);
 
     d3.select('#gene-search-tab')
     .select('table')
@@ -673,30 +716,33 @@ const update_selected_gene = function(gene_idx,rnaseq){
                     if(j){
                         var href = null;
                         switch(i){
-                            case 0:
-                                href = null;
-                                break;
-                            case 1:
+                            case 2:
                                 href = 'https://flybase.org/reports/' + d;
                                 d3.select(this).select('a').attr('class','active-link')
                                 break;
-                            case 2:
+                            case 3:
                                 href = 'https://www.genome.jp/dbget-bin/www_bget?dme:' + d;
                                 d3.select(this).select('a').attr('class','active-link')
+                                break;
+                            default:
+                                href = null;
                                 break;
                         }
                         d3.select(this)
                         .select('a')
                             .attr('href',href)
                             .nodes()[0].innerHTML = d;
-                    } else if (i===5){
-                        console.log(d)
-                        d3.select(this)
-                        .select('a')
-                            .attr('href',href)
-                            .nodes()[0].innerHTML = d;
-                    }
+                    } 
                 })
+        })
+
+    d3.select('#num-behaviors')
+    .selectAll('rect')
+        .style('fill','rgb(200,200,200)')
+        .each(function(d,i){
+            if(i===sig_logp.length){
+                d3.select(this).style('fill','rgb(200,0,100)')
+            }
         })
 }
 
@@ -714,9 +760,9 @@ const find_all_genes = function(gene_ids,rnaseq){
         } else if(input_txt.includes('dmel')){
             input_type = 'kegg';
         } else {
-            input_type = 'gene_name';
+            input_type = 'gene_symbols';
         }
-        gene_idx.push(rnaseq[input_type].map( v => { return v.toLowerCase()}).indexOf(input_txt));
+        gene_idx.push(rnaseq[input_type].map( v => { return v.toLowerCase() }).indexOf(input_txt));
     }
 
     return gene_idx;
@@ -724,12 +770,7 @@ const find_all_genes = function(gene_ids,rnaseq){
 
 const parse_input_list = function(input_txt){
 
-    var split_txt = input_txt.split(/\n/);
-    const spc_split = input_txt.split(' ');
-    if( spc_split > split_txt.length){
-        split_txt = spc_split;
-    }
-
+    var split_txt = input_txt.split(/\n| /);
     return split_txt;   
 }
 
@@ -772,11 +813,14 @@ const update_matching_id_div = function(gene_idx,gene_list,rnaseq){
                     d3.select(this).style('color','rgba(255,255,255,0.38)');
                 }
             })
+
 }
 
 
 // GENE SEARCH TAB
 const search_genes = function(input_txt){
+
+    
 
     d3.json('decathlon_rnaseq_results.json').then(function(rnaseq){
         
@@ -788,6 +832,34 @@ const search_genes = function(input_txt){
         }, []);
         matched_idx = matched_idx.filter( i => { return i>=0; });
         update_matching_id_div(matched_idx,matched_list,rnaseq);
+
+        if(matched_idx.length){
+            d3.select('#gene-search-results-div').selectAll('svg').remove()
+        }
+
+        // plot num behaviors/gene histogram
+        var p = rnaseq.model[0].log_p.slice();
+        for(let i=0; i<p.length; i++){
+            p[i] = p[i].reduce(function(a,b){ return a + Number(b>0) }, 0);
+        }
+        
+        // initialize plotting parameters
+        var plot = new_plot();
+        plot.svg = d3.select('#gene-search-results-div').append('svg').style('display','block')
+        plot.svg_width = 320;
+        plot.svg_height = 270;
+        plot.margin = {top: 35, right: 10, bottom: 100, left: 50};
+        plot.xmin = p.reduce(function(a,b){ return Math.min(a,b), 0});
+        plot.xmax = p.reduce(function(a,b){ return Math.max(a,b), 1});
+        plot.data = p;
+        plot.xlabel = 'Num. Behaviors';
+        plot.ylabel = 'Count';
+        plot.color = 'rgb(200,200,200)';
+        plot_hist(plot);
+        plot.svg
+            .attr('id','num-behaviors')
+            .attr('transform-origin','top right')
+            .attr('transform','scale(1.25)');
         
         // append data to the search tab
         d3.select('#gene-search-tab').data(rnaseq);
@@ -795,13 +867,29 @@ const search_genes = function(input_txt){
         if(matched_idx.length){
             update_selected_gene(matched_idx[0],rnaseq);
         }
+
     })
 }
 
-d3.select('#gene-search-textbox')
-    .on("keydown",function(d){
-        if(d3.event.key === 'Enter'){
-            this.blur();
-            search_genes(this.value)
+d3.select('#gene-search-submit')
+    .on("click",function(d){ search_genes(d3.select('#gene-search-textbox').nodes()[0].value) })
+
+var fileInput = document.getElementById('fileid');
+var fileDisplayArea = document.getElementById('gene-search-textbox');
+
+fileInput.addEventListener('change', function(e) {
+    var file = fileInput.files[0];
+    var file_ext = file.name.split('.').pop();
+    console.log(file_ext)
+
+    if (file_ext === 'txt' | file_ext === 'csv') {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+            fileDisplayArea.value = reader.result;
         }
-    })
+
+        reader.readAsText(file);
+    }
+});
+

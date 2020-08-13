@@ -280,6 +280,38 @@ d3.json("decathlon.json").then(function(dec){
 				}
 				})
 
+	var all_metrics = [];
+	d3.select('#matrix-header')
+			.select('select')
+					.each(function(d){ 
+							all_metrics = dec[0]['full'].fields })
+	d3.select('#metric-summary-tab').select('select')
+			.selectAll('option')
+					.data(all_metrics)
+					.enter()
+			.append('option')
+					.attr('value',function(d){ return d; })
+					.text(function(d){ return d; });
+
+	d3.select('#metric-summary-tab')
+			.selectAll('tr')
+					.filter(function(d,i){ return i>0 })
+					.remove();
+
+	d3.select('#metric-summary-tab')
+			.select('table')
+			.selectAll('tr')
+					.data(d3.range(8))
+					.enter()
+			.append('tr')
+					.each(function(d){
+							d3.select(this).selectAll('td')
+									.data(d3.range(3))
+									.enter()
+							.append('td')
+									.each(function(){ d3.select(this).append('p') })
+					})
+
 	// initialize page at start with inbred-full dataset
 	init_page_from_dataset(dec[0],'full');
 

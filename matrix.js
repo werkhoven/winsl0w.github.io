@@ -152,7 +152,6 @@ const matrix_mouseup= function(d,scale,labels){
 		}
 	}
 
-	//console.log(curr_selection)
 	update_rect_selections();
 
 	var hov_rect = d3.select('#hover-rect')
@@ -177,7 +176,7 @@ const matrix_mouseup= function(d,scale,labels){
 	if(d3.select('#qselections').select('.selected').size()){
 		d3.select('#qselections').select('.selected').nodes()[0].click()
 	}
-	update_apriori_menu(d.x_label)
+	update_selected_metric(d.x_label)
 }
 
 const matrix_click = function(d,dec_data,scatter_scale){
@@ -295,7 +294,7 @@ const matrix_click = function(d,dec_data,scatter_scale){
 
 	d3.select('#scatter-xlabel').text(dec_data.fields[d.x])
 	d3.select('#scatter-ylabel').text(dec_data.fields[d.y])
-	update_apriori_menu(d.x_label)
+	update_selected_metric(d.x_label)
 		
 }
 
@@ -488,7 +487,6 @@ const metric_selection_click = function(d){
 	}
 	
 	if(d3.event.shiftKey && !(prev_metric_selection===null)){
-		console.log('shift')
 		if(prev_metric_selection < d.list_idx){
 			new_selection_idx = d3.range(prev_metric_selection,d.list_idx+1,1);
 		} else {
@@ -499,9 +497,6 @@ const metric_selection_click = function(d){
 		prev_metric_selection = d.list_idx;
 		selection_idx = new_selection_idx;
 	}
-
-	console.log('new selection:',new_selection_idx)
-	console.log('prev selection:',prev_metric_selection)
 
 	// remove items from selection that are no longer in current selection
 	const trim_idx = selection_idx.filter(v => { 
@@ -612,7 +607,7 @@ const init_metric_selections = function(metric_selections){
 				return curr_selection.some(v => v===d.idx-1) ? 'on' : 'off';
 			})
 			.on('click',metric_selection_click)
-			.text(function(d,i){ return d.field; });	
+			.text(function(d,i){ return d.field });	
 
 }
 

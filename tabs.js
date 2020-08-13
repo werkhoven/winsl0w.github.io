@@ -54,38 +54,6 @@ const switch_tab = function(){
         case "Metric Summary":
             d3.select('#metric-summary-tab').style('visibility','visible');
 
-            var all_metrics = [];
-            d3.select('#matrix-header')
-                .select('select')
-                    .each(function(d){ 
-                        all_metrics = d[0]['full'].fields })
-            d3.select('#metric-summary-tab').select('select')
-                .selectAll('option')
-                    .data(all_metrics)
-                    .enter()
-                .append('option')
-                    .attr('value',function(d){ return d; })
-                    .text(function(d){ return d; });
-
-            d3.select('#metric-summary-tab')
-                .selectAll('tr')
-                    .filter(function(d,i){ return i>0 })
-                    .remove();
-
-            d3.select('#metric-summary-tab')
-                .select('table')
-                .selectAll('tr')
-                    .data(d3.range(8))
-                    .enter()
-                .append('tr')
-                    .each(function(d){
-                        d3.select(this).selectAll('td')
-                            .data(d3.range(3))
-                            .enter()
-                        .append('td')
-                            .each(function(){ d3.select(this).append('p') })
-                    })
-
             const selected_metric_name = get_selected_metric();
             var element = document.getElementById('metric-summary-tab-select');
             element.value = selected_metric_name;
@@ -156,7 +124,7 @@ const pval_bar_click = function(d,i,y_grp){
 
     const text_elem = y_grp.selectAll('text').filter(function(dd,ii){ return i === ii })
 
-    update_apriori_menu(text_elem.nodes()[0].innerHTML)
+    update_selected_metric(text_elem.nodes()[0].innerHTML)
 
     // execute click on metric summary tab and load selected summary
     d3.select('#tab-div').select('ul').selectAll('li')
@@ -269,7 +237,7 @@ const loading_tick_click = function(){
 }
 const pval_tick_click = function(d){
 
-    update_apriori_menu(d.innerHTML)
+    update_selected_metric(d.innerHTML)
 
     // execute click on metric summary tab and load selected summary
     d3.select('#tab-div').select('ul').selectAll('li')
@@ -912,7 +880,6 @@ const search_genes = function(input_txt){
         // append data to the search tab
         d3.select('#gene-search-tab').data(rnaseq);
 
-        
         update_selected_gene(matched_idx[0],rnaseq);
         }
 

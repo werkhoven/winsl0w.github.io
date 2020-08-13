@@ -44,26 +44,61 @@ const update_apriori_menu = function(metric_name){
 
     var qselect_div;
     var div_pos;
-    var ndiv;
+    var ndiv = qselect_div = d3.select('#metric-selections').selectAll('div').size();
+    var selection = {
+        group: null,
+        active: false,
+    }
     d3.select('#tab-header').select('select')
         .each(function(d){
-            var apriori_grp_name = get_apriori_grp(metric_name,d);
+            selection.group = get_apriori_grp(metric_name,d);
             qselect_div = d3.select('#behavior-selection-div')
                 .selectAll('div')
-                    .filter(function() { return this.innerHTML === apriori_grp_name });
+                    .filter(function(){ return this.innerHTML === selection.group });
             if(qselect_div.attr('class') !== 'selected'){
                 qselect_div.nodes()[0].click();
             }
         })
 
-    d3.select('#metric-selections').selectAll('div')
+    var selected_div = d3.select('#metric-selections').selectAll('div')
         .style('border','1px solid transparent')
-        .filter(function(){ return this.innerHTML === metric_name })
+        .filter(function(d,i){
+            if(this.innerHTML === metric_name){
+                div_pos = i;
+            }
+            return this.innerHTML === metric_name
+        })
         .style('border','1px dashed rgb(150,150,150)')
 
-        /*
-    var mselections_div = d3.select('#metric-selections')
-    var max_scroll = mselections_div.nodes()[0].scrollHeight - mselections_div.attr('height');
-    console.log(d3.select('#metric-selections').nodes()[0].scrollTop)
-    */
+
+    var mselections_div = d3.select('#metric-selections').nodes()[0]
+    var max_scroll = mselections_div.scrollHeight - mselections_div.offsetHeight;
+    //d3.select('#metric-selections').nodes()[0].scrollTop = max_scroll * div_pos / (ndiv-1);
+
+    selection.active = selected_div.attr('class') === 'active';
+    return selection;
+}
+
+
+// schedule all page updates for metric selection change
+const update_selected_metric = function(metric_name){
+
+    // update metric summary dropdown
+
+    // update qselection and metric selection menus
+    const selection = update_apriori_menu(metric_name);
+
+    console.log(selection)
+
+    // update loading dropdown menu
+    if(selection.active){
+        var loadings_dropdown = d3.select('#tab-header').select('select').nodes()[0];
+        loadings_dropdown.value = selection.group;
+        loadings_dropdown
+
+        var event = new Event('change', {value: selection.group});
+        loadings_dropdown.dispatchEvent(event);
+    }
+    
+    // update scatter plot
 }

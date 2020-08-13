@@ -167,7 +167,6 @@ const init_page_from_dataset = function(dec,matrix_type){
 	}
 
 
-	
 
 	plot_apriori_barplots(apriori,'Activity');
 
@@ -192,6 +191,13 @@ const init_page_from_dataset = function(dec,matrix_type){
 			.text(function(d){ return d })
 
 		init_colorbar();
+
+
+		// update gene search
+		if(d3.select('#gene-result-textbox').select('div[selected=true]').size()){
+			d3.select('#gene-result-textbox').select('div[selected=true]').nodes()[0].click();
+		}
+		
 }
 
 
@@ -229,6 +235,11 @@ const update_page_dataset = function(dec,matrix_type){
 					.data(row.map(d => { return d}))
 					.attr('fill',function(d){return color(d.z)})
 			})
+
+	// update gene search
+	if(d3.select('#gene-result-textbox').select('div[selected=true]').size()){
+		d3.select('#gene-result-textbox').select('div[selected=true]').nodes()[0].click();
+	}
 }
 
 

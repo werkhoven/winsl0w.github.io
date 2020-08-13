@@ -2,6 +2,9 @@
 //selections
 var curr_selection = [];
 var curr_quick_selection = '';
+var drag_start = [];
+var drag_stop = [];
+var is_dragging = false;
 
 // define color and alpha presets
 const sel_alpha = 1;
@@ -60,14 +63,33 @@ const hilightRowCol = function(d,scale,labels,obj){
     d3.select(obj).attr('stroke-opacity',0)
 			.attr('stroke-width','2px');
 
-	if(in_selection(curr_selection,d.x,d.y) || curr_selection.length<1){
-		d3.select('#hover-rect')
-				.attr('x',scale(labels[d.y]))
-				.attr('y',scale(labels[d.x]))
-				.style('stroke-opacity',1);
+	var hov_rect = d3.select('#hover-rect')
+
+	if(is_dragging){
+			hov_rect
+				.style('stroke-opacity',1)
+				.style('stroke','rgb(0,255,0)')
+				.attr('x',scale(labels[Math.min(drag_start[0],d.y)]))
+				.attr('y',scale(labels[Math.min(drag_start[1],d.x)]))
+				.attr('width',scale(labels[Math.abs(drag_start[0] - d.y)+1]))
+				.attr('height',scale(labels[Math.abs(drag_start[1] - d.x)+1]))
+
+	} else if(in_selection(curr_selection,d.x,d.y) || curr_selection.length<1){
+		hov_rect
+			.attr('width',scale(labels[1]))
+			.attr('height',scale(labels[1]))
+			.attr('x',scale(labels[d.y]))
+			.attr('y',scale(labels[d.x]))
+			.style('stroke-opacity',1)
+			.style('stroke','rgb(0,255,0)');
 	} else {
-		d3.select('#hover-rect')
-			.style('stroke-opacity',0);
+		hov_rect
+			.attr('width',scale(labels[1]))
+			.attr('height',scale(labels[1]))
+			.attr('x',scale(labels[d.y]))
+			.attr('y',scale(labels[d.x]))
+			.style('stroke-opacity',0.7)
+			.style('stroke','rgb(200,200,255)');
 		return;
 	}
 
@@ -88,9 +110,12 @@ const unhilightRowCol = function(d,scale,labels,obj){
 
     d3.select(obj).attr('stroke-opacity',0);
 
-    d3.select('#hover-rect')
+		if(!is_dragging){
+			d3.select('#hover-rect')
         .attr('x',scale(labels[d.y]))
         .attr('y',scale(labels[d.x]))
+		}
+    
 
     d3.select('.mouseover-textgroup').attr('visibility','hidden')
 
@@ -98,11 +123,64 @@ const unhilightRowCol = function(d,scale,labels,obj){
 
 }
 
-const matrix_click = function(d,dec_data,scatter_scale){
+const matrix_mousedown = function(d){
+	drag_start = [d.y,d.x];
+	is_dragging = true;
+}
 
-	if(!in_selection(curr_selection,d.x,d.y) && curr_selection.length>0){
+const matrix_mouseup= function(d,scale,labels){
+
+	drag_stop = [d.y,d.x];
+	is_dragging = false;
+	if(drag_start.every(function(v,i){ return v === drag_stop[i] })){
 		return;
 	}
+
+	var xrange = [Math.min(drag_start[0],drag_stop[0]),Math.max(drag_start[0],drag_stop[0])];
+	var yrange = [Math.min(drag_start[1],drag_stop[1]),Math.max(drag_start[1],drag_stop[1])];
+	xrange = d3.range(xrange[0],xrange[1]+1);
+	yrange = d3.range(yrange[0],yrange[1]+1);
+
+	yrange.forEach( i => { xrange.push(i) });
+	xrange = xrange.getUnique();
+	
+	for(let i=0; i<xrange.length; i++){
+		if(curr_selection.some( function(j){ return j === xrange[i] })){
+			curr_selection = curr_selection.filter( j => { return j !== xrange[i] });
+		} else {
+			curr_selection.push(xrange[i]);
+		}
+	}
+
+	//console.log(curr_selection)
+	update_rect_selections();
+
+	var hov_rect = d3.select('#hover-rect')
+	if(in_selection(curr_selection,d.x,d.y) || curr_selection.length<1){
+		hov_rect
+			.attr('width',scale(labels[1]))
+			.attr('height',scale(labels[1]))
+			.attr('x',scale(labels[d.y]))
+			.attr('y',scale(labels[d.x]))
+			.style('stroke-opacity',1)
+			.style('stroke','rgb(0,255,0)');
+	} else {
+		hov_rect
+			.attr('width',scale(labels[1]))
+			.attr('height',scale(labels[1]))
+			.attr('x',scale(labels[d.y]))
+			.attr('y',scale(labels[d.x]))
+			.style('stroke-opacity',0.7)
+			.style('stroke','rgb(200,200,255)');
+	}
+	
+	if(d3.select('#qselections').select('.selected').size()){
+		d3.select('#qselections').select('.selected').nodes()[0].click()
+	}
+	update_apriori_menu(d.x_label)
+}
+
+const matrix_click = function(d,dec_data,scatter_scale){
 
 	d3.selectAll('.scatter-dot').remove()
 	d3.selectAll('.scatter-fit').remove()
@@ -217,6 +295,7 @@ const matrix_click = function(d,dec_data,scatter_scale){
 
 	d3.select('#scatter-xlabel').text(dec_data.fields[d.x])
 	d3.select('#scatter-ylabel').text(dec_data.fields[d.y])
+	update_apriori_menu(d.x_label)
 		
 }
 
@@ -246,7 +325,9 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
                     .attr('fill',function(d){return color(d.z)})
                     .on('mouseover',function(d){ hilightRowCol(d,scale,labels) })
 					.on('mouseout',function(d){ unhilightRowCol(d,scale,labels,this) })
-					.on('click', function(d){ matrix_click(d,dec_data,scatter_scale) });
+					.on('click', function(d){ matrix_click(d,dec_data,scatter_scale) })
+					.on('mousedown', function(d){ matrix_mousedown(d) })
+					.on('mouseup', function(d){ matrix_mouseup(d,scale,labels) });
         })
 
     return rows;
@@ -395,7 +476,19 @@ const init_qselections = function(selection,names,selection_idx){
 const metric_selection_click = function(d){
 
 	var new_selection_idx;
-	if(d3.event.shiftKey && !(prev_metric_selection==null)){
+	if(prev_metric_selection===null){
+		d3.select('#metric-selections')
+            .selectAll('div.active')
+            .each(function(dd,i){
+                const style = d3.select(this).attr('style');
+                if(typeof(style)==='string'){
+									prev_metric_selection = i;
+                } 
+						})
+	}
+	
+	if(d3.event.shiftKey && !(prev_metric_selection===null)){
+		console.log('shift')
 		if(prev_metric_selection < d.list_idx){
 			new_selection_idx = d3.range(prev_metric_selection,d.list_idx+1,1);
 		} else {
@@ -406,6 +499,9 @@ const metric_selection_click = function(d){
 		prev_metric_selection = d.list_idx;
 		selection_idx = new_selection_idx;
 	}
+
+	console.log('new selection:',new_selection_idx)
+	console.log('prev selection:',prev_metric_selection)
 
 	// remove items from selection that are no longer in current selection
 	const trim_idx = selection_idx.filter(v => { 
@@ -487,8 +583,10 @@ const metric_selection_click = function(d){
                     return style.includes('dashed');
                 } 
             })
-            .nodes()[0]
+						.nodes()[0]
+						
 	if(selected_metric){
+		
 		var element = document.getElementById('metric-summary-tab-select');
 		element.value = selected_metric.innerHTML;
 		var event = new Event('change', {value: selected_metric.innerHTML});

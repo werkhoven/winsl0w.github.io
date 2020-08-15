@@ -180,7 +180,8 @@ const init_page_from_dataset = function(dec,matrix_type){
 			.on('change', function(d){ 
 				const grp_name = d3.select(this).nodes()[0].value;
 				plot_apriori_barplots(d,grp_name);
-				update_rect_selections();
+				console.log('menu_change')
+				update_loading_bar_colors();
 				d3.select(this.parentNode).select('h2').nodes()[0].innerHTML = grp_name + ' PCs';
 			 })
 		.selectAll('option')
@@ -191,7 +192,7 @@ const init_page_from_dataset = function(dec,matrix_type){
 			.text(function(d){ return d })
 
 		init_colorbar();
-
+		init_apriori_rects(apriori,matrix_type,xscale);
 
 		// update gene search
 		if(d3.select('#gene-result-textbox').select('div[selected=true]').size()){

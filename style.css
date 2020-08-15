@@ -14,15 +14,19 @@ html{
   --high-emph-txt: rgba(255,255,255,0.87);
   --med-emph-txt: rgba(255,255,255,0.72);
   --low-emph-txt: rgba(255,255,255,0.38);
+  --matrix-top: 50px;
+  --matrix-left: 430px;
+  --matrix-height: 650px;
+  --body-width: 1330px;
 }
 
 body{
   background-color: var(--primary-bg-color);
   color: var(--high-emph-txt);
   margin: auto;
-  width: 1320px;
+  width: var(--body-width);
   height: 1725px;
-  max-width: 1320px;
+  max-width: var(--body-width);
   position: relative;
   font-family: "Arial", sans-serif;
   font-weight: 100;
@@ -33,7 +37,7 @@ body{
 h1{
   margin: 10px 0px 10px 0px;
   position: relative;
-  left: 420px;
+  left: var(--matrix-left);
   font-size: 50px;
   color: var(--high-emph-txt)
 }
@@ -69,11 +73,11 @@ div .disabled{
   font-size: 14px;
 }
 #matrix-header{
-  width: 650px;
+  width: var(--matrix-height);
   height: 20px;
   position: absolute;
   top: 25px;
-  left: 420px;
+  left: var(--matrix-left);
 }
 #matrix-header select{
   position: absolute;
@@ -167,11 +171,11 @@ svg{
                                 supported by Chrome, Opera and Firefox */
 }
 #svg-container{
-  width: 650px;
-  height: 650px;
+  width: var(--matrix-height);
+  height: var(--matrix-height);
   position: absolute;
-  left: 420px;
-  top: 50px;
+  left: var(--matrix-left);
+  top: var(--matrix-top);
 }
 #matrix-svg{
   position: absolute;
@@ -185,6 +189,19 @@ svg{
   shape-rendering: crispEdges;
 }
 
+#apriori-rect-parent{
+  position: absolute;
+  left: 420px;
+  top: var(--matrix-top);
+  width: 8px;
+  height: var(--matrix-height);
+}
+.apriori-rect{
+  display: block;
+  width: 8px;
+  border: 0px solid transparent;
+  padding: 0px;
+}
 .scatter-plot{
   float: right;
   position: absolute;
@@ -237,14 +254,12 @@ svg{
   width: 185px;
   color: var(--med-emph-txt);
 }
-
 #qselections h2, h3{
   position: relative;
   left: 0px;
   top: 0px;
   width: 170px;
 }
-
 #qselection-arrow.on{
   width: 0; 
   height: 0;
@@ -256,6 +271,13 @@ svg{
   border-right:10px solid black;
   position: absolute;
   top: 800px;
+}
+.circle{
+  display: inline-block;
+  left: 0px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50px;
 }
 
 #behavior-selection-div{
@@ -345,7 +367,7 @@ svg{
 
 #metric-selections{
   position: absolute;
-  top: 50px;
+  top: var(--matrix-top);
   height: 638px;
   width: 200px;
 }
@@ -437,7 +459,6 @@ svg{
 #metric-loadings-tab div.tab-content{
   overflow: hidden;
   overflow-x: scroll;
-  white-space: nowrap;
 }
 .tab-content::-webkit-scrollbar{
   background-color: var(--secondary-bg-color);

@@ -2,6 +2,7 @@
 //selections
 var curr_selection = [];
 var curr_quick_selection = '';
+var selected_metric_labels = [];
 var drag_start = [];
 var drag_stop = [];
 var is_dragging = false;
@@ -90,7 +91,6 @@ const hilightRowCol = function(d,scale,labels,obj){
 			.attr('y',scale(labels[d.x]))
 			.style('stroke-opacity',0.7)
 			.style('stroke','rgb(200,200,255)');
-		return;
 	}
 
 	d3.select('.mouseover-textgroup').raise()
@@ -128,7 +128,7 @@ const matrix_mousedown = function(d){
 	is_dragging = true;
 }
 
-const matrix_mouseup= function(d,scale,labels){
+const matrix_mouseup= function(rect,d,scale,labels){
 
 	drag_stop = [d.y,d.x];
 	is_dragging = false;
@@ -152,8 +152,6 @@ const matrix_mouseup= function(d,scale,labels){
 		}
 	}
 
-	update_rect_selections();
-
 	var hov_rect = d3.select('#hover-rect')
 	if(in_selection(curr_selection,d.x,d.y) || curr_selection.length<1){
 		hov_rect
@@ -176,7 +174,10 @@ const matrix_mouseup= function(d,scale,labels){
 	if(d3.select('#qselections').select('.selected').size()){
 		d3.select('#qselections').select('.selected').nodes()[0].click()
 	}
-	update_selected_metric(d.x_label)
+
+	//update_selected_metric(d.x_label)
+	update_rect_selections();
+	rect.dispatchEvent(new Event('click'));
 }
 
 const matrix_click = function(d,dec_data,scatter_scale){
@@ -323,10 +324,10 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
                     .attr('x', function(d){ return scale(labels[d.y])})
                     .attr('fill',function(d){return color(d.z)})
                     .on('mouseover',function(d){ hilightRowCol(d,scale,labels) })
-					.on('mouseout',function(d){ unhilightRowCol(d,scale,labels,this) })
-					.on('click', function(d){ matrix_click(d,dec_data,scatter_scale) })
-					.on('mousedown', function(d){ matrix_mousedown(d) })
-					.on('mouseup', function(d){ matrix_mouseup(d,scale,labels) });
+										.on('mouseout',function(d){ unhilightRowCol(d,scale,labels,this) })
+										.on('click', function(d){ matrix_click(d,dec_data,scatter_scale) })
+										.on('mousedown', function(d){ matrix_mousedown(d) })
+										.on('mouseup', function(d){ matrix_mouseup(this,d,scale,labels) });
         })
 
     return rows;
@@ -338,6 +339,34 @@ const update_rect_selections = function(){
 	// update matrix rects
 	if(curr_selection.length<1){
 		d3.selectAll('.matrix-rect').style('fill-opacity',1);
+
+	} else {
+		const unselect_rects = d3.selectAll('.matrix-rect').filter(function(dd){
+				return !in_selection(curr_selection,dd.x,dd.y);
+		});
+		const select_rects = d3.selectAll('.matrix-rect').filter(function(dd){
+			return in_selection(curr_selection,dd.x,dd.y);
+		});
+		select_rects.style('fill-opacity',1);
+		unselect_rects.style('fill-opacity',0.25);
+
+		// query names of selected metrics
+		selected_metric_labels = [];
+		select_rects
+			.filter(function(dd){
+				return dd.x === dd.y;
+			})
+			.each(function(dd,i){ selected_metric_labels.push(dd.x_label) });
+	}
+
+	// update the color of loading bars
+	update_loading_bar_colors();
+}
+
+
+const update_loading_bar_colors = function(){
+
+	if(curr_selection.length<1){
 
 		// deselected loadings
 		d3.selectAll('.y-axis').each(function(){
@@ -353,58 +382,42 @@ const update_rect_selections = function(){
 						.style('fill',d3.rgb(irc[0],irc[1],irc[2],unsel_alpha));
 					})
 		});
+
 	} else {
-		const unselect_rects = d3.selectAll('.matrix-rect').filter(function(dd){
-				return !in_selection(curr_selection,dd.x,dd.y);
-		});
-		const select_rects = d3.selectAll('.matrix-rect').filter(function(dd){
-			return in_selection(curr_selection,dd.x,dd.y);
-		});
-		select_rects.style('fill-opacity',1);
-		unselect_rects.style('fill-opacity',0.25);
-
-		// query names of selected metrics
-		var selected_metrics = [];
-		select_rects
-			.filter(function(dd){
-				return dd.x === dd.y;
-			})
-			.each(function(dd,i){ selected_metrics.push(dd.x_label) });
-
-		// update selected loadings
-		d3.selectAll('.y-axis').each(function(){
-			var metric_idx = [];
-			d3.select(this).selectAll('text').each(function(t,i){
-				const curr_metric = d3.select(this).nodes()[0].innerHTML;
-				const is_selected = selected_metrics.some(function(m){ return m === curr_metric });
-				if(is_selected){
-					metric_idx.push(i);
-					d3.select(this)
-						.attr('active',true)
-						.style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],unsel_alpha));
-				} else {
-					d3.select(this)
-						.attr('active',false)
-						.style('fill',d3.rgb(itc[0],itc[1],itc[2],unsel_alpha));
-				}
-			})
-			
-			d3.select(this.parentNode)
-				.select('.loadings-bar-parent')
-					.each(function(){ 
-						d3.select(this).selectAll('rect').each(function(t,i){
-							if(metric_idx.some(function(v){ return v===i })){
-								d3.select(this)
-									.attr('active',true)
-									.style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],unsel_alpha));
-							} else {
-								d3.select(this)
-									.attr('active',false)
-									.style('fill',d3.rgb(irc[0],irc[1],irc[2],unsel_alpha));
-							}
+			// update selected loadings
+			d3.selectAll('.y-axis').each(function(){
+				var metric_idx = [];
+				d3.select(this).selectAll('text').each(function(t,i){
+					const curr_metric = d3.select(this).nodes()[0].innerHTML;
+					const is_selected = selected_metric_labels.some(function(m){ return m === curr_metric });
+					if(is_selected){
+						metric_idx.push(i);
+						d3.select(this)
+							.attr('active',true)
+							.style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],unsel_alpha));
+					} else {
+						d3.select(this)
+							.attr('active',false)
+							.style('fill',d3.rgb(itc[0],itc[1],itc[2],unsel_alpha));
+					}
+				})
+				
+				d3.select(this.parentNode)
+					.select('.loadings-bar-parent')
+						.each(function(){ 
+							d3.select(this).selectAll('rect').each(function(t,i){
+								if(metric_idx.some(function(v){ return v===i })){
+									d3.select(this)
+										.attr('active',true)
+										.style('fill',d3.rgb(act_col[0],act_col[1],act_col[2],unsel_alpha));
+								} else {
+									d3.select(this)
+										.attr('active',false)
+										.style('fill',d3.rgb(irc[0],irc[1],irc[2],unsel_alpha));
+								}
+							})
 						})
-					})
-		})
+			})
 	}
 }
 
@@ -454,6 +467,19 @@ const qselection_click = function(d){
 var prev_metric_selection;
 var prev_selected_element;
 var selection_idx = [];
+const apriori_bar_colors = [
+	'rgb(255,0,195)',
+	'rgb(124,0,255)',
+	'rgb(0,67,255)',
+	'rgb(0,255,255)',
+	'rgb(0,255,60)',
+	'rgb(255,188,0)',
+	'rgb(255,0,0)',
+	'rgb(74,0,89)',
+	'rgb(0,191,153)',
+	'rgb(11,142,0)',
+	'rgb(164,181,0)'
+]
 
 const init_qselections = function(selection,names,selection_idx){
 
@@ -464,10 +490,24 @@ const init_qselections = function(selection,names,selection_idx){
 		.append('div')
 			.attr('class','inactive')
 			.attr('data-status','off')
+			.style('position','relative')
 			.on('mouseover',qselection_mouseover)
 			.on('mouseout',qselection_mouseout)
 			.on('click',qselection_click)
-			.text(function(d,i){ return names[i]; })	
+			.text(function(d,i){ return names[i] })
+			//.style('color',function(d,i){ return apriori_bar_colors[i] })
+			.each(function(d,i){
+				if(selection==='behavior'){
+					d3.select(this)
+						.append('table')
+							.style('position','absolute')
+							.style('right','10px')
+							.style('top','0px')
+						.append('tr')
+							.attr('class','circle')
+							.style('background',apriori_bar_colors[i])
+				}
+			})
 
 }
 
@@ -721,6 +761,41 @@ const init_colorbar = function(){
 			.attr('transform',`translate(10,${(h+20)/2}) rotate(-90)`)
 			.style('font-size','14px')
 
+}
+
+
+
+const init_apriori_rects = function(apriori,matrix_type,scale){
+	
+	var rect_arr = [];
+	const trim_factor = 4;
+	const y_trim = (scale(apriori[0].fields[1]) - scale(apriori[0].fields[0]))/trim_factor;
+	for(let i=0; i<apriori.length; i++){
+		var rect = {
+			y1: scale(apriori[i].fields[0]) + y_trim,
+			y2: scale(apriori[i].fields[apriori[i].fields.length-1]) + y_trim*trim_factor - y_trim,
+			height: null,
+		}
+		rect.height = rect.y2 - rect.y1;
+		rect_arr.push(rect);
+	}
+
+	console.log(rect_arr[0].height)
+	console.log(y_trim*trim_factor)
+	console.log(y_trim)
+
+	//.style('margin',`${y_trim}px 0px ${y_trim*2}px 0px`)
+	d3.select('#matrix-div')
+		.append('svg')
+			.attr('id','apriori-rect-parent')
+		.selectAll('rect')
+			.data(rect_arr)
+			.enter()
+		.append('rect')
+			.attr('class','apriori-rect')
+			.attr('y', function(d){ return d.y1 })
+			.attr('height',function(d){ return d.height })
+			.style('fill',function(d,i){ return apriori_bar_colors[i] })
 }
 
 // apply metric toggling to metric selection buttons

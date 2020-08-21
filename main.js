@@ -152,9 +152,10 @@ const init_page_from_dataset = function(dec,matrix_type){
 
 		var dist_qselect_data = [];
 		for(let i=0; i<apriori_grps.length; i++){
-			dist_qselect_data.push({fields: [],idx: [],list_idx: []});
+			dist_qselect_data.push({fields: [], idx: [], list_idx: [], name: null});
 		}
 		for(let i=0; i<apriori_grps.length; i++){
+			dist_qselect_data[i].name = apriori[i].name;
 			for(let j=0; j<apriori[i].dist_fields.length; j++){
 				dist_qselect_data[i].fields[j] = apriori[i].dist_fields[j];
 				dist_qselect_data[i].idx[j] = apriori[i].dist_idx[j] + 1;
@@ -165,7 +166,6 @@ const init_page_from_dataset = function(dec,matrix_type){
 	} else {
 		init_qselections('behavior',apriori_grps,apriori);
 	}
-
 
 
 	plot_apriori_barplots(apriori,'Activity');
@@ -193,6 +193,41 @@ const init_page_from_dataset = function(dec,matrix_type){
 
 		init_colorbar();
 		init_apriori_rects(apriori,matrix_type,xscale);
+
+		// initialize metric summary dropdown menu
+		d3.select('#metric-summary-tab').select('select').selectAll('option').remove()
+		d3.select('#metric-summary-tab').select('select')
+				.selectAll('option')
+						.data(dec[matrix_type].fields)
+						.enter()
+				.append('option')
+						.attr('value',function(d){ return d; })
+						.text(function(d){ return d; });
+	
+		d3.select('#metric-summary-tab')
+				.selectAll('tr')
+						.filter(function(d,i){ return i>0 })
+						.remove();
+	
+		d3.select('#metric-summary-tab')
+				.select('table')
+				.selectAll('tr')
+						.data(d3.range(8))
+						.enter()
+				.append('tr')
+						.each(function(d){
+								d3.select(this).selectAll('td')
+										.data(d3.range(3))
+										.enter()
+								.append('td')
+										.each(function(){ d3.select(this).append('p') })
+						})
+
+		// set the current value
+		var metric_summ_dropdown = d3.select('#metric-summary-tab').select('select').nodes()[0];
+		metric_summ_dropdown.value = dec[matrix_type].fields[0];
+		metric_summ_dropdown.dispatchEvent(new Event('change',{ value:  dec[matrix_type].fields[0]}))
+
 
 		// update gene search
 		if(d3.select('#gene-result-textbox').select('div[selected=true]').size()){
@@ -280,38 +315,6 @@ d3.json("decathlon.json").then(function(dec){
 					document.getElementById('clear-selections').click();
 				}
 				})
-
-	var all_metrics = [];
-	d3.select('#matrix-header')
-			.select('select')
-					.each(function(d){ 
-							all_metrics = dec[0]['full'].fields })
-	d3.select('#metric-summary-tab').select('select')
-			.selectAll('option')
-					.data(all_metrics)
-					.enter()
-			.append('option')
-					.attr('value',function(d){ return d; })
-					.text(function(d){ return d; });
-
-	d3.select('#metric-summary-tab')
-			.selectAll('tr')
-					.filter(function(d,i){ return i>0 })
-					.remove();
-
-	d3.select('#metric-summary-tab')
-			.select('table')
-			.selectAll('tr')
-					.data(d3.range(8))
-					.enter()
-			.append('tr')
-					.each(function(d){
-							d3.select(this).selectAll('td')
-									.data(d3.range(3))
-									.enter()
-							.append('td')
-									.each(function(){ d3.select(this).append('p') })
-					})
 
 	// initialize page at start with inbred-full dataset
 	init_page_from_dataset(dec[0],'full');

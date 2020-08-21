@@ -69,11 +69,16 @@ const hilightRowCol = function(d,scale,labels,obj){
 	if(is_dragging){
 			hov_rect
 				.style('stroke-opacity',1)
-				.style('stroke','rgb(0,255,0)')
 				.attr('x',scale(labels[Math.min(drag_start[0],d.y)]))
 				.attr('y',scale(labels[Math.min(drag_start[1],d.x)]))
 				.attr('width',scale(labels[Math.abs(drag_start[0] - d.y)+1]))
 				.attr('height',scale(labels[Math.abs(drag_start[1] - d.x)+1]))
+
+			if(d3.event.shiftKey){
+				hov_rect.style('stroke','rgb(255,0,0)')
+			} else {
+				hov_rect.style('stroke','rgb(0,255,0)')
+			}
 
 	} else if(in_selection(curr_selection,d.x,d.y) || curr_selection.length<1){
 		hov_rect
@@ -126,6 +131,11 @@ const unhilightRowCol = function(d,scale,labels,obj){
 const matrix_mousedown = function(d){
 	drag_start = [d.y,d.x];
 	is_dragging = true;
+
+	if(d3.event.shiftKey){
+		d3.select('#hover-rect')
+			.style('stroke','rgb(255,0,0)')
+	}
 }
 
 const matrix_mouseup= function(rect,d,scale,labels){
@@ -136,6 +146,7 @@ const matrix_mouseup= function(rect,d,scale,labels){
 		return;
 	}
 
+	// get metric indices in selection range
 	var xrange = [Math.min(drag_start[0],drag_stop[0]),Math.max(drag_start[0],drag_stop[0])];
 	var yrange = [Math.min(drag_start[1],drag_stop[1]),Math.max(drag_start[1],drag_stop[1])];
 	xrange = d3.range(xrange[0],xrange[1]+1);
@@ -143,15 +154,25 @@ const matrix_mouseup= function(rect,d,scale,labels){
 
 	yrange.forEach( i => { xrange.push(i) });
 	xrange = xrange.getUnique();
-	
-	for(let i=0; i<xrange.length; i++){
-		if(curr_selection.some( function(j){ return j === xrange[i] })){
-			curr_selection = curr_selection.filter( j => { return j !== xrange[i] });
-		} else {
-			curr_selection.push(xrange[i]);
-		}
-	}
 
+	// remove metrics in selection if shiftkey pressed
+	if(d3.event.shiftKey){
+		for(let i=0; i<xrange.length; i++){
+			if(curr_selection.some( function(j){ return j === xrange[i] })){
+				curr_selection = curr_selection.filter( j => { return j !== xrange[i] });
+			}
+		}
+
+	// add metrics in selection if shiftkey NOT pressed
+	} else {
+		for(let i=0; i<xrange.length; i++){
+			if(curr_selection.every( function(j){ return j !== xrange[i] })){
+				curr_selection.push(xrange[i]);
+			}
+		}
+	}	
+
+	// update hover rect properties
 	var hov_rect = d3.select('#hover-rect')
 	if(in_selection(curr_selection,d.x,d.y) || curr_selection.length<1){
 		hov_rect
@@ -171,12 +192,15 @@ const matrix_mouseup= function(rect,d,scale,labels){
 			.style('stroke','rgb(200,200,255)');
 	}
 	
+	// refresh the qselections/metric selections
 	if(d3.select('#qselections').select('.selected').size()){
 		d3.select('#qselections').select('.selected').nodes()[0].click()
 	}
 
-	//update_selected_metric(d.x_label)
+	// update matrix rendering
 	update_rect_selections();
+
+	// trigger scatter plot
 	rect.dispatchEvent(new Event('click'));
 }
 
@@ -222,12 +246,8 @@ const matrix_click = function(d,dec_data,scatter_scale){
 	d3.json('ci95s.json').then(function(ci_data){
 
 		// get current dataset index
-		var dataset_idx = parseInt(d3.select('#matrix-header').select('select').nodes()[0].value,10);
-		const matrix_type = d3.select('#matrix-header').select('select')
-					.selectAll('option')
-					.filter(function(t,i){ return i === dataset_idx})
-					.nodes()[0].innerHTML.split('-')[1];
-		dataset_idx = dataset_idx % 2;
+		const dataset_idx = get_dataset_idx();
+		const matrix_type = get_matrix_type();
 
 		var fit_x, fit_y;
 		if(row===col){
@@ -335,6 +355,12 @@ var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
 };
 
 const update_rect_selections = function(){
+
+	var matrix_metrics;
+    d3.select('#matrix-header')
+            .select('select')
+                .each(function(d){ matrix_metrics = d[get_dataset_idx()][get_matrix_type()].fields.slice() });
+	console.log(matrix_metrics[curr_selection[curr_selection.length-1]])
 
 	// update matrix rects
 	if(curr_selection.length<1){
@@ -457,6 +483,15 @@ const qselection_click = function(d){
 	d3.select(this)
 		.attr('data-status','on')
 		.attr('class','selected');
+
+	d3.selectAll('.apriori-rect')
+		.style('opacity',0.72)
+		.style('outline','0px solid white')
+		.style('outline-offset','0px')
+		.filter(function(){ return d3.select(this).attr('name') === d.name })
+		.style('opacity',1)
+		.style('outline','1px solid rgb(200,200,200)')
+		.style('outline-offset','-1px')
 
 	//define the current selection and initialize metric selection divs
 	const metric_selections = d.idx.map((v,i) => { return {field: d.fields[i], idx: v, list_idx: d.list_idx[i]} });
@@ -657,9 +692,15 @@ const metric_toggle_all = function(){
 	// change button appearance to unpressed
 	d3.select(this).attr('class','active');
 
+	if(!curr_quick_selection){
+		curr_quick_selection = d3.select('#behavior-selection-div').select('div').nodes()[0].innerText;
+	}
+
 	const curr_qselect = d3.select('#qselections')
-		.selectAll('div')
-		.filter(function(){ return this.innerText === curr_quick_selection});
+			.selectAll('div')
+			.filter(function(){ return this.innerText === curr_quick_selection});
+
+	console.log(curr_quick_selection)
 
 	switch(this.innerText){
 		case "Select Group":
@@ -768,23 +809,25 @@ const init_colorbar = function(){
 const init_apriori_rects = function(apriori,matrix_type,scale){
 	
 	var rect_arr = [];
-	const trim_factor = 4;
-	const y_trim = (scale(apriori[0].fields[1]) - scale(apriori[0].fields[0]))/trim_factor;
+	const trim_factor = 6;
+	var field_key;
+	if(matrix_type==='full'){
+		field_key = 'fields';
+	} else {
+		field_key = 'dist_fields';
+	}
+
+	const y_trim = (scale(apriori[0][field_key][1]) - scale(apriori[0][field_key][0]))/trim_factor;
 	for(let i=0; i<apriori.length; i++){
 		var rect = {
-			y1: scale(apriori[i].fields[0]) + y_trim,
-			y2: scale(apriori[i].fields[apriori[i].fields.length-1]) + y_trim*trim_factor - y_trim,
+			y1: scale(apriori[i][field_key][0]) + y_trim,
+			y2: scale(apriori[i][field_key][apriori[i][field_key].length-1]) + y_trim*trim_factor - y_trim,
 			height: null,
 		}
 		rect.height = rect.y2 - rect.y1;
 		rect_arr.push(rect);
 	}
 
-	console.log(rect_arr[0].height)
-	console.log(y_trim*trim_factor)
-	console.log(y_trim)
-
-	//.style('margin',`${y_trim}px 0px ${y_trim*2}px 0px`)
 	d3.select('#matrix-div')
 		.append('svg')
 			.attr('id','apriori-rect-parent')
@@ -792,14 +835,22 @@ const init_apriori_rects = function(apriori,matrix_type,scale){
 			.data(rect_arr)
 			.enter()
 		.append('rect')
+			.attr('name',function(d,i){ return apriori[i].name })
 			.attr('class','apriori-rect')
 			.attr('y', function(d){ return d.y1 })
 			.attr('height',function(d){ return d.height })
 			.style('fill',function(d,i){ return apriori_bar_colors[i] })
+			.style('opacity',0.72)
 }
 
 // apply metric toggling to metric selection buttons
 d3.select('#metric-select-buttons').selectAll('div')
+	.on('mouseup',metric_toggle_all)
+	.on('mousedown',function(){ d3.select(this).attr('class','selected') })
+	.on('mouseover',function(){ d3.select(this).attr('class','active') })
+	.on('mouseout',function(){ d3.select(this).attr('class','inactive') })
+
+d3.select('#tab-header').select('.buttons').selectAll('div')
 	.on('mouseup',metric_toggle_all)
 	.on('mousedown',function(){ d3.select(this).attr('class','selected') })
 	.on('mouseover',function(){ d3.select(this).attr('class','active') })

@@ -27,28 +27,44 @@
                     <div class="inactive">Select Group</div>
                     <div class="inactive">Deselect Group</div>
                 </div>
-                <div id="metric-selections" class="scroll-div"></div>
+                <div id="metric-selection-scroll-par">
+                    <div id="metric-selections"></div>
+                </div>
+                <div id="metric-selections-shift-click-instuct">
+                    <i><b>shift + click</b> to toggle multiple behaviors</i>
+                </div>
             </div>
             <div id="matrix-header">
+                <!--
+                <div style="display: inline-block; width: auto; height: 100%; font-size: 10.5px;
+                    vertical-align: top; position: absolute; right: 265px">
+                    <div style="display: block"><i>Add behaviors: click + drag</i></div>
+                    <div style="display: block"><i>Remove behaviors: shift-click</i></div>
+                </div>
+            -->
                 <span>Select dataset:</span>
                 <select></select>
                 <div id="clear-selections" class="inactive">Clear All Selections</div>
             </div>
             <aside id="instructions">
                 <h2 style="margin-top: 0px"><u>Instructions</u></h2>
-                <ol style="padding-left: 0px; margin-top: 15px;">
+                <ol style="padding-left: 0px; margin-top: 15px; font-size: 12px;">
                     <li>Individual elements in the matrix 
                         correspond to the pairwise correlations between 
-                        behavioral features.
+                        behavioral metrics.
                     </li>
                     <li>
-                        Mouseover individual correlations to see their
-                        corresponding behavioral features.
+                        <b><i>Click + drag</i></b> or <b><i>Shift-click+drag</i></b>
+                        in the matrix or use the <b>Behavior Groups</b> and <b>Assays</b> 
+                        quick selection groupings to select/deselect behavioral metrics.
                     </li>
                     <li>
-                        Left-click correlations to see scatter plots of the
-                        individual behavioral scores and their contributions 
-                        to distilled matrix PCs.
+                        Left-click individual elements to see scatter plots of the
+                        individual behavioral metric pairs.
+                    </li>
+                    <li>
+                        Left-click individual elements to see scatter plots of the
+                        individual behavioral metric pairs.
                     </li>
                 </ol>
             </aside>
@@ -59,13 +75,22 @@
             <ul style="width: 100%; height: 31px; margin: 0; padding: 0; border-bottom: 1px solid black;">
                 <li class="active">Metric Loadings</li
                 ><li class="inactive">Metric Summary</li
-                ><li class="inactive">Gene Search</li>
+                ><li class="inactive">Gene Search</li
+                ><li class="inactive">Enrichment Categories</li>
             </ul>
             <div class="tab-parent" id="metric-loadings-tab">
-                <div id="tab-header">
-                    <span style="margin-right: -10px">Metric group:</span>
-                    <select></select>
-                    <h2 style="left: 400px">Activity PC</h2>
+                <div id="tab-header" style="margin-left: 70px">
+                    <div style="display: inline-block">
+                        <div style="display: block">
+                            <span style="margin-right: -10px; display: inline-block">Metric group:</span>
+                            <select style="display: inline-block"></select>
+                        </div>
+                        <div class="buttons" style="display: block; margin-top: 10px">
+                            <div class="inactive" style="display: inline-block">Deselect Group</div>
+                            <div class="inactive" style="display: inline-block">Select Group</div>
+                        </div>
+                    </div>
+                    <h2 style="position: absolute; left: 662px; text-anchor: middle">Activity PC</h2>
                 </div>
                 <div class="tab-content"></div>
             </div>
@@ -79,13 +104,16 @@
                                 <tr>
                                     <th colspan="2" style="width: 100%; height: auto">
                                         <span>Select metric: &nbsp;</span>
-                                        <select id="metric-summary-tab-select" style="margin: 20px 0px 20px 0px; padding: 0px;">word up</select>
+                                        <select id="metric-summary-tab-select" style="margin: 20px 0px 20px 0px; padding: 0px;"></select>
                                     </th>
                                 </tr>
                             </table>
                         </div>
-                        <div id="hist-div">
-                            <p style="text-align: center; font-size: 16px; margin: 0px 0px 20px 0px">raw data histograms</p>
+                        <div id="metric-summary-plot-div">
+                            <div id="hist-div">
+                            </div>
+                            <div id="scree-plot">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -128,7 +156,67 @@
                     </div>
                 </div>
             </div>
+            <div class="tab-parent" id="enrichment-tab" style="visibility: hidden">
+                    <div class="tab-content">
+                        <div style="margin: 40px 50px 0px 50px">
+                            <h2>Gene Enrichment Categories</h2>
+                            <hr>
+                            <p style="margin-bottom: 40px">Enter a description of how to use the tab here.</p>
+                            <div style="display: inline-block; width: 40%; vertical-align: top">
+                                <table style="width: 100%; height: 100%">
+                                    <tr>
+                                        <th colspan="2" style="width: 100%; height: auto">
+                                            <span>Select category: &nbsp;</span>
+                                            <select id="enrichment-tab-select" style="margin: 0px 0px 20px 0px; padding: 0px;"></select>
+                                        </th>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div style="display: block; width: 100%; padding: 10px 0px 0px 0px">
+                                <table id='enrichment-tab-parent-table' style="width: 100%; height: 100%">
+                                    <tr>
+                                        <th style="width: 33.3%">
+                                            <div style="font-weight: 100">
+                                                Category Metrics:
+                                            </div>
+                                            <table id="cat-metrics" class="scroll-table">
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th><i>p</i>-value</th>
+                                                </tr>
+                                            </table>
+                                        </th>
+                                        <th style="width: 33.3%">
+                                            <div style="font-weight: 100">
+                                                Category Gene Hits:
+                                            </div>
+                                            <table id="cat-hits" class="scroll-table">
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th><i>p</i>-value</th>
+                                                </tr>
+                                            </table>
+                                        </th>
+                                        <th style="width: 33.3%">
+                                            <div style="font-weight: 100">
+                                                Category All Genes:
+                                            </div>
+                                            <table id="cat-genes" class="scroll-table">
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th><i>p</i>-value</th>
+                                                </tr>
+                                            </table>
+                                        </th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
         <div style="display: block; width: 100%; height: 20px; position: absolute; bottom: 0px">
             <span></span>
         </div>

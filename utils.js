@@ -39,6 +39,18 @@ const get_apriori_grp = function(metric_name,apriori){
     }
 }
 
+const get_matrix_type = function(){
+    if(Math.floor(d3.select('#matrix-header').select('select').nodes()[0].value / 2)){
+        return 'distilled';
+    } else {
+        return 'full';
+    }
+}
+
+const get_dataset_idx = function(){
+    return parseInt(d3.select('#matrix-header').select('select').nodes()[0].value,10) % 2;
+}
+
 // update the apriori menu selection and selected metric
 const update_apriori_menu = function(metric_name){
 
@@ -53,8 +65,10 @@ const update_apriori_menu = function(metric_name){
             qselect_div = d3.select('#behavior-selection-div')
                 .selectAll('div')
                     .filter(function(){ return this.innerHTML === selection.group });
-            if(qselect_div.attr('class') !== 'selected'){
-                qselect_div.nodes()[0].click();
+            if(qselect_div.size()){
+                if(qselect_div.attr('class') !== 'selected'){
+                    qselect_div.nodes()[0].click();
+                }
             }
         })
 
@@ -65,7 +79,9 @@ const update_apriori_menu = function(metric_name){
         })
         .style('border','1px dashed rgb(150,150,150)')
 
-    selection.active = selected_div.attr('class') === 'active';
+    if(selected_div.size()){
+        selection.active = selected_div.attr('class') === 'active';
+    }
     return selection;
 }
 

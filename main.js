@@ -18,6 +18,18 @@ const init_page_from_dataset = function(dec,matrix_type){
 
 	d3.selectAll('svg').remove();
 
+	d3.select('#mask-container')
+		.append('svg')
+			.attr('id','matrix-mask-svg')
+		.append('rect')
+			.attr('id','matrix-mouseout-mask')
+			.on('mouseover',function(){
+				is_dragging = false;
+				drag_start = [];
+				drag_stop = [];
+			})
+			
+
 	// select the parent svg
 	var svg = d3.select('#svg-container').append("svg")
 			.attr("width", width)
@@ -31,8 +43,8 @@ const init_page_from_dataset = function(dec,matrix_type){
 	// initialize background rectangle
 	svg.append('rect')
 		.attr('class','background-rect')
-		.attr('width',plot_height+2)
-		.attr('height',plot_height+2)
+		.attr('width',plot_height+12)
+		.attr('height',plot_height+12)
 
 
 	// initialize mouseover details box
@@ -179,10 +191,11 @@ const init_page_from_dataset = function(dec,matrix_type){
 			.data([apriori])
 			.on('change', function(d){ 
 				const grp_name = d3.select(this).nodes()[0].value;
+				const grp_idx = d.map(v=>{ return v.name }).indexOf(grp_name);
 				plot_apriori_barplots(d,grp_name);
-				console.log('menu_change')
 				update_loading_bar_colors();
-				d3.select(this.parentNode).select('h2').nodes()[0].innerHTML = grp_name + ' PCs';
+				d3.select('#tab-header').select('h2').nodes()[0].innerText = grp_name + ' PCs';
+				d3.select('#tab-header').select('.circle').style('background-color',apriori_bar_colors[grp_idx])
 			 })
 		.selectAll('option')
 			.data(apriori_grps)
@@ -226,14 +239,18 @@ const init_page_from_dataset = function(dec,matrix_type){
 		// set the current value
 		var metric_summ_dropdown = d3.select('#metric-summary-tab').select('select').nodes()[0];
 		metric_summ_dropdown.value = dec[matrix_type].fields[0];
-		metric_summ_dropdown.dispatchEvent(new Event('change',{ value:  dec[matrix_type].fields[0]}))
+		metric_summ_dropdown.dispatchEvent(new Event('change',{ value:  dec[matrix_type].fields[0]}));
+		clear_tab_notification('Metric Summary');
 
 
 		// update gene search
 		if(d3.select('#gene-result-textbox').select('div[selected=true]').size()){
 			d3.select('#gene-result-textbox').select('div[selected=true]').nodes()[0].click();
 		}
-		
+
+		// update apriori menu
+		d3.select('#qselections').select('.selected').nodes()[0].click();	
+		update_rect_selections();
 }
 
 
@@ -312,12 +329,12 @@ d3.json("decathlon.json").then(function(dec){
 					update_page_dataset(d[dataset_idx%2],matrix_type)
 				} else {
 					init_page_from_dataset(d[dataset_idx%2],matrix_type);
-					document.getElementById('clear-selections').click();
 				}
 				})
 
 	// initialize page at start with inbred-full dataset
 	init_page_from_dataset(dec[0],'full');
+	init_enrichment_table();
 
 });
 

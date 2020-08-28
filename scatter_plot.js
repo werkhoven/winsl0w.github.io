@@ -74,15 +74,14 @@ const init_scatterplot = function(){
 			.attr('height',200)
 
 	d3.select('.scatter-axes')
-			.selectAll('dot')
+			.selectAll('circle')
 			.data(scatter_data)
 			.enter()
 		.append('circle')
 			.attr('class','scatter-dot')
 			.attr('cx', function(d){ return scatter_scale(d[0])})
 			.attr('cy', function(d){ return scatter_scale(d[1])})
-			.attr('r',2)
-			.style('fill','none')
+			.attr('r',1)
 
 	return scatter_scale;
 

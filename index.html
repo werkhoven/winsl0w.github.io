@@ -15,6 +15,7 @@
             <h1>Decathlon data browser</h1>
         </div>
         <div id="matrix-div" style="position: relative; width: auto; height: 740px">
+            <div id="mask-container"></div>
             <aside id="qselections">
                 <!--<h2 style="margin-top: 0px"><u>Quick Selections</u></h2>-->
                 <h3>Behavior Groups</h3>
@@ -31,17 +32,10 @@
                     <div id="metric-selections"></div>
                 </div>
                 <div id="metric-selections-shift-click-instuct">
-                    <i><b>shift + click</b> to toggle multiple behaviors</i>
+                    <i><b>shift + click</b> to select a range of metrics</i>
                 </div>
             </div>
             <div id="matrix-header">
-                <!--
-                <div style="display: inline-block; width: auto; height: 100%; font-size: 10.5px;
-                    vertical-align: top; position: absolute; right: 265px">
-                    <div style="display: block"><i>Add behaviors: click + drag</i></div>
-                    <div style="display: block"><i>Remove behaviors: shift-click</i></div>
-                </div>
-            -->
                 <span>Select dataset:</span>
                 <select></select>
                 <div id="clear-selections" class="inactive">Clear All Selections</div>
@@ -54,7 +48,7 @@
                         behavioral metrics.
                     </li>
                     <li>
-                        <b><i>Click + drag</i></b> or <b><i>Shift-click+drag</i></b>
+                        <b><i>Click + drag</i></b> or <b><i>Ctrl-click+drag</i></b>
                         in the matrix or use the <b>Behavior Groups</b> and <b>Assays</b> 
                         quick selection groupings to select/deselect behavioral metrics.
                     </li>
@@ -85,12 +79,18 @@
                             <span style="margin-right: -10px; display: inline-block">Metric group:</span>
                             <select style="display: inline-block"></select>
                         </div>
-                        <div class="buttons" style="display: block; margin-top: 10px">
+                        <div id="loadings-select-buttons" class="buttons" style="display: block; margin-top: 10px">
                             <div class="inactive" style="display: inline-block">Deselect Group</div>
                             <div class="inactive" style="display: inline-block">Select Group</div>
                         </div>
                     </div>
-                    <h2 style="position: absolute; left: 662px; text-anchor: middle">Activity PC</h2>
+                    <div style="position: absolute; -webkit-transform: translate(-50%, 0); left: 662px; top: 0px"> 
+                        <h2 style="text-anchor: middle">Activity PC</h2>
+                        <table style="display: inline-block; vertical-align: bottom">
+                            <tr class="circle" style="background-color: rgb(255,0,195)">
+                            </tr>
+                        </table>
+                    </div>
                 </div>
                 <div class="tab-content"></div>
             </div>
@@ -161,7 +161,10 @@
                         <div style="margin: 40px 50px 0px 50px">
                             <h2>Gene Enrichment Categories</h2>
                             <hr>
-                            <p style="margin-bottom: 40px">Enter a description of how to use the tab here.</p>
+                            <p style="margin-bottom: 20px">Select a KEGG pathway significantly enriched in the decathlon screen from the dropdown menu.
+                                <i>Left click</i> individual rows of the gene tables to select/deselect genes or 
+                                <i>Shift-click</i> a range of rows to select/deselect a range of genes. 
+                                <i>Append Selected Genes</i> to add selected genes to Gene Search input.</p>
                             <div style="display: inline-block; width: 40%; vertical-align: top">
                                 <table style="width: 100%; height: 100%">
                                     <tr>
@@ -175,37 +178,63 @@
                             <div style="display: block; width: 100%; padding: 10px 0px 0px 0px">
                                 <table id='enrichment-tab-parent-table' style="width: 100%; height: 100%">
                                     <tr>
-                                        <th style="width: 33.3%">
+                                        <th style="width: 200px">
                                             <div style="font-weight: 100">
                                                 Category Metrics:
                                             </div>
                                             <table id="cat-metrics" class="scroll-table">
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th><i>p</i>-value</th>
-                                                </tr>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Bootstrap probability</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                </tbody>
                                             </table>
                                         </th>
-                                        <th style="width: 33.3%">
-                                            <div style="font-weight: 100">
+                                        <th style="width: 450px">
+                                            <div style="font-weight: 100; display: inline-block; width: 100%; position: relative">
                                                 Category Gene Hits:
+                                                <div class="buttons" style="position: absolute; right: 12px; top: 0px">
+                                                    <div id="append-gene-hits" class="inactive" style="width: 140px; margin: 0px">Append Selected Genes</div>
+                                                </div>
                                             </div>
                                             <table id="cat-hits" class="scroll-table">
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th><i>p</i>-value</th>
-                                                </tr>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Symbol</th>
+                                                        <th>FlyBase</th>
+                                                        <th>KEGG</th>
+                                                        <th>Bootstrap probability</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                </tbody>
                                             </table>
                                         </th>
-                                        <th style="width: 33.3%">
-                                            <div style="font-weight: 100">
+                                        <th style="width: 400px">
+                                            <div style="font-weight: 100; display: inline-block; width: 100%; position: relative">
                                                 Category All Genes:
-                                            </div>
+                                                <div class="buttons" style="position: absolute; right: 12px; top: 0px">
+                                                        <div id="append-gene-all" class="inactive" style="width: 140px; margin: 0px">Append Selected Genes</div>
+                                                    </div>
+                                                </div>
                                             <table id="cat-genes" class="scroll-table">
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th><i>p</i>-value</th>
-                                                </tr>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name<br>&nbsp;</th>
+                                                        <th>Symbol</th>
+                                                        <th>FlyBase</th>
+                                                        <th>KEGG</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                </tbody>
                                             </table>
                                         </th>
                                     </tr>

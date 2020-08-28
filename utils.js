@@ -10,6 +10,32 @@ Array.prototype.getUnique = function(){
 return a;
 }
 
+const get_sort_permutation = function(arr){
+
+    // handle cases with duplicate arrays
+    if(arr.getUnique().length < arr.length){
+        var u_p = arr.getUnique();
+        var n_p = u_p.map( i => {
+            return arr.reduce(function(a,b){ if(b==i) a++; return a;}, []);
+        })
+        var dup_idx = [];
+        n_p.forEach((v,i)=>{ if(v>1) dup_idx.push(i) });
+        var dup_vals = dup_idx.map(v=>{ return u_p[v] });
+        for(let i=0; i<dup_vals.length; i++){
+            var idx = [];
+            arr.forEach((v,j)=>{ if(v===dup_vals[i]) idx.push(j) });
+            idx.filter((v,j)=>{ return j>0 }).forEach((v,j)=>{ arr[v] = arr[v]+0.0001*(j+1)})
+        }
+    }
+
+    // sort the array
+    var sorted_arr = arr.slice(0).sort();
+
+    // return sorted order
+    var sorted_order = sorted_arr.map( (v,i) => { return arr.indexOf(v) });
+    return sorted_order.map((v,i)=>{ return sorted_order[sorted_order.length-i-1] })
+}
+
 const getAssayNames = function(fields){
     var re = /([A-Z](-*)[A-z]+\s)+/g;
     return fields.map(d => { return d.match(re)[0].trim() });
@@ -64,7 +90,7 @@ const update_apriori_menu = function(metric_name){
             selection.group = get_apriori_grp(metric_name,d);
             qselect_div = d3.select('#behavior-selection-div')
                 .selectAll('div')
-                    .filter(function(){ return this.innerHTML === selection.group });
+                    .filter(function(){ return this.innerText === selection.group });
             if(qselect_div.size()){
                 if(qselect_div.attr('class') !== 'selected'){
                     qselect_div.nodes()[0].click();
@@ -75,10 +101,11 @@ const update_apriori_menu = function(metric_name){
     var selected_div = d3.select('#metric-selections').selectAll('div')
         .style('border','1px solid transparent')
         .filter(function(d,i){
-            return this.innerHTML === metric_name
+            return this.innerHTML === metric_name;
         })
         .style('border','1px dashed rgb(150,150,150)')
 
+    console.log(selected_div.nodes()[0])
     if(selected_div.size()){
         selection.active = selected_div.attr('class') === 'active';
     }
@@ -87,13 +114,24 @@ const update_apriori_menu = function(metric_name){
 
 
 // schedule all page updates for metric selection change
-const update_selected_metric = function(metric_name){
+const update_selected_metric = function(metric_name,update_dropdown){
 
+    console.log('update selected metric')
+    
     // update metric summary dropdown
+    if(update_dropdown){
+        var element = document.getElementById('metric-summary-tab-select');
+        element.value = metric_name;
+        var event = new Event('change', {value: metric_name});
+        element.dispatchEvent(event);
+    }
+    
+    
 
     // update qselection and metric selection menus
     const selection = update_apriori_menu(metric_name);
 
+    console.log('active:',selection.active);
     // update loading dropdown menu
     if(selection.active){
         var loadings_dropdown = d3.select('#tab-header').select('select').nodes()[0];
@@ -103,5 +141,40 @@ const update_selected_metric = function(metric_name){
             var event = new Event('change', {value: selection.group});
             loadings_dropdown.dispatchEvent(event);
         }
+    }
+}
+
+
+const clear_tab_notification = function(tab_name){
+    var tab = d3.select('#tab-div').select('ul')
+        .selectAll('li').filter(function(){
+            return this.innerText === tab_name;
+        }
+    )
+
+    tab.select('table').remove();
+}
+
+const add_tab_notification = function(tab_name){
+
+    var tab = d3.select('#tab-div').select('ul')
+        .selectAll('li').filter(function(){
+            return this.innerText === tab_name;
+        }
+    )
+
+    // check to see if notification already exists
+    if(tab.select('.notification').size()){
+        return;
+    } else {
+        tab.append('table')
+            .style('vertical-align','middle')
+            .style('position','absolute')
+            .style('right','10px')
+            .style('top','7px')
+            .style('width','15px')
+            .style('height','15px')
+        .append('tr')
+            .attr('class','notification')
     }
 }

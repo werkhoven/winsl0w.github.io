@@ -155,7 +155,7 @@ th, td{
 svg{
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
-  shape-rendering: optimizeSpeed;
+  shape-rendering: crispEdges;
 }
 
 #matrix-div, svg, .buttons div, .scroll-table td{
@@ -194,7 +194,6 @@ svg{
 .matrix-rect{
   stroke-opacity: 0;
   stroke-width: 0;
-  shape-rendering: crispEdges;
 }
 
 #apriori-rect-parent{

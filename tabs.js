@@ -416,13 +416,26 @@ const plot_bar = function(plot,plot_mode){
                 .attr(data_dim,function(d,i){
                     return Math.abs(plot[data_scale + 'scale'](0)-plot[data_scale + 'scale'](d));
                 })
+                .attr("transform", function(d,i) {
+                    if(data_scale==='x'){
+                        var xx = d > 0 ? plot[data_scale + 'scale'](0) - offset[i] : plot[data_scale + 'scale'](d);
+                        var yy = plot[nondata_scale + 'scale'](plot.labels[i]);
+                    } else {
+                        var yy = d > 0 ? plot[data_scale + 'scale'](0) - offset[i] : plot[data_scale + 'scale'](d);
+                        var xx = plot[nondata_scale + 'scale'](plot.labels[i]);
+                    }
+                    return `translate(${xx},${yy})`;
+                })
+                .style('fill',plot.color)
+                /*
                 .attr(nondata_scale, function(d,i){
                     return plot[nondata_scale + 'scale'](plot.labels[i])
                 })
                 .attr(data_scale, function(d,i){
                     return d > 0 ? plot[data_scale + 'scale'](0) - offset[i] : plot[data_scale + 'scale'](d);
                 })
-                .style('fill',plot.color)
+                */
+                
 
     return plot;
     
@@ -870,12 +883,42 @@ const init_gene_search_table = function(){
                         }
                     }
                 } else {
-                    d3.select(this)
+                    var pathway_table = d3.select(this)
                         .append('td')
                             .attr('colspan',2)
                             .style('margin-top','40px')
                             .style('width','450px')
+                            .style('position','relative')
                             .text(d)
+
+                    pathway_table
+                        .append('div')
+                            .attr('class','buttons')
+                            .style('float','right')
+                            .style('vertical-align','top')
+                        .append('div')
+                            .attr('class','inactive')
+                            .attr('id','view-pathway-button')
+                            .text('View Pathway')
+                            .style('margin-top','0px')
+                            .on('click',function(){
+                                var selected_row = d3.select(this.parentNode.parentNode)
+                                    .select('tr[selected=true]');
+                                
+                                if(selected_row.size()){
+                                    var cat_name = selected_row.select('td').nodes()[0].innerText;
+                                    var enrichment_dropdown = d3.select('#enrichment-tab-select').nodes()[0];
+                                    enrichment_dropdown.value = cat_name;
+                                    var enrichment_change = new Event('change',{value: cat_name});
+                                    enrichment_dropdown.dispatchEvent(enrichment_change);
+                                    d3.select('#tab-div').select('ul').selectAll('li')
+                                        .filter(function(){ return this.innerText.includes('Enrichment')})
+                                        .nodes()[0].click();
+                                } 
+                            })
+                            .on('mouseover',function(){ d3.select(this).attr('class','active') })
+                            .on('mouseout',function(){ d3.select(this).attr('class','inactive') })
+                    pathway_table
                         .append('table')
                             .attr('class','scroll-table')
                         .append('thead')
@@ -891,6 +934,7 @@ const init_gene_search_table = function(){
                         .append('tbody')
                             .attr('class','inactive')
                             .style('width','460px')
+                            
                 }
 
             })
@@ -949,22 +993,25 @@ const update_selected_gene = function(gene_idx,rnaseq){
                 .on('mouseover', function(d,i){ loading_tick_mouseover(this,i,plot_rects) })
                 .on('mouseout', function(d,i){ loading_tick_mouseout(this,i,plot_rects) })
                 .on('click', function(d,i){ pval_tick_click(this) })
+    } else {
+        var sig_logp = ['**gene not modeled**']
     }
 
     var gene_fbgn = 'FBgn' + rnaseq['fbgn'][gene_idx].toFixed(0).padStart(7,'0');
     var gene_hit_idx = rnaseq['hits'][dataset_idx]['gene_idx'].indexOf(gene_idx+1);
 
     var gene_cats = ['none'];
+    var cat_ids = [null]
     if(gene_hit_idx>=0){
         var gene_cat_idx = rnaseq['hits'][dataset_idx]['cat_idx'][gene_hit_idx];
         if(typeof(gene_cat_idx)==='number') gene_cat_idx = [gene_cat_idx];
-        var cat_ids = gene_cat_idx.map( i => { return rnaseq['hits'][dataset_idx]['cat_ids'][i-1] });
+        cat_ids = gene_cat_idx.map( i => { return rnaseq['hits'][dataset_idx]['cat_ids'][i-1] });
         gene_cats = gene_cat_idx.map( i => { return rnaseq['hits'][dataset_idx]['cat_names'][i-1] });
     }
 
     var gene_id_types = ['name','symbol','fbgn','kegg'];
-    gene_ids = gene_id_types.map( v => { return rnaseq[v][gene_idx] });
-    gene_ids.push(sig_logp.length,gene_cats);
+    var gene_ids = gene_id_types.map( v => { return rnaseq[v][gene_idx] });
+    gene_ids.push(sig_logp,gene_cats);
 
     d3.select('#gene-search-tab')
     .select('table')
@@ -986,6 +1033,13 @@ const update_selected_gene = function(gene_idx,rnaseq){
                                 href = 'https://www.genome.jp/dbget-bin/www_bget?dme:' + d;
                                 d3.select(this).select('a').attr('class','active-link').attr('target','_blank')
                                 break;
+                            case 4:
+                                if(typeof(d[0])==='number'){
+                                    d = d.length;
+                                } else if (typeof(d[0]==='string')){
+                                    d = d[0];
+                                }
+                                break;
                             default:
                                 href = null;
                                 break;
@@ -1006,10 +1060,12 @@ const update_selected_gene = function(gene_idx,rnaseq){
                             .append('tr')
                                 .attr('class','data-row')
                                 .style('height','20px')
+                                .attr('selected','false')
                                 .each(function(row_dat,row_num){
                                     for(let col_num=0; col_num<2; col_num++){
                                         if(col_num){
-                                            d3.select(this).append('td')
+                                            d3.select(this)
+                                                .append('td')
                                                     .attr('class','inactive')
                                                     .style('width','225px')
                                                 .append('a')
@@ -1029,39 +1085,48 @@ const update_selected_gene = function(gene_idx,rnaseq){
                                     
                                 })
                                 .on('mouseover',function(){
+                                    if(d3.select(this).attr('selected')!=='true'){
                                         d3.select(this).selectAll('td').attr('class','active');
+                                    }
                                 })
                                 .on('mouseout',function(){
+                                    if(d3.select(this).attr('selected')!=='true'){
                                         d3.select(this).selectAll('td').attr('class','inactive');
+                                    }
                                 })
                                 .on('click',function(){
-                                    var cat_name = d3.select(this).select('td').nodes()[0].innerText;
-                                    var enrichment_dropdown = d3.select('#enrichment-tab-select').nodes()[0];
-                                    enrichment_dropdown.value = cat_name;
-                                    var enrichment_change = new Event('change',{value: cat_name});
-                                    enrichment_dropdown.dispatchEvent(enrichment_change);
-                                    d3.select('#tab-div').select('ul').selectAll('li')
-                                        .filter(function(){ return this.innerText.includes('Enrichment')})
-                                        .nodes()[0].click();
+
+                                    d3.select(this.parentNode).selectAll('td').attr('class','inactive');
+                                    if(d3.select(this).attr('selected')==='true'){
+                                        d3.select(this.parentNode).selectAll('tr').attr('selected','false');
+                                    } else {
+                                        d3.select(this.parentNode).selectAll('tr').attr('selected','false');
+                                        d3.select(this).attr('selected','true').selectAll('td').attr('class','active')
+                                    }               
+
                                 })
 
                         // remove old entries
                         data_rows.exit().remove()
 
                         // update old entries
-                        data_rows.each(function(row_dat,row_num){
+                        data_rows
+                            .attr('selected','false')
+                            .each(function(row_dat,row_num){
                             for(let col_num=0; col_num<2; col_num++){
                                 if(col_num){
                                     d3.select(this).select('a')
                                             .attr('href',`https://www.genome.jp/kegg-bin/show_pathway?${cat_ids[row_num]}`)
                                             .text(cat_ids[row_num]);
                                 } else {
-                                    d3.select(this).select('td')
-                                        .text(row_dat);
+                                    d3.select(this)
+                                        .select('td')
+                                            .text(row_dat);
                                 }
                             }
-                            
                         })
+                        .selectAll('td')
+                            .attr('class','inactive')
                     }
                 })
         })
@@ -1070,7 +1135,7 @@ const update_selected_gene = function(gene_idx,rnaseq){
     .selectAll('rect')
         .style('fill','rgb(200,200,200)')
         .each(function(d,i){
-            if(i===sig_logp.length){
+            if(i===sig_logp.length & gene_idx < rnaseq.num_modeled){
                 d3.select(this).style('fill','rgb(200,0,100)')
             }
         })
@@ -1281,15 +1346,13 @@ const enrichment_table_click = function(obj){
     var ncols = d3.select(obj).selectAll('td').size()
     switch(ncols){
         case 2:
-            // execute click on metric summary tab and load selected summary
-            d3.select(obj).selectAll('td.active').each(function(d,i){
-                if(!i) update_selected_metric(this.innerText,false);
-            });
-            
-            d3.select('#tab-div').select('ul').selectAll('li')
-                .filter(function(d,i){ return i===1 })
-                .nodes()[0].click();
-                
+
+            d3.select(obj.parentNode).selectAll('td').attr('class','inactive');
+            if(d3.select(obj).attr('selected')==='true'){
+                d3.select(obj).attr('selected','false');
+            } else {
+                d3.select(obj).attr('selected','true').selectAll('td').attr('class','active')
+            }               
             break;
         case 5:
             
@@ -1516,12 +1579,15 @@ const update_enrichment_table = function(cat_name,rnaseq){
             data_rows.exit().remove()
 
             // update data
-            data_rows.each(function(row_dat,row_num){
+            data_rows
+                .attr('selected',false)
+                .each(function(row_dat,row_num){
                 if(table_num){
                     row_dat = row_dat - 1;
                 }
                 d3.select(this)
                     .selectAll('td')
+                        .attr('class','inactive')
                     .each(function(col_num){
                         update_enrichment_table_row(this,rnaseq,cat_idx,table_num,row_dat,row_num,col_num);
                     })
@@ -1558,6 +1624,19 @@ const init_enrichment_table = function(){
 
         d3.select('#append-gene-hits').on('click',append_selected_genes);
         d3.select('#append-gene-all').on('click',append_selected_genes);
+        d3.select('#view-metric-summary').on('click',function(){
+            // execute click on metric summary tab and load selected summary
+            var selected_row = d3.select('#cat-metrics').selectAll('td.active')
+            if(selected_row.size()){
+                selected_row.each(function(d,i){
+                    if(!i) update_selected_metric(this.innerText,false);
+                });
+
+                d3.select('#tab-div').select('ul').selectAll('li')
+                    .filter(function(d,i){ return i===1 })
+                    .nodes()[0].click();
+            }
+        })
 
         // init table rows
         var table_rows = ['Name','KEGG Pathway-ID','Bootstrap min. <i>p</i>-value','Num. Metrics'];

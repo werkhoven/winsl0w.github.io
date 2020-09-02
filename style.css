@@ -26,8 +26,8 @@ body{
   color: var(--high-emph-txt);
   margin: auto;
   width: var(--body-width);
-  height: 1775px;
   max-width: var(--body-width);
+  height: 1775px;
   position: relative;
   font-family: "Arial", sans-serif;
   font-weight: 100;
@@ -36,6 +36,27 @@ body{
   display: block;
   overflow: hidden;
   overflow-y: scroll;
+}
+
+#nav-container-outer{
+  position: relative;
+  width: 100%;
+  height: 35px;
+  background-color: var(--primary-bg-color);
+}
+#nav-container-inner{
+  position: relative;
+  width: 200%;
+  height: 35px;
+  background-color: var(--inactive-bg-color);
+}
+#nav-container-outer a{
+  position: relative;
+  display: inline-block;
+  margin: 12px 30px 0px 0px;
+  color: var(--med-emph-txt);
+  left: var(--matrix-left);
+  text-decoration: none;
 }
 
 h1{
@@ -605,5 +626,24 @@ svg{
   border-radius: 50px;
   margin: 0px 0px 5px 10px;
   vertical-align: middle;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  width: 120px;
+  background-color: rbga(255,255,255,0.3);
+  color: #000;
+  text-align: center;
+  padding: 5px 0;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
 }
 

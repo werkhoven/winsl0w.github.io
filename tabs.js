@@ -1695,3 +1695,17 @@ fileInput.addEventListener('change', function(e) {
 });
 
 
+// set hover tooltip
+const show_tooltip = function(e,msg){
+
+    d3.select(e)
+        .select('.tooltip')
+        .data([msg])
+        .enter()
+    .append('span')
+        .attr('class','tooltip')
+        .text(msg)
+}
+
+
+

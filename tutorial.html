@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" href="github-markdown.css">
+        <title>Decathlon Data Browser: Tutorial</title>
+    </head>
+    <body class="markdown-body" style="width: 1330px; margin: auto; overflow: hidden; overflow-y: scroll">
+        
+        <nav id="nav-container-outer" style="font-family: Arial, sans-serif; 
+        font-weight: 100; font-size: 16px; line-height: 20px; margin-bottom: 50px;">
+            <a href="index.html">Home</a>
+            <a href="tutorial" target="_blank">Tutorial</a>
+            <a href="tutorial" target="_blank">Download Data</a>
+            <a href="https://www.biorxiv.org/content/10.1101/779363v1.full" target="_blank">Original Publication</a>
+            <a>About</a>
+            <hr style="border: 1px solid #6d6d6d; height: 0px; margin: 0.5em 0em 0.5em 0em; position: relative; left: -430px">
+        </nav>
+        
+        <div style="width: 900px; margin: auto">
+            <!--<hr style="border: 0px solid transparent; margin: 10px 0px 80px 0px; height: 1px; background-color: #6d6d6d">-->
+            <h1>Decathlon Data Browser Tutorial</h1>
+            <h3>Contents</h3>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li>Getting started</li>
+                <li>Selecting Behaviors</li>
+                <li>Metric Loadings</li>
+                <li>Metric Summary</li>
+                <li>Gene Search</li>
+                <li>Enrichment Pathways</li>
+            </ul>
+            <h2><a name="overview">Overview</a></h2>
+            <p>The Decathlon Data Browser is an interface for exploring the correlation structure of a suite of 
+                behavioral measures collected on individual inbred and outbred fruit flies and their gene expression profiles. 
+                This tool serves as a companion resource to the original <a href="">paper</a> and <a href="">dataset</a>.</p>
+            <p>High-dimensional data can be difficult to develop an intuition for, even more so when trying to understand the 
+                interaction of multiple high dimensional datasets. The Data Browser is designed to facilitate understanding of 
+                three types of questions:</p>
+            <ol>
+                <li>How are behavioral measures related to one another?</li>
+                <li>How is individual gene expression related to behavioral measures?</li>
+                <li>Which are molecular pathways are predictive of behavioral measures?</li>
+            </ol>
+            <h2>Getting started</h2>
+            <p>Outline the workflow of the browser</p>
+            <h2>Selecting Behaviors</h2>
+            <p>Several options for selecting behavioral measures have been included to help subset the data by relevant characteristics. 
+                Create a behavior selection by any of the following ways:</p>
+            <ol>
+                <li>Select behaviors based on correlation values directly from the matrix.</li>
+                <ul>
+                    <li><b>Left-click</b> + drag to <i>add</i> a range of rows and columns to the selection.</li>
+                    <li><b>Hold Ctrl + left-click</b> + drag to <i>remove</i> a range of rows and columns from the selection.</li>
+                    <li>Keep in mind that each value in the matrix is representative of pairwise correlation of the row and column 
+                        behavioral measures, meaning that selecting measures this way will add/remove measures in both the row and column range.
+                    </li>
+                </ul>
+                <li>Select behaviors by categorically similar "Behavior Groups" or by the "Assays" they were collected from.</li>
+                <ul>
+                    <li>Click a behavior group or assay to display the associated behaviors in the metric window</li>
+                    <li>Left-click to add/remove individual measures or <b>Shift-click</b> to
+                        add/remove a range of behaviors from the metric window.</li>
+                    <li>Use the buttons above the metric selection window to quickly select or deselect all behaviors within a group.</li>
+                </ul>
+                <li>Select behaviors based on their loading contributions to Behavior Group principal components.</li>
+                <ul>
+                    <li>Use the dropdown menu from the "Metric Loadings" tab to switch display of a priori behavioral groups.</li>
+                    <li>Left-click on the loading bar plots to add/remove individual measures or <b>Shift-click</b> to
+                        add/remove a range of behaviors.</li>
+                    <li>Use the buttons below the dropdown menu to quickly select or deselect all behaviors within the 
+                        active a priori behavioral group.</li>
+                </ul>
+            </ol>
+            <p>All behaviors are considered selected by default if no specific behaviors are selected. 
+                This default state can be restored at anytime by clicking the "Clear All Selections" button above the correlation matrix.</p>
+            <h2>Metric Loadings</h2>
+            <p>A priori behavioral groups are composed of sets of categorically similar behaviors that are likely correlated because they measure 
+                similar underlying phenomena. For example, behavioral metrics such as average movement speed, total number of movement bouts, 
+                and average length of movement bouts are all measures of an animal's activity level and therefore belong to the 
+                "Activity" a priori group. We attempt to dimensionally reduce these groups with principal component analysis into a smaller number of 
+                significant principal components (PC) which are composed of linear combinations of a priori group behaviors. More information on 
+                this process can be found in the original paper.</p>
+            <p>The Metric Loadings tab can be used to visualize the linear weights (i.e. loadings) of each behavioral measure to each 
+                PC within the group. Behavior selections can be partitioned by interesting features within their PC loading plots 
+                by clicking on single or ranges of behaviors within the plot.</p>
+            <h2>Metric Summary</h2>
+            <p>Details of behavioral metrics such as which assay the metric was collected from, a description of the metric, and the calculation 
+                of the metric can be found under the Metric Summary tab. The plots shown here depict the individual fly histograms the of the 
+                raw behavioral data split by experimental batch. A summary of the most recently selected behavioral measure is shown by default.</p>
+            <h2>Gene Search</h2>
+            <p>The Gene Search tab can be used to explore the relationship between behavioral measures and fly gene expression profiles. 
+                To perform a search, construct a list of gene identifiers (either gene symbol, FlyBase gene number, KEGG gene ID) separated by 
+                either by a newline or space and click "Submit". Gene IDs will be automatically matched and displayed in the 
+                "Valid Matching Identifiers" window. Gene IDs with no match will be filtered and removed from the list. 
+                Gene lists can be constructed in a few different ways:</p>
+                <ul>
+                    <li>A pre-existing list of candidate genes can be entered manually in the Gene-ID search box or imported by file. This option can be 
+                        used to obtain a list or selection of significantly correlated with genes of interest.
+                    </li>
+                    <li>Genes significantly correlated with behaviors in the current behavioral selection can be automatically appended
+                        to the search list by clicking the "Append Genes from Behavioral Selection" button. This option can be used to obtain a 
+                        list of genes from selection of behaviors of interest. The <i>p</i>-value threshold used to determine significance can be 
+                        adjusted manually via the "<i>p</i>-value cutoff" textbox. (<i>p</i>=0.05 by default).</li>
+                    <li>Gene lists associated with <a href="https://www.genome.jp/kegg/pathway.html" target="_blank">KEGG pathways</a> found to be significantly 
+                        enriched in the decathlon gene-behavior models can be constructed from the Enriched KEGG Pathways tab. This option 
+                        can be used to identify genes or behaviors linked to molecular pathways.</li>
+                </ul>
+            <h2>Enrichment Pathways</h2>
+            <p>Information about gene sets associated with KEGG pathways that were found to be significantly enriched in one or more 
+                behavioral metrics can be found under the Gene Enrichment tab. Summary metrics of the pathway across all behavioral 
+                metrics such as the bootstrap minimum <i>p</i>-value and the average number of metrics for which the pathway was significantly enriched
+                were computed by bootstrapping the behavioral data upstream of the gene-behavior modeling step. These bootstrapped models were used 
+                to construct a list of significantly predictive genes for each metric and, from there, a list of significantly enriched KEGG pathways
+                for each metric. Therefore, these summary values represent average across all replicates 
+                of the minimum <i>p</i>-value across metrics and the total number of metric hits for a given pathway.</p>
+                </p>
+        </div>
+    </body>
+</html>

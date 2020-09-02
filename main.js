@@ -251,6 +251,11 @@ const init_page_from_dataset = function(dec,matrix_type){
 		// update apriori menu
 		d3.select('#qselections').select('.selected').nodes()[0].click();	
 		update_rect_selections();
+
+		// trigger click on first non-diagonal value
+		var first_rect = d3.selectAll('.matrix-rect').filter(function(d,i){ return i===1}).nodes()[0];
+		first_rect.dispatchEvent(new Event('click'));
+		first_rect.dispatchEvent(new Event('click'));
 }
 
 
@@ -341,6 +346,7 @@ d3.json("decathlon.json").then(function(dec){
 d3.select('.mouseover-textbox').raise()
 d3.select('#svg-container')
 	.on('mouseout',function(d){ d3.select('#hover-rect').style('stroke-opacity',0) })
+
 
 
 

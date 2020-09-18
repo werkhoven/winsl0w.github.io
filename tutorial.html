@@ -9,9 +9,9 @@
         
         <nav id="nav-container-outer" style="font-family: Arial, sans-serif; 
         font-weight: 100; font-size: 16px; line-height: 20px; margin-bottom: 50px;">
-            <a href="index.html">Home</a>
-            <a href="tutorial" target="_blank">Tutorial</a>
-            <a href="tutorial" target="_blank">Download Data</a>
+            <a href="./">Browser</a>
+            <a href="tutorial">Tutorial</a>
+            <a href="http://lab.debivort.org/structure-of-behavioral-variability/" target="_blank">Download Data</a>
             <a href="https://www.biorxiv.org/content/10.1101/779363v1.full" target="_blank">Original Publication</a>
             <a>About</a>
             <hr style="border: 1px solid #6d6d6d; height: 0px; margin: 0.5em 0em 0.5em 0em; position: relative; left: -430px">
@@ -25,8 +25,8 @@
                 <li><a href="#overview">Overview</a></li>
                 <li>Getting started</li>
                 <li>Selecting Behaviors</li>
-                <li>Metric Loadings</li>
-                <li>Metric Summary</li>
+                <li>Behavior Loadings</li>
+                <li>Behavior Summary</li>
                 <li>Gene Search</li>
                 <li>Enrichment Pathways</li>
             </ul>
@@ -58,14 +58,14 @@
                 </ul>
                 <li>Select behaviors by categorically similar "Behavior Groups" or by the "Assays" they were collected from.</li>
                 <ul>
-                    <li>Click a behavior group or assay to display the associated behaviors in the metric window</li>
+                    <li>Click a behavior group or assay to display the associated behaviors in the behavior window</li>
                     <li>Left-click to add/remove individual measures or <b>Shift-click</b> to
-                        add/remove a range of behaviors from the metric window.</li>
-                    <li>Use the buttons above the metric selection window to quickly select or deselect all behaviors within a group.</li>
+                        add/remove a range of behaviors from the behavior window.</li>
+                    <li>Use the buttons above the behavior selection window to quickly select or deselect all behaviors within a group.</li>
                 </ul>
                 <li>Select behaviors based on their loading contributions to Behavior Group principal components.</li>
                 <ul>
-                    <li>Use the dropdown menu from the "Metric Loadings" tab to switch display of a priori behavioral groups.</li>
+                    <li>Use the dropdown menu from the "Behavior Loadings" tab to switch display of a priori behavioral groups.</li>
                     <li>Left-click on the loading bar plots to add/remove individual measures or <b>Shift-click</b> to
                         add/remove a range of behaviors.</li>
                     <li>Use the buttons below the dropdown menu to quickly select or deselect all behaviors within the 
@@ -74,9 +74,9 @@
             </ol>
             <p>All behaviors are considered selected by default if no specific behaviors are selected. 
                 This default state can be restored at anytime by clicking the "Clear All Selections" button above the correlation matrix.</p>
-            <h2>Metric Loadings</h2>
+            <h2>Behavior Loadings</h2>
             <p>A priori behavioral groups are composed of sets of categorically similar behaviors that are likely correlated because they measure 
-                similar underlying phenomena. For example, behavioral metrics such as average movement speed, total number of movement bouts, 
+                similar underlying phenomena. For example, behaviors such as average movement speed, total number of movement bouts, 
                 and average length of movement bouts are all measures of an animal's activity level and therefore belong to the 
                 "Activity" a priori group. We attempt to dimensionally reduce these groups with principal component analysis into a smaller number of 
                 significant principal components (PC) which are composed of linear combinations of a priori group behaviors. More information on 
@@ -85,8 +85,8 @@
                 PC within the group. Behavior selections can be partitioned by interesting features within their PC loading plots 
                 by clicking on single or ranges of behaviors within the plot.</p>
             <h2>Metric Summary</h2>
-            <p>Details of behavioral metrics such as which assay the metric was collected from, a description of the metric, and the calculation 
-                of the metric can be found under the Metric Summary tab. The plots shown here depict the individual fly histograms the of the 
+            <p>Details of behaviors such as which assay the behavior was collected from, a description of the behavior, and the calculation 
+                of the behavioral score can be found under the Metric Summary tab. The plots shown here depict the individual fly histograms the of the 
                 raw behavioral data split by experimental batch. A summary of the most recently selected behavioral measure is shown by default.</p>
             <h2>Gene Search</h2>
             <p>The Gene Search tab can be used to explore the relationship between behavioral measures and fly gene expression profiles. 
@@ -108,12 +108,12 @@
                 </ul>
             <h2>Enrichment Pathways</h2>
             <p>Information about gene sets associated with KEGG pathways that were found to be significantly enriched in one or more 
-                behavioral metrics can be found under the Gene Enrichment tab. Summary metrics of the pathway across all behavioral 
-                metrics such as the bootstrap minimum <i>p</i>-value and the average number of metrics for which the pathway was significantly enriched
+                behaviors can be found under the Gene Enrichment tab. Summary behaviors of the pathway across all behaviors
+                 such as the bootstrap minimum <i>p</i>-value and the average number of behaviors for which the pathway was significantly enriched
                 were computed by bootstrapping the behavioral data upstream of the gene-behavior modeling step. These bootstrapped models were used 
-                to construct a list of significantly predictive genes for each metric and, from there, a list of significantly enriched KEGG pathways
-                for each metric. Therefore, these summary values represent average across all replicates 
-                of the minimum <i>p</i>-value across metrics and the total number of metric hits for a given pathway.</p>
+                to construct a list of significantly predictive genes for each behavior and, from there, a list of significantly enriched KEGG pathways
+                for each behavior. Therefore, these summary values represent average across all replicates 
+                of the minimum <i>p</i>-value across behaviors and the total number of behaviors hits for a given pathway.</p>
                 </p>
         </div>
     </body>

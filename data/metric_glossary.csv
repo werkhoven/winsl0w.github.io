@@ -1,0 +1,121 @@
+Name,Description,Scale,Calculation,Assay
+Circadian circling bias (1),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (1),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (1),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (1),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (1),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Circadian circling bias (2),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (2),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (2),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (2),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (2),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Spatial Shade-light circling bias,"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Spatial Shade-light
+Spatial Shade-light trial number,Number of 10 minute intervals where the fly moved out of the starting boundary zone,0 to 12 (max possible),sum[ trials ],Spatial Shade-light
+Spatial Shade-light photo occupancy,Fraction of time spent in the light,"0 to 1 (Dark = 0, Light = 1)",time_in_light / experiment_duration,Spatial Shade-light
+Spatial Shade-light mean speed,Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Spatial Shade-light
+Spatial Shade-light bout number,Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Spatial Shade-light
+Spatial Shade-light bout length,Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Spatial Shade-light
+Spatial Shade-light bout clumpiness,Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Spatial Shade-light
+Circadian circling bias (3),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (3),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (3),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (3),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (3),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Arena circling bias,"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Arena
+Arena mean speed,Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Arena
+Arena bout number,Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Arena
+Arena bout length,Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Arena
+Arena bout clumpiness,Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Arena
+Circadian circling bias (4),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (4),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (4),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (4),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (4),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Circadian circling bias (5),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (5),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (5),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (5),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (5),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Optomotor circling bias,"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Optomotor
+Optomotor optomotor index,Index of rotational motion with or against the rotational direction of the stimulus,"-1 to 1 (against = -1, with = 1)",2 * [ nframes_with - nframes_against ] / [ nframes_with + nframes_against ] - 1,Optomotor
+Optomotor mean speed,Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Optomotor
+Optomotor trial number,"Number of optomotor stimuli triggered by the animal (i.e. animal moving, away from arena, and minimum intertrial interval exceeded)",0 to 1200 (max possible),sum[ trials ],Optomotor
+Optomotor bout number,Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Optomotor
+Optomotor bout length,Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Optomotor
+Optomotor bout clumpiness,Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Optomotor
+Circadian circling bias (6),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (6),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (6),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (6),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (6),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Y-Maze circling bias,"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Y-Maze
+Y-Maze turn bias,Fraction of turns toward the right arm of the arena,"0 to 1 (Left = 0, Right = 1)",num_right_turns / num_total_turns,Y-Maze
+Y-Maze choice number,Total number of turns through the arena center,0 to inf,sum[ turns ],Y-Maze
+Y-Maze turn clumpiness,Score of the regularity or irregularity of timing between turns through the arena center,0 to inf,stddev[ interturn_interval ] / mean[ interturn_interval],Y-Maze
+Y-Maze turn switchiness,Score of the regularity or irregularity of alternating between left and right turns,0 to inf,num_switches / [ 2 * fraction_right * fraction_left * num_turns ],Y-Maze
+Y-Maze mean speed,Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Y-Maze
+Y-Maze bout number,Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Y-Maze
+Y-Maze bout length,Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Y-Maze
+Y-Maze bout clumpiness,Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Y-Maze
+Circadian circling bias (7),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (7),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (7),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (7),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (7),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Odor Sensitivity photo occupancy,Fraction of time spent in odor,0 to 1,time_in_odor / experiment_duration,Odor Sensitivity
+Odor Sensitivity preodor occupancy,Fraction of time spent on odor size before odor presentation (i.e. baseline occupancy),0 to 1,time_on_odor_size / experiment_duration,Odor Sensitivity
+Odor Sensitivity turn bias,Fraction of tunnel turn around events made to the right,0 to 1,num_right_turns / num_total_turns,Odor Sensitivity
+Odor Sensitivity turn clumpiness,Score of the regularity or irregularity of timing between turns through the arena center,0 to inf,stddev[ interturn_interval ] / mean[ interturn_interval],Odor Sensitivity
+Odor Sensitivity turn switchiness,Score of the regularity or irregularity of alternating between left and right turns,0 to inf,num_switches / [ 2 * fraction_right * fraction_left * num_turns ],Odor Sensitivity
+Odor Sensitivity choice number,Number of crossings from the clean air side to the odor side,0 to inf,sum[ crossings ],Odor Sensitivity
+Odor Sensitivity mean speed,Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Odor Sensitivity
+Circadian circling bias (8),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (8),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (8),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (8),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (8),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Circadian circling bias (9),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (9),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (9),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (9),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (9),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+LED Y-Maze circling bias,"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],LED Y-Maze
+LED Y-Maze turn bias,Fraction of turns toward the right arm of the arena,"0 to 1 (Left = 0, Right = 1)",num_right_turns / num_total_turns,LED Y-Maze
+LED Y-Maze photo bias,Fraction of turns toward the lit arm of the arena,"0 to 1 (Dark = 0, Light = 1)",num_light_turns / num_total_turns,LED Y-Maze
+LED Y-Maze choice number,Total number of turns through the arena center,0 to inf,sum[ turns ],LED Y-Maze
+LED Y-Maze turn clumpiness,Score of the regularity or irregularity of timing between turns through the arena center,0 to inf,stddev[ interturn_interval ] / mean[ interturn_interval],LED Y-Maze
+LED Y-Maze turn switchiness,Score of the regularity or irregularity of alternating between left and right turns,0 to inf,num_switches / [ 2 * fraction_right * fraction_left * num_turns ],LED Y-Maze
+LED Y-Maze light switchiness,Score of the regularity or irregularity of alternating between dark and light turns,0 to inf,num_switches / [ 2 * fraction_right * fraction_left * num_turns ],LED Y-Maze
+LED Y-Maze mean speed,Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],LED Y-Maze
+LED Y-Maze bout number,Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],LED Y-Maze
+LED Y-Maze bout length,Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,LED Y-Maze
+LED Y-Maze bout clumpiness,Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,LED Y-Maze
+Circadian circling bias (10),"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Circadian
+Circadian mean speed (10),Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Circadian
+Circadian bout number (10),Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Circadian
+Circadian bout length (10),Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Circadian
+Circadian bout clumpiness (10),Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Circadian
+Circadian gravitactic index (1),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",2 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Activity Screen circling bias,"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Activity Screen
+Activity Screen turn bias,Fraction of turns toward the right arm of the arena,"0 to 1 (Left = 0, Right = 1)",num_right_turns / num_total_turns,Activity Screen
+Activity Screen choice number,Total number of turns through the arena center,0 to inf,sum[ turns ],Activity Screen
+Activity Screen turn clumpiness,Score of the regularity or irregularity of timing between turns through the arena center,0 to inf,stddev[ interturn_interval ] / mean[ interturn_interval],Activity Screen
+Activity Screen turn switchiness,Score of the regularity or irregularity of alternating between left and right turns,0 to inf,num_switches / [ 2 * fraction_right * fraction_left * num_turns ],Activity Screen
+Activity Screen mean speed,Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Activity Screen
+Circadian gravitactic index (2),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",2 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Circadian gravitactic index (3),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",3 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Circadian gravitactic index (4),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",4 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Circadian gravitactic index (5),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",5 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Circadian gravitactic index (6),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",6 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Circadian gravitactic index (7),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",7 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Temporal Shade-light circling bias,"Index of clockwise versus counter-clockwise walking (CW = -1, CCW = 1)","-1 to 1 (CW = -1, CCW = 1)",-sin[ avg_circumferential_velocity ],Temporal Shade-light
+Temporal Shade-light photo occupancy,Fraction of time spent in the light,"0 to 1 (Dark = 0, Light = 1)",time_in_light / experiment_duration,Temporal Shade-light
+Temporal Shade-light trial number,Total number of trials initiated by crossing virtual border,0 to inf,sum[ trials ],Temporal Shade-light
+Temporal Shade-light mean speed,Average frame-to-frame speed over the duration of the experiment,0 to inf (mm/sec),mean[ frame_displacement / interframe_interval ],Temporal Shade-light
+Temporal Shade-light light clumpiness,Score of the regularity or irregularity of timingbetween  trials initiated by crossing virtual border,0 to inf,stddev[ intertrial_interval ] * num_trials / experiment_duration,Temporal Shade-light
+Temporal Shade-light bout number,Total number of movement bouts over the duration of the experiment,0 to inf,sum[ bouts ],Temporal Shade-light
+Temporal Shade-light bout length,Average length of movement bouts over the duration of the experiment,0 to inf (mm),mean[ bout_length ] ,Temporal Shade-light
+Temporal Shade-light bout clumpiness,Score of the regularity or irregularity of timing between movement bouts,0 to inf,stddev[ interbout_interval ] * num_bouts / experiment_duration,Temporal Shade-light
+Circadian gravitactic index (8),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",2 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Circadian gravitactic index (9),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",3 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian
+Circadian gravitactic index (10),Index scoring arena floor versus arena ceiling occupancy,"-1 to 1 (Floor = -1, Ceiling = 1)",4 * [ time_on_ceiling - time_on_floor ] / experiment_duration - 1,Circadian

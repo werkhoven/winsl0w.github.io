@@ -1,0 +1,10 @@
+Name,Description,Arena Geometry,Throughput,Duration
+Activity Screen,Activity measurement profiling at the start of the decathlon experiment used to narrow future testing from a cohort of 288 flies to the most active 192 flies,Y-shaped arena with arms equally spaced apart at 120 degrees (12.7mm length for each maze arm),96 flies per behavioral box,2 hrs
+Arena,Open exploration of circular arena.,Circular (28mm diameter),48 flies per beahvioral box,2 hrs
+Circadian,Overnight activity level monitoring on food.,"96-multiwell plate (6.8mm diameter, 10.5mm depth)",96 flies per behavioral box,20-21 hrs
+LED Y-Maze,Discrete two-choice (light or no light) phototactic assay. Choices are scored as turns toward or away from a lit arm of the maze and as turns to the right or left of the choice point.,Y-shaped arena with LEDs at the end of each arm (12.7mm length for each maze arm),72 flies per behavioral box,2 hrs
+Odor Sensitivity,Odor vs no-odor adaptation assay measuring sensitivity to a low concentration (typically aversive) odorant  ,Linear tunnels with odorant ports at either end and decision boundary in center ,15 flies per experiment,"15 min  (3 min preodor, 12 min odor)"
+Optomotor,Optomotor response assay where flies are repeatedly targeted with a high-contrast rotating pinwheel stimulus projected onto the arena floor,Circular (28mm diameter),48 flies per beahvioral box,2 hrs
+Spatial Shade-light,"Phototaxis assay where dark and light occupancy are measured. Individual arenas are targeted with a half lit, half dark spatial pattern.  ",Circular (28mm diameter),48 flies per beahvioral box,2 hrs
+Temporal Shade-light,Phototaxis assay where dark and light occupancy are measured. Individual arenas are either fully dark or fully lit depending on fly position relative to an invisible virtual boundary.  ,Circular (28mm diameter),48 flies per beahvioral box,2 hrs
+Y-Maze,Discrete two-choice (right or left) locomotor handedness assay. Choices are scored as turns to the right or left of the choice point in a Y-shaped arena.,Y-shaped arena with arms equally spaced apart at 120 degrees (12.7mm length for each maze arm),96 flies per behavioral box,2 hrs

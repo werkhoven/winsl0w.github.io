@@ -83,8 +83,8 @@
             <ul style="width: 100%; height: 31px; margin: 0; padding: 0; border-bottom: 1px solid black;">
                 <li class="active">Behavior Loadings</li
                 ><li class="inactive">Behavior Summary</li
-                ><li class="inactive">Behavior Gene Lists</li
-                ><li class="inactive">Gene Search</li
+                ><li class="inactive">Select Genes by Behavior</li
+                ><li class="inactive">Search by Gene ID</li
                 ><li class="inactive">KEGG Pathways</li>
             </ul>
             <div class="tab-parent" id="metric-loadings-tab">
@@ -124,7 +124,7 @@
                                 </tr>
                             </table>
                         </div>
-                        <div id="metric-summary-plot-div">
+                        <div id="metric-summary-plot-div" style="overflow: hidden; max-height: 800px">
                             <div id="hist-div">
                             </div>
                             <div id="scree-plot">
@@ -136,41 +136,53 @@
             <div class="tab-parent" id="behavior-gene-lists-tab" style="visibility: hidden">
                     <div class="tab-content">
                         <div style="margin: 40px 50px 0px 50px">
-                            <h2>Behavior Gene Lists</h2>
+                            <h2>Select Genes by Behavior</h2>
                             <hr>
                             <p style="margin-bottom: 40px">Browse lists of genes correlated to one or more behaviors. 
-                                Curate a selection of genes manually or automatically using a <i>p</i>-value threshold. 
-                                Once the selection is complete, append selected to the "Gene Search" tab and run a search. 
-                                Use the "Restrict to selected behaviors" button to restrict the gene list to genes correlated 
-                                with the behaviors selected above.
+                                Create a selection of genes manually or automatically using a <i>p</i>-value threshold.
+                                Set the scope of the threshold, clear, and append buttons to apply those operations to 1) this behavior - the behavior 
+                                currently selected from the dropdown menu 2) selected behaviors - the behaviors selected in the correlation matrix 
+                                or 3) all behaviors. 
+                                Once the selection is complete, "Append Selected Genes" to add the selected genes to the 
+                                "Search Genes by Gene ID" input and run a search.
                             </p>
                             <div style="display: inline-block; width: 30%; vertical-align: top">
                                 <div style="display: block; margin-bottom: 20px">
                                     <label for="behavior-gene-dropdown" style="display: inline-block; width: 130px">Select Behavior:</label>
                                     <select id="behavior-gene-dropdown" class="behavior-gene-input"></select>
                                 </div>
-                                <div style="display: block; margin-bottom: 20px">
-                                    <label for="pval-thresh-textbox" style="display: inline-block; width: 130px"><i>p</i>-value threshold:</label>
-                                    <input id="pval-thresh-textbox" type="text" class="behavior-gene-input" style="width: 50px" value="0.05"></input>
-                                </div>
+                                
                                 <div style="display: block; margin-bottom: 20px; height: auto; width: auto">
-                                    <p>Apply threshold to:</p>
-                                    <div style="float: right; display: block">
-                                        <label for="pval-thresh-radiobutton-single">single behavior</label>
-                                        <input id="pval-thresh-radiobutton-single" name="thresh-type" type="radio" value="single"></input>
-                                        <label for="pval-thresh-radiobutton-all">all behaviors</label>
+                                    <p>Apply operations to:</p>
+                                    <div style="margin-left: 30px">
+                                        <input id="pval-thresh-radiobutton-single" name="thresh-type" type="radio" value="single" checked></input>
+                                        <label for="pval-thresh-radiobutton-single">this behavior</label>
+                                    </div>
+                                    <div style="margin-left: 30px">
+                                        <input id="pval-thresh-radiobutton-selected" name="thresh-type" type="radio" value="selected"></input>
+                                        <label for="pval-thresh-radiobutton-selected">selected behaviors</label>
+                                    </div>
+                                    <div style="margin-left: 30px">
                                         <input id="pval-thresh-radiobutton-all" name="thresh-type" type="radio" value="all"></input>
+                                        <label for="pval-thresh-radiobutton-all">all behaviors</label>
                                     </div>
                                 </div>
+                                <div style="display: block; margin-bottom: 20px">
+                                        <label for="pval-thresh-textbox" style="display: inline-block; width: 130px"><i>p</i>-value threshold:</label>
+                                        <input id="pval-thresh-textbox" type="text" class="behavior-gene-input" style="width: 50px" value="0.05"></input>
+                                </div>
                                 <div class="buttons" style="position: relative">
-                                    <div id="pval-thresh-button" class="inactive" style="position: absolute; left: 132px; width: 150px; margin-left: 0px">Apply Threshold</div>
+                                    <div id="pval-thresh-button" class="inactive" style="width: 150px; margin-left: 10px">Apply Threshold</div>
                                 </div>
                             </div>
-                            <div style="display: inline-block; width: 40%; height: 450px; overflow: hidden; margin: 1px; padding: 0px 0px 0px 65px; position: relative;">
+                            <div style="display: inline-block; width: 40%; height: 550px; overflow: hidden; margin: 1px; padding: 0px 0px 0px 65px; position: relative;">
                                     <div style="display: block; height: 30px; position: relative;">
                                         <p style="position: absolute; bottom: 2px; margin: 0px; font-weight: 500">Gene List</p>
                                         <div class="buttons" style="position: absolute; right: 0px; bottom: 2px">
-                                            <div id="behavior-gene-list-append" class="inactive" style="width: 140px; margin: 0px">
+                                            <div id="behavior-gene-list-clear" class="inactive" style="width: 50px; margin: 0px; vertical-align: bottom">
+                                                Clear
+                                            </div>
+                                            <div id="behavior-gene-list-append" class="inactive" style="width: 140px; margin: 0px; vertical-align: bottom">
                                                 Append Selected Genes
                                             </div>
                                         </div>
@@ -191,34 +203,48 @@
 
                                         </tbody>
                                     </table>
+                                    <table>
+                                        <th style="font-weight: 100">Total genes in selection:</th>
+                                        <th id="num-genes-in-selection" style="font-weight: 100">0</th>
+                                    </table>
+                                    </div>
                             </div>
                         </div>
                     </div>
-                </div>
             </div>
             <div class="tab-parent" id="gene-search-tab" style="visibility: hidden">
                 <div class="tab-content">
                     <div style="margin: 40px 50px 0px 50px">
-                        <h2>Gene Search</h2>
+                        <h2>Search by Gene ID</h2>
                         <hr>
-                        <p style="margin-bottom: 40px">Search genes by entering a valid gene identifiers (Gene Symbol, FlyBase gene number, or KEGG-ID) into the box below.
-                                    For example, to search for Notch enter: "N", "FBgn0004647", or "Dmel_CG3936".
-                                    To search multiple entries simultaneously, separate identifiers by a space or newline (no commas or other delimiters).</p>
+                        <p>
+                            Search genes by entering a valid gene identifiers (Gene Symbol, FlyBase gene number, or KEGG-ID) into the box below.
+                            For example, to search for Notch enter: "N", "FBgn0004647", or "Dmel_CG3936".
+                            To search multiple entries simultaneously, separate identifiers by a space or newline (no commas or other delimiters). 
+                        </p>
+                        <p style="margin-bottom: 40px">
+                            Create a new behavioral selection from behaviors correlated (<i>p</i> &lt; 0.05) to one or more of the queried genes by clicking 
+                            "Select Correlated Behaviors".
+                        </p>
                         <div style="display: block; margin-bottom: 20px">
                             <label for="batch-select-dropdown" style="display: inline-block">Select batch:</label>
                             <select id="batch-select-dropdown" style="display: inline-block"></select>
                         </div>
                         <div style="display: inline-block; width: 20%; vertical-align: top">
                             <div>
-                                <label for="gene-search-textbox" style="display: block">Enter gene identifier(s):</label>
+                                <div class="buttons" style="width: 100%; position: relative">
+                                    <label for="gene-search-textbox" style="position: relative; left: 0px">Enter gene identifier(s):</label>
+                                    <div class="inactive" id="gene-search-clear" style="width: 40px; margin: 0; 
+                                    position: relative; bottom: 2px; left: 13px">Clear</div>
+                                </div>
                                 <textarea id="gene-search-textbox" class="scroll-div" placeholder="Gene ID"
                                 rows="8" spellcheck="false" style="width: 224px; font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;"></textarea>
                                 <div class="buttons" style="width: 100%; text-align: right">
                                     <form id="import-form" method="POST" enctype="multipart/form-data" style="visibility: hidden; width: 0px; height: 0px">
                                         <input id='fileid' type='file' name='filename' style="width: 0px; margin: 0px; padding: 0px; visibility: hidden"/>
                                     </form>
-                                    <div class="inactive" id="gene-search-import">Import File</div>
-                                    <div class="inactive" id="gene-search-submit">Submit</div>
+                                    <div class="inactive" id="gene-search-import" style="width: 80px">Import File</div>
+                                    <div class="inactive" id="gene-search-submit" style="width: 50px">Submit</div>
                                 </div>
                                 
                                 <label for="gene-result-textbox" style="display: block; margin-top: 20px">Valid matching identifier(s):</label>
@@ -253,7 +279,7 @@
                             <p style="margin-bottom: 20px">Select a KEGG pathway significantly enriched in the decathlon screen from the dropdown menu.
                                 <i>Left click</i> individual rows of the gene tables to select/deselect genes or 
                                 <i>Shift-click</i> a range of rows to select/deselect a range of genes. 
-                                <i>Append Selected Genes</i> to add selected genes to Gene Search input.</p>
+                                <i>Append Selected Genes</i> to add selected genes to the "Search by Gene ID" input.</p>
                             <div style="display: inline-block; width: 40%; vertical-align: top">
                                 <table style="width: 100%; height: 100%">
                                     <tr>
@@ -288,9 +314,10 @@
                                             </table>
                                         </th>
                                         <th style="width: 450px">
-                                            <div style="font-weight: 100; display: inline-block; width: 100%; position: relative">
+                                            <div style="font-weight: 100; display: inline-block; width: 100%; position: relative; vertical-align: bottom">
                                                 Gene Hits:
                                                 <div class="buttons" style="position: absolute; right: 12px; top: 0px">
+                                                    <div id="clear-gene-hits" class="inactive" style="width: 50px; margin: 0px">Clear</div>
                                                     <div id="append-gene-hits" class="inactive" style="width: 140px; margin: 0px">Append Selected Genes</div>
                                                 </div>
                                             </div>
@@ -310,9 +337,10 @@
                                             </table>
                                         </th>
                                         <th style="width: 400px">
-                                            <div style="font-weight: 100; display: inline-block; width: 100%; position: relative">
+                                            <div style="font-weight: 100; display: inline-block; width: 100%; position: relative; vertical-align: bottom">
                                                 All Pathway Genes:
                                                 <div class="buttons" style="position: absolute; right: 12px; top: 0px">
+                                                        <div id="clear-gene-all" class="inactive" style="width: 50px; margin: 0px">Clear</div>
                                                         <div id="append-gene-all" class="inactive" style="width: 140px; margin: 0px">Append Selected Genes</div>
                                                     </div>
                                                 </div>

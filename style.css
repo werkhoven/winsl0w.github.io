@@ -485,15 +485,15 @@ svg{
   position: relative;
   display: inline-block;
   margin: 0px;
-  padding: 0px;
-  width: 17%;
+  padding: 0 40px 0 20px;
+  width: auto;
   height: 30px;
   border-style: solid;
   border-color: black;
   border-width: 1px 1px 1px 1px;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-  text-align: center;
+  text-align: left;
   line-height: 30px;
   cursor: pointer;
   z-index: 0;

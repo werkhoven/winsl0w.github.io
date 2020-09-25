@@ -143,6 +143,7 @@ const update_selected_metric = function(metric_name,update_dropdown){
         var event = new Event('change', {value: metric_name});
         element.dispatchEvent(event);
     }
+    
 
     // update qselection and metric selection menus
     const selection = update_apriori_menu(metric_name);

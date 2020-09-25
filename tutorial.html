@@ -23,12 +23,13 @@
             <h3>Contents</h3>
             <ul>
                 <li><a href="#overview">Overview</a></li>
-                <li>Getting started</li>
-                <li>Selecting Behaviors</li>
-                <li>Behavior Loadings</li>
-                <li>Behavior Summary</li>
-                <li>Gene Search</li>
-                <li>Enrichment Pathways</li>
+                <li><a href="#getting-started">Getting started</a></li>
+                <li><a href="#selecting-behaviors">Selecting Behaviors</a></li>
+                <li><a href="#behavior-loadings">Behavior Loadings</a></li>
+                <li><a href="#behavior-summary">Behavior Summary</a></li>
+                <li><a href="#select-genes-by-behavior">Select Genes by Behavior</a></li>
+                <li><a href="#search-by-gene-id">Search by Gene ID</a></li>
+                <li><a href="#kegg-pathways">KEGG Pathways</a></li>
             </ul>
             <h2><a name="overview">Overview</a></h2>
             <p>The Decathlon Data Browser is an interface for exploring the correlation structure of a suite of 
@@ -42,9 +43,48 @@
                 <li>How is individual gene expression related to behavioral measures?</li>
                 <li>Which are molecular pathways are predictive of behavioral measures?</li>
             </ol>
-            <h2>Getting started</h2>
-            <p>Outline the workflow of the browser</p>
-            <h2>Selecting Behaviors</h2>
+            <h2><a name="getting-started">Getting started</a></h2>
+            <ol>
+                <li>
+                    <u>Select a dataset</u> - The decathlon behavioral data is split by genetic background (inbred or outbred) and behavioral measure
+                    dimensionality (full or distilled).
+                </li>
+                <li>
+                    <u>Explore behavior correlations</u> - Click on pairwise correlations in the correlation matrix to see scatter plots of standardized behavioral 
+                    metrics or hover to see details of the correlation such as names of the corresponding behaviors, sample size, and correlation coefficient.
+                </li>
+                <li>
+                    <u>Create a behavioral selection</u> - In addition to visualizing behavior correlations, the correlation matrix serves as an organizing feature for 
+                    selecting subsets of behaviors to explore further. Use the correlation matrix or behavior group selection menus to 
+                    subset behavioral metrics. See <a>Selecting Behaviors</a> for details.
+                </li>
+                <li>
+                    <u>Explore behavioral dimensionality</u> - View principal components (PCs) of Behavior Groups from the correlation
+                    matrix and the loadings of each behavior within the group from the Behavioral Loadings tab. From here you can also select 
+                    behaviors by features in principal components (e.g. select all behaviors that are positively weighted for the 
+                    second PC of the Activity Behavior Group).
+                </li>
+                <li>
+                    <u>View behavior details</u> - Browse behavior and assay descriptions, details, and calculations from the Behavior Summary tab. View histograms of the data 
+                    split by experimental batch.
+                </li>
+                <li>
+                    <u>Find genes correlated to behaviors</u> - Browse lists of genes correlated to each behavior and construct gene queries by selecting 
+                    genes significantly correlated to one or more behaviors.
+                </li>
+                <li>
+                    <u>Search and view gene details</u> - Search genes in the Search by Gene ID tab by inputting a list manually or building a list via
+                     the Select Genes by Behavior or KEGG Pathways tabs. Browse summary data for each gene such as the total number 
+                     and rank-ordered <i>p</i>-values of signficantly correlated behaviors. Optionally generate new behavior selections of correlated 
+                     behaviors or view KEGG pathways linked to each gene that were found to be significantly enriched in behavioral measures.
+                </li>
+                <li>
+                    <u>Explore functional biological pathways associated with behaviors</u> - Browse KEGG pathways significantly enriched in lists
+                     genes correlated to decathlon behaviors. Browse behaviors linked to KEGG Pathways and build search queries from genes significantly 
+                     linked to both behavioral metrics and enriched KEGG pathways.
+                </li>
+            </ol>
+            <h2><a name="selecting-behaviors">Selecting Behaviors</a></h2>
             <p>Several options for selecting behavioral measures have been included to help subset the data by relevant characteristics. 
                 Create a behavior selection by any of the following ways:</p>
             <ol>
@@ -74,7 +114,7 @@
             </ol>
             <p>All behaviors are considered selected by default if no specific behaviors are selected. 
                 This default state can be restored at anytime by clicking the "Clear All Selections" button above the correlation matrix.</p>
-            <h2>Behavior Loadings</h2>
+            <h2><a name="behavior-loadings">Behavior Loadings</a></h2>
             <p>A priori behavioral groups are composed of sets of categorically similar behaviors that are likely correlated because they measure 
                 similar underlying phenomena. For example, behaviors such as average movement speed, total number of movement bouts, 
                 and average length of movement bouts are all measures of an animal's activity level and therefore belong to the 
@@ -84,12 +124,29 @@
             <p>The Metric Loadings tab can be used to visualize the linear weights (i.e. loadings) of each behavioral measure to each 
                 PC within the group. Behavior selections can be partitioned by interesting features within their PC loading plots 
                 by clicking on single or ranges of behaviors within the plot.</p>
-            <h2>Metric Summary</h2>
+            <h2><a name="behavior-summary">Behavior Summary</a></h2>
             <p>Details of behaviors such as which assay the behavior was collected from, a description of the behavior, and the calculation 
-                of the behavioral score can be found under the Metric Summary tab. The plots shown here depict the individual fly histograms the of the 
+                of the behavioral score can be found under the Behavior Summary tab. The plots shown here depict the individual fly histograms the of the 
                 raw behavioral data split by experimental batch. A summary of the most recently selected behavioral measure is shown by default.</p>
-            <h2>Gene Search</h2>
-            <p>The Gene Search tab can be used to explore the relationship between behavioral measures and fly gene expression profiles. 
+            <h2><a name="select-genes-by-behavior">Select Genes by Behavior</a></h2>
+            <p>
+                The Search Genes by Behavior tab can be used to explore lists of genes correlated to each behavior or to generate 
+                selections of gene IDs to perform a search on the "Search by Gene ID" tab. This option can be used to obtain a 
+                list of genes from a selection of behaviors of interest. Genes can be selected manually (Left-click for single,
+                Shift-click for range) or automatically by selecting genes below a <i>p</i>-value threshold. The 
+                <i>p</i>-value threshold used to determine significance can be 
+                adjusted manually via the "<i>p</i>-value cutoff" textbox. (<i>p</i>=0.05 by default). All genes within the selection can 
+                be added to the Search by Gene ID input window by clicking the "Append Selected Genes" button. Selected genes can 
+                be cleared by clicking the "Clear" button. 
+            </p>
+            <p>The scope of the threshold, append, and clear operations can be adjusted to apply to:</p>
+            <ul>
+                <li><u>this behavior</u> - operations apply only to the behavior currently selected from the dropdown menu</li>
+                <li><u>selected behaviors</u> - operations apply only to the behaviors currently selected in the correlation matrix</li>
+                <li><u>all behaviors</u> - operations apply to all behavioral measures in the currently select batch (change batches under the Search by Gene ID)</li>
+            </ul>
+            <h2><a name="search-by-gene-id">Search by Gene ID</a></h2>
+            <p>The Search by Gene ID tab can be used to explore the relationship between behavioral measures and fly gene expression profiles. 
                 To perform a search, construct a list of gene identifiers (either gene symbol, FlyBase gene number, KEGG gene ID) separated by 
                 either by a newline or space and click "Submit". Gene IDs will be automatically matched and displayed in the 
                 "Valid Matching Identifiers" window. Gene IDs with no match will be filtered and removed from the list. 
@@ -98,17 +155,15 @@
                     <li>A pre-existing list of candidate genes can be entered manually in the Gene-ID search box or imported by file. This option can be 
                         used to obtain a list or selection of significantly correlated with genes of interest.
                     </li>
-                    <li>Genes significantly correlated with behaviors in the current behavioral selection can be automatically appended
-                        to the search list by clicking the "Append Genes from Behavioral Selection" button. This option can be used to obtain a 
-                        list of genes from selection of behaviors of interest. The <i>p</i>-value threshold used to determine significance can be 
-                        adjusted manually via the "<i>p</i>-value cutoff" textbox. (<i>p</i>=0.05 by default).</li>
+                    <li>Genes significantly correlated with behaviors in the current behavioral selection can be appended
+                        to the search list from the Search by Gene ID tab.</li>
                     <li>Gene lists associated with <a href="https://www.genome.jp/kegg/pathway.html" target="_blank">KEGG pathways</a> found to be significantly 
                         enriched in the decathlon gene-behavior models can be constructed from the Enriched KEGG Pathways tab. This option 
                         can be used to identify genes or behaviors linked to molecular pathways.</li>
                 </ul>
-            <h2>Enrichment Pathways</h2>
+            <h2><a name="kegg-pathways">KEGG Pathways</a></h2>
             <p>Information about gene sets associated with KEGG pathways that were found to be significantly enriched in one or more 
-                behaviors can be found under the Gene Enrichment tab. Summary behaviors of the pathway across all behaviors
+                behaviors can be found under the Gene pathways tab. Summary behaviors of the pathway across all behaviors
                  such as the bootstrap minimum <i>p</i>-value and the average number of behaviors for which the pathway was significantly enriched
                 were computed by bootstrapping the behavioral data upstream of the gene-behavior modeling step. These bootstrapped models were used 
                 to construct a list of significantly predictive genes for each behavior and, from there, a list of significantly enriched KEGG pathways

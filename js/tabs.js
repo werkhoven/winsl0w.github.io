@@ -59,11 +59,11 @@ const switch_tab = function(){
             element.dispatchEvent(event);
             break;
 
-        case "Behavior Gene Lists":
+        case "Select Genes by Behavior":
             d3.select('#behavior-gene-lists-tab').style('visibility','visible');
             break;
 
-        case "Gene Search":
+        case "Search by Gene ID":
             d3.select('#gene-search-tab').style('visibility','visible');
             init_gene_search_table();
             break;

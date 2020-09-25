@@ -66,22 +66,28 @@ const init_gene_search_table = function(){
                             })
                             .on('mouseover',function(){ d3.select(this).attr('class','active') })
                             .on('mouseout',function(){ d3.select(this).attr('class','inactive') })
-                    pathway_table
-                        .append('table')
-                            .attr('class','scroll-table')
-                        .append('thead')
-                            .selectAll('th')
-                                .data(['Name','Pathway ID'])
-                                .enter()
-                            .append('th')
-                                .style('height','20px')
-                                .style('font-size','12px')
-                                .text(function(v){ return v })
-                    d3.select(this)
-                        .select('.scroll-table')
-                        .append('tbody')
-                            .attr('class','inactive')
-                            .style('width','460px')
+
+                        pathway_table
+                            .append('table')
+                                .attr('class','scroll-table')
+                                .style('overflow','hidden')
+                            .append('thead')
+                                .selectAll('th')
+                                    .data(['Name','Pathway ID'])
+                                    .enter()
+                                .append('th')
+                                    .style('height','20px')
+                                    .style('width','230px')
+                                    .style('font-size','12px')
+                                    .style('box-sizing','border-box')
+                                    .text(function(v){ return v })
+                        d3.select(this)
+                            .select('.scroll-table')
+                            .append('tbody')
+                                .attr('class','inactive')
+                                .style('width','460px')
+                                .style('overflow-y','hidden')
+                                .style('overflow-x','hidden')
                             
                 }
 
@@ -99,9 +105,8 @@ const update_selected_gene = function(gene_idx,rnaseq){
         plot.svg.select('.axis').remove()
     }
     
+    console.log('gene_idx: '+gene_idx,'n: '+rnaseq.num_modeled)
     if(gene_idx < rnaseq.num_modeled){
-
-        console.log(get_batch_idx());
 
         var sig_idx = rnaseq.model[get_batch_idx()].log_p[gene_idx].reduce(function(arr,d,i){
             if(d>0) arr.push(i);
@@ -195,6 +200,7 @@ const update_selected_gene = function(gene_idx,rnaseq){
                                 break;
                         }
                         d3.select(this)
+                            .style('width','58%')
                         .select('a')
                             .attr('href',href)
                             .nodes()[0].innerHTML = d;
@@ -211,13 +217,14 @@ const update_selected_gene = function(gene_idx,rnaseq){
                                 .attr('class','data-row')
                                 .style('height','20px')
                                 .attr('selected','false')
+                                .style('width','460px')
                                 .each(function(row_dat,row_num){
                                     for(let col_num=0; col_num<2; col_num++){
                                         if(col_num){
                                             d3.select(this)
                                                 .append('td')
                                                     .attr('class','inactive')
-                                                    .style('width','225px')
+                                                    .style('width','230px')
                                                 .append('a')
                                                     .style('font-size','12px')
                                                     .attr('class','active-link')
@@ -227,7 +234,7 @@ const update_selected_gene = function(gene_idx,rnaseq){
                                         } else {
                                             d3.select(this).append('td')
                                                 .attr('class','inactive')
-                                                .style('width','225px')
+                                                .style('width','230px')
                                                 .style('font-size','12px')
                                                 .text(row_dat);
                                         }
@@ -466,6 +473,9 @@ const search_genes = function(input_txt){
     })
 }
 
+d3.select('#gene-search-clear').on('click',function(){
+    d3.select('#gene-search-textbox').nodes()[0].value = '';
+})
 
 // File import
 d3.select('#gene-search-submit')

@@ -1,5 +1,12 @@
 var behavior_gene_list_fbgn = [];
 
+const clear_selected_genes = function(){
+    d3.select(this.parentNode.parentNode.parentNode)
+        .selectAll('.data-row')
+            .attr('selected',false)
+        .each(function(){ d3.select(this).selectAll('td').attr('class','inactive') });
+}
+
 const append_selected_genes = function(){
 
     var selected_genes = [];
@@ -25,7 +32,7 @@ const append_selected_genes = function(){
     // update notification tab if enrichment not active
 	var summary_is_active = d3.select('#tab-div')
         .select('ul').select('li.active').nodes()[0].innerText.includes('Gene');
-    if(!summary_is_active) add_tab_notification('Gene Search');
+    if(!summary_is_active) add_tab_notification('Search by Gene ID');
 }
 
 const select_table_range = function(obj,this_fbgn,prev_fbgn){
@@ -78,6 +85,7 @@ const update_behavior_gene_list_fbgn = function(fbgn,mode){
             behavior_gene_list_fbgn = behavior_gene_list_fbgn.filter(v=>{ return !fbgn.some(vv=>{return vv===v})})
             break;
     }
+    d3.select('#num-genes-in-selection').nodes()[0].innerText = behavior_gene_list_fbgn.length;
 }
 
 
@@ -151,7 +159,6 @@ const enrichment_table_click = function(obj){
             }
             break;
     }
-    console.log(behavior_gene_list_fbgn)
 }
 
 
@@ -381,6 +388,8 @@ const init_enrichment_table = function(){
 
         d3.select('#append-gene-hits').on('click',append_selected_genes);
         d3.select('#append-gene-all').on('click',append_selected_genes);
+        d3.select('#clear-gene-hits').on('click',clear_selected_genes);
+        d3.select('#clear-gene-all').on('click',clear_selected_genes);
         d3.select('#view-metric-summary').on('click',function(){
             // execute click on metric summary tab and load selected summary
             var selected_row = d3.select('#cat-metrics').selectAll('td.active')

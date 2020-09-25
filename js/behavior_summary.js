@@ -159,6 +159,8 @@ const update_distilled_metric_table = function(metric_name){
 // switch apriori plots on dropdown menu change
 const load_metric_summary = function(metric_name){
 
+    console.log(metric_name)
+
     update_apriori_menu(metric_name);
 
     // append histograms

@@ -1,16 +1,55 @@
 const behavior_gene_list_col_widths = [200,80,80,80];
 
+const get_thresholded_fbgn = function(pval_thresh,rnaseq){
+
+        // check which behaviors to query
+        var thresh_type = d3.selectAll('input[name=thresh-type]').filter(function(){return this.checked }).attr('value');
+        var matrix_type = get_matrix_type();
+        var thresh_metric_idx = [];
+        var all_metrics = [];
+        d3.select('#behavior-gene-dropdown')
+            .selectAll('option')
+            .each(function(){ all_metrics.push(this.innerText) });
+    
+        switch(thresh_type){
+            case 'single':
+                thresh_metric_idx.push(all_metrics.indexOf(d3.select('#behavior-gene-dropdown').nodes()[0].value));
+                break;
+            case 'selected':
+                thresh_metric_idx = thresh_metric_idx.concat(curr_selection[matrix_type].getUnique());
+                break;
+            case 'all':
+                thresh_metric_idx = d3.range(all_metrics.length);
+                break;
+        }
+
+        var sig_idx = [];
+        rnaseq.model[get_batch_idx()].log_p.forEach(function(p_arr,i){
+            var thresh_p = thresh_metric_idx.map(v=>{ return p_arr[v]} );
+            if(thresh_p.some(log_p => { return Math.pow(10,-log_p) < pval_thresh })){
+                sig_idx.push(i);
+            }
+        })
+
+        return sig_idx.map(i => {return 'FBgn' + rnaseq.fbgn[i].toFixed(0).padStart(7,'0')}).getUnique();
+}
+
+const clear_behavior_gene_list = function(rnaseq){
+
+    var sig_fbgn = get_thresholded_fbgn(0.05,rnaseq);
+    behavior_gene_list_fbgn = behavior_gene_list_fbgn.filter(function(curr_fbgn){
+        return !sig_fbgn.some(v=>{return v===curr_fbgn});
+    })
+    
+    // update selected rows
+    update_gene_selection();
+}
+
 const apply_pval_thresh = function(rnaseq){
     
     var pval_thresh = parseFloat(document.getElementById('pval-thresh-textbox').value);
-    var sig_idx = [];
-    rnaseq.model[get_batch_idx()].log_p.forEach(function(p_arr,i){
-        if(p_arr.some(log_p => { return Math.pow(10,-log_p) < pval_thresh })){
-            sig_idx.push(i);
-        }
-    })
-    
-    var sig_fbgn = sig_idx.map(i => {return 'FBgn' + rnaseq.fbgn[i].toFixed(0).padStart(7,'0')});
+    var sig_fbgn = get_thresholded_fbgn(pval_thresh,rnaseq);
+
     behavior_gene_list_fbgn = behavior_gene_list_fbgn.concat(sig_fbgn).getUnique();
     
     // update selected rows
@@ -66,17 +105,21 @@ const update_gene_selection = function(){
                 .each(function(){ all_table_fbgn.push(this.innerText) })
         })
 
-    console.log(all_table_fbgn,behavior_gene_list_fbgn)
+    d3.select('#behavior-gene-list-table').selectAll('.data-row')
+            .attr('selected',false)
+        .selectAll('td')
+            .attr('class','inactive')
+
     d3.select('#behavior-gene-list-table').selectAll('.data-row')
         .filter(function(d,i){ return behavior_gene_list_fbgn.some(v=>{return v === all_table_fbgn[i] })})
         .attr('selected',true)
         .selectAll('td')
             .attr('class','active')
+
+    d3.select('#num-genes-in-selection').nodes()[0].innerText = behavior_gene_list_fbgn.length;
 }
 
 const update_behavior_gene_list_table = function(metric_name,rnaseq){
-
-    console.log('update')
 
     var metric_idx = rnaseq.model[get_batch_idx()].fields.indexOf(metric_name);
     var metric_pvals = rnaseq.model[get_batch_idx()].log_p.map(v => {return v[metric_idx] });
@@ -169,7 +212,9 @@ const init_behavior_gene_list_table = function(){
 
         // attach callback to gene append button
         d3.select('#behavior-gene-list-append').on('click',append_selected_genes);
+        d3.select('#behavior-gene-list-clear').on('click',function(){ clear_behavior_gene_list(rnaseq)})
         d3.select('#pval-thresh-button').on('click',function(){ apply_pval_thresh(rnaseq) });
+        
     })
 }
         

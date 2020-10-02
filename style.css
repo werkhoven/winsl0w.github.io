@@ -642,13 +642,13 @@ svg{
 
 .notification{
   position: absolute;
-  background-color: rgb(30,150,20);
-  height: 11px;
-  width: 11px;
-  right: 0px;
-  border-radius: 50px;
-  margin: 0px 0px 5px 10px;
-  vertical-align: middle;
+  fill: rgb(30,150,20);
+  height: 15px;
+  width: 15px;
+  cx: 7.5;
+  cy: 7.5;
+  r: 7px;
+  shape-rendering: geometricPrecision;
 }
 
 .tooltip {

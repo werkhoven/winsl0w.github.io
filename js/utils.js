@@ -183,15 +183,25 @@ const add_tab_notification = function(tab_name){
     if(tab.select('.notification').size()){
         return;
     } else {
-        tab.append('table')
+        tab.append('svg')
             .style('vertical-align','middle')
             .style('position','absolute')
             .style('right','10px')
             .style('top','7px')
             .style('width','15px')
             .style('height','15px')
-        .append('tr')
+        .append('circle')
             .attr('class','notification')
+        tab.select('svg')
+            .append('text')
+                .attr('class','small')
+                .attr('x',7.5)
+                .attr('y',12)
+                .style('fill','var(--high-emph-txt)')
+                .style('text-anchor','middle')
+                .style('font-weight','bold')
+                .text('!');
+            
     }
 }
 

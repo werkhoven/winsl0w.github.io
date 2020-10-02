@@ -184,6 +184,21 @@ const init_page_from_dataset = function(dec,matrix_type){
 
 	// set loadings drop-down menu items
 	d3.select('#tab-header').selectAll('option').remove();
+	d3.select('#metric-loadings-tab')
+		.select('h2').each(function(){
+			d3.select(this.parentNode)
+				.append('svg')
+					.style('display','inline-block')
+					.style('position','relative')
+					.style('bottom','-4px')
+					.style('width','20px')
+					.style('height','20px')
+				.append('rect')
+					.attr('id','loadings-color-tab')
+					.style('fill','rgb(255,0,195)')
+					.style('width','16px')
+					.style('height','16px')
+		});
 
 	d3.select('#tab-header')
 		.select('select')
@@ -195,7 +210,7 @@ const init_page_from_dataset = function(dec,matrix_type){
 				plot_apriori_barplots(d,grp_name);
 				update_loading_bar_colors();
 				d3.select('#tab-header').select('h2').nodes()[0].innerText = grp_name + ' PCs';
-				d3.select('#tab-header').select('.circle').style('background-color',apriori_bar_colors[grp_idx])
+				d3.select('#loadings-color-tab').style('fill',apriori_bar_colors[grp_idx])
 			 })
 		.selectAll('option')
 			.data(apriori_grps)

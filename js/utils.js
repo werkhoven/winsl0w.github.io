@@ -164,11 +164,13 @@ const update_selected_metric = function(metric_name,update_dropdown){
 const clear_tab_notification = function(tab_name){
     var tab = d3.select('#tab-div').select('ul')
         .selectAll('li').filter(function(){
-            return this.innerText === tab_name;
+            var this_tab = this.innerText.match(/([A-z]| )*/g)[0];
+            console.log(this_tab)
+            return this_tab === tab_name;
         }
     )
 
-    tab.select('table').remove();
+    tab.select('svg').remove();
 }
 
 const add_tab_notification = function(tab_name){

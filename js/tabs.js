@@ -42,8 +42,9 @@ const switch_tab = function(){
 
     // hide all tabs and set current tab to visible
     d3.selectAll('.tab-parent').style('visibility','hidden');
-    const curr_tab_name = d3.select(this).nodes()[0].innerText;
+    const curr_tab_name = d3.select(this).nodes()[0].innerText.match(/([A-z]| )*/g)[0];
     clear_tab_notification(curr_tab_name);
+    console.log(curr_tab_name)
     switch(curr_tab_name){
 
         case "Behavior Loadings":

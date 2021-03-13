@@ -335,15 +335,27 @@ const init_page_from_dataset = function(dec,matrix_type){
 const update_page_dataset = function(dec,matrix_type){
 
 	var color = d3.scaleLinear()
-		.domain([-1,-.64,-.004,.004,.316,.756,1])
+		.domain([-1.0000,-0.8745,-0.7490,-0.6235,-0.5059,-0.3804,-0.2549,-0.1294,-0.0118,-0.0039,0.1216,0.2471,0.3725,0.4980,0.6235,0.7490,0.8745,1.0000])
 		.range([
-			d3.rgb(0,255,255),
-			d3.rgb(0,51,255),
-			d3.rgb(0,10,50),
-			d3.rgb(42,4,0),
-			d3.rgb(255,26,0),
-			d3.rgb(255,230,0),
-			d3.rgb(255,255,255)]);
+			d3.rgb(253,255,255),
+			d3.rgb(187,252,255),
+			d3.rgb(114,235,255),
+			d3.rgb(44,202,255),
+			d3.rgb(0,157,255),
+			d3.rgb(0,103,255),
+			d3.rgb(21,39,255),
+			d3.rgb(19,0,201),
+			d3.rgb(0,0,0),
+			d3.rgb(0,0,0),
+			d3.rgb(96,0,0),
+			d3.rgb(164,6,0),
+			d3.rgb(215,56,0),
+			d3.rgb(248,109,0),
+			d3.rgb(255,165,0),
+			d3.rgb(255,215,0),
+			d3.rgb(255,247,107),
+			d3.rgb(255,255,251)
+		]);
 
 		var x_labels = dec[matrix_type].fields;
 		const n = x_labels.length;

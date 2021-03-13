@@ -801,9 +801,6 @@ const metric_toggle_all = function(){
 // ititialize colorbar
 const init_colorbar = function(){
 
-	var color = d3.scaleLinear()
-		.domain()
-		.range();
 
 	    // define matrix color scale
 		const caxis_domain = [-1.0000,-0.8745,-0.7490,-0.6235,-0.5059,

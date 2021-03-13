@@ -342,9 +342,28 @@ const matrix_click = function(d,dec_data,scatter_scale){
 var renderMatrix = (data,scale,labels,dec_data,scatter_scale) =>{
 
 	// define matrix color scale
-	var color = d3.scaleLinear().domain([-1,-.64,-.004,.004,.316,.756,1])
-		.range([d3.rgb(0,255,255),d3.rgb(0,51,255),d3.rgb(0,10,50),
-		d3.rgb(42,4,0),d3.rgb(255,26,0),d3.rgb(255,230,0),d3.rgb(255,255,255)]);
+	var color = d3.scaleLinear()
+		.domain([-1.0000,-0.8745,-0.7490,-0.6235,-0.5059,-0.3804,-0.2549,-0.1294,-0.0118,-0.0039,0.1216,0.2471,0.3725,0.4980,0.6235,0.7490,0.8745,1.0000])
+		.range([
+			d3.rgb(253,255,255),
+			d3.rgb(187,252,255),
+			d3.rgb(114,235,255),
+			d3.rgb(44,202,255),
+			d3.rgb(0,157,255),
+			d3.rgb(0,103,255),
+			d3.rgb(21,39,255),
+			d3.rgb(19,0,201),
+			d3.rgb(0,0,0),
+			d3.rgb(0,0,0),
+			d3.rgb(96,0,0),
+			d3.rgb(164,6,0),
+			d3.rgb(215,56,0),
+			d3.rgb(248,109,0),
+			d3.rgb(255,165,0),
+			d3.rgb(255,215,0),
+			d3.rgb(255,247,107),
+			d3.rgb(255,255,251)
+		]);
 
     var rows = d3.select('#matrix-svg-trans').selectAll(".row")
             .data(data)
@@ -782,20 +801,39 @@ const metric_toggle_all = function(){
 // ititialize colorbar
 const init_colorbar = function(){
 
+	var color = d3.scaleLinear()
+		.domain()
+		.range();
+
 	    // define matrix color scale
-		const caxis_domain = [-1,-.64,-.004,.004,.316,.756,1];
+		const caxis_domain = [-1.0000,-0.8745,-0.7490,-0.6235,-0.5059,
+							-0.3804,-0.2549,-0.1294,-0.0118,-0.0039,
+							0.1216,0.2471,0.3725,0.4980,0.6235,0.7490,
+							0.8745,1.0000];
 		const min = caxis_domain.reduce((a,b) => { return Math.min(a,b) });
 		var caxis_pct = caxis_domain.map( v => v + (0-min));
 		const max = caxis_pct.reduce((a,b) => { return Math.max(a,b) });
 		caxis_pct = caxis_pct.map( v => v / max * 100);
 		const caxis_colors = [
-				d3.rgb(0,255,255),
-				d3.rgb(0,51,255),
-				d3.rgb(0,10,50),
-				d3.rgb(42,4,0),
-				d3.rgb(255,26,0),
-				d3.rgb(255,230,0),
-				d3.rgb(255,255,255)];
+			d3.rgb(253,255,255),
+			d3.rgb(187,252,255),
+			d3.rgb(114,235,255),
+			d3.rgb(44,202,255),
+			d3.rgb(0,157,255),
+			d3.rgb(0,103,255),
+			d3.rgb(21,39,255),
+			d3.rgb(19,0,201),
+			d3.rgb(0,0,0),
+			d3.rgb(0,0,0),
+			d3.rgb(96,0,0),
+			d3.rgb(164,6,0),
+			d3.rgb(215,56,0),
+			d3.rgb(248,109,0),
+			d3.rgb(255,165,0),
+			d3.rgb(255,215,0),
+			d3.rgb(255,247,107),
+			d3.rgb(255,255,251)
+		];
 		var color = d3.scaleLinear()
 			.domain(caxis_domain)
 			.range(caxis_colors);
